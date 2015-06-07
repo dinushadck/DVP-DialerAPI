@@ -6,13 +6,14 @@ var redis=require('redis');
 var messageFormatter = require('DVP-Common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
 var DbConn = require('DVP-DBModels');
 var config = require('config');
+var moment=require('moment');
 
 var port = config.Redis.port;
 var ip = config.Redis.ip;
 var hpath=config.Host.hostpath;
 var logger = require('DVP-Common/LogHandler/CommonLogHandler.js').logger;
 
-var client = redis.createClient("127.0.0.1",6379);
+var client = redis.createClient(6379,"127.0.0.1");
 client.on("error", function (err) {
     console.log("Error " + err);
 
@@ -98,7 +99,7 @@ function LoadCampaigns(req,callback)
                 {
                     for(var index in result)
                     {
-                        if(CheckValidCampaign(result[index].StartTime.toString(),result[index].StartTime.toString()))
+                        if(CheckValidCampaign(result[index].StartTime.toString(),result[index].EndTime.toString()))
                         {
                             var CampName=result[index].CampaignName+"_"+result[index].id;
                             client.lpush("CMPLIST",CampName,function(err,reply)
@@ -107,7 +108,7 @@ function LoadCampaigns(req,callback)
                                 {
                                     logger.error('[DVP-DialerApi.LoadCampaign] - [%s] - [PGSQL] - Exception occurred while Pushing to redis',err);
 //callback(err,undefined);
-                                    continue;
+                                    ///continue;
                                 }
                                 else
                                 {
@@ -157,7 +158,19 @@ function PickCurrentCampaign(callback)
         }
         else
         {
-            callback(undefined,reply)
+            //callback(undefined,reply)
+            var flag=reply+"_FLAG";
+            client.set(flag,"1",function(err,rep)
+            {
+                if(err)
+                {
+
+                }
+                else
+                {
+                    callback(undefined,reply)
+                }
+            })
         }
 
     })
@@ -224,8 +237,78 @@ function SetCampaignMaxMin(MXMN,value,CampName)
 
 }
 
-function FillCampaignPhones(campId,campName,Max)
+function FillCampaignPhones(campId,Max,callback)
 {
+    var Phnarr=[];
+
+    var CID= campId.split("_");
+
+    DbConn.Campaign.find({where:[{id:CID[1]}]}).complete(function(err,campRes)
+    {
+        if(err) {
+
+        }else
+        {
+            if(campRes !=null)
+            {
+                //console.log("Found "+campRes);
+                if(Max==-1){
+                DbConn.CampaignPhones.findAll({where:[{CampaignId:CID[1]},{Enable:"1"}]},{limit:campRes.Max}).complete(function(errPhn,resultPhn) {
+                    if(errPhn)
+                    {
+
+                    }
+                    else
+                    {
+                        if(resultPhn.length==0)
+                        {
+
+                        }
+                        else
+                        {
+                            for(var index in resultPhn)
+                            {
+                                Phnarr.push(resultPhn.Phone);
+                            }
+                            callback(undefined,Phnarr);
+                        }
+                    }
+
+                })
+
+            }else
+                {
+                    DbConn.CampaignPhones.findAll({where:[{CampaignId:CID[1]},{Enable:"1"}]},{limit:campRes.Max}).complete(function(errPhn,resultPhn) {
+                        if(errPhn)
+                        {
+
+                        }
+                        else
+                        {
+                            if(resultPhn.length==0)
+                            {
+
+                            }
+                            else
+                            {
+                                for(var index in resultPhn)
+                                {
+                                    Phnarr.push(resultPhn.Phone);
+                                }
+                                callback(undefined,Phnarr);
+                            }
+                        }
+
+                    })
+                }
+            }
+            else
+            {
+                console.log("Not Found "+campRes);
+            }
+        }
+    });
+/*
     DbConn.CampaignPhones.findAll({where:[{CampaignId:campId},{Enable:"1"}]},{limit:Max}).complete(function(err,result)
     {
         if(err)
@@ -241,6 +324,7 @@ function FillCampaignPhones(campId,campName,Max)
             }
         }
     })
+    */
 }
 
 function CheckFillCount(CampName)
@@ -294,7 +378,141 @@ function GetCurrentMaxMin(CampName,MaxMin)
 
 }
 
+function ReturnPhones(CampName,Max,callback)
+{
+    var arr=[];
+    DbConn.CampaignPhones.findAll({where:[{CampaignId:CampName},{Enable:"1"}]},{limit:Max}).complete(function(err,result)
+    {
+        if(err)
+        {
+            callback(err,undefined);
+        }
+        else
+        {
+
+            for(var index in result)
+            {
+                arr[index]=result[index].Phone;
+            }
+            callback(undefined,arr);
+        }
+    })
+}
+
+function GetCampaign(callback) {
+    var Camparr=[];
+    try
+    {
+       var nowTm= moment().format("YYYY-MM-DD HH:mm");
+
+        DbConn.Campaign.findAll({attributes:["id","CampaignName","Min","Max","StartTime","EndTime"],where:[{"StartTime":{lt:nowTm}},{"EndTime":{gt:nowTm}}]}).complete(function (err,result)
+        {
+            if(err)
+            {
+                logger.error('[DVP-DialerApi.LoadCampaign] - [%s] - [PGSQL] - Exception occurred while Searching Campaign Data ',req.body,ex);
+                callback(err, undefined);
+            }
+            else
+            {
+                if(result.length==0)
+                {
+                    logger.error('[DVP-DialerApi.LoadCampaign] - [%s] - [PGSQL] - No campaign found  ');
+                    //  console.log('No user with the Extension has been found.');
+                    ///logger.info( 'No user found for the requirement. ' );
+                    callback('No Campaign found', undefined);
+                }
+                else
+                {
+                    /*
+                    for(var index in result)
+                    {
+                        if(CheckValidCampaign(result[index].StartTime.toString(),result[index].EndTime.toString()))
+                        {
+                            var CampName=result[index].CampaignName+"_"+result[index].id;
+                            Camparr.push(result[index].toJSON());
+
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+*/
+                    //console.log(typeof (reu));
+                    console.log(JSON.stringify(result));
+                    callback(undefined,result);
+                }
+
+            }
+        })
+
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DialerApi.LoadCampaign] - [%s] - [PGSQL] - Exception occurred while Loading Campaign Data ',req.body,ex);
+        callback(ex, undefined);
+    }
+}
+
+function GetCampaignCount(callback)
+{
+    var Count=0;
+    try
+    {
+
+
+        DbConn.Campaign.findAll().complete(function (err,result)
+        {
+            if(err)
+            {
+                logger.error('[DVP-DialerApi.LoadCampaign] - [%s] - [PGSQL] - Exception occurred while Searching Campaign Data ',req.body,ex);
+                callback(err, undefined);
+            }
+            else
+            {
+                if(result.length==0)
+                {
+                    logger.error('[DVP-DialerApi.LoadCampaign] - [%s] - [PGSQL] - No campaign found  ');
+                    //  console.log('No user with the Extension has been found.');
+                    ///logger.info( 'No user found for the requirement. ' );
+                    callback('No Campaign found', undefined);
+                }
+                else
+                {
+                    for(var index in result)
+                    {
+                        if(CheckValidCampaign(result[index].StartTime.toString(),result[index].EndTime.toString()))
+                        {
+                            var CampName=result[index].CampaignName+"_"+result[index].id;
+                            Count++;
+
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    callback(undefined,Count);
+                }
+
+            }
+        })
+
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DialerApi.LoadCampaign] - [%s] - [PGSQL] - Exception occurred while Loading Campaign Data ',req.body,ex);
+        callback(ex, undefined);
+    }
+}
 module.exports.AddCampaign = AddCampaign;
 module.exports.LoadCampaigns = LoadCampaigns;
 module.exports.PickCurrentCampaign = PickCurrentCampaign;
 module.exports.GetPhonesOfCampaign = GetPhonesOfCampaign;
+module.exports.ReturnPhones = ReturnPhones;
+module.exports.GetCampaign = GetCampaign;
+module.exports.GetCampaignCount = GetCampaignCount;
+module.exports.FillCampaignPhones = FillCampaignPhones;
+
