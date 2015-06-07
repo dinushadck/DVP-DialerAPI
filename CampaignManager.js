@@ -405,11 +405,11 @@ function GetCampaign(callback) {
     {
        var nowTm= moment().format("YYYY-MM-DD HH:mm");
 
-        DbConn.Campaign.findAll({attributes:["id","CampaignName","Min","Max","StartTime","EndTime"],where:[{"StartTime":{lt:nowTm}},{"EndTime":{gt:nowTm}}]}).complete(function (err,result)
+        DbConn.Campaign.findAll({attributes:["id","CampaignName","Min","Max","StartTime","EndTime"],where:[{"StartTime":{lt:nowTm}}]}).complete(function (err,result)
         {
             if(err)
             {
-                logger.error('[DVP-DialerApi.LoadCampaign] - [%s] - [PGSQL] - Exception occurred while Searching Campaign Data ',req.body,ex);
+                logger.error('[DVP-DialerApi.LoadCampaign] - - [PGSQL] - Exception occurred while Searching Campaign Data ',err);
                 callback(err, undefined);
             }
             else

@@ -59,6 +59,9 @@ func GetCampaign() {
 		Method: "GET",
 		Result: &s,
 	}
+
+	fmt.Println(r)
+
 	_, err := restclient.Do(&r)
 	if err != nil {
 		//panic(err)

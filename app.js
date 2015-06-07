@@ -63,19 +63,24 @@ RestServer.get('/DVP/API/1.0/DialerApi/GetCampaign',function(req,res,next)
         {
             //console.log(err);
             var jsonString = messageFormatter.FormatMessage(err, "Error", false, arr);
-            res.send(jsonString);
-            res.end(jsonString);
+            //res.send(jsonString);
+
         }
         else
         {
             //console.log(result[0]);
            // console.log(arr);
             var jsonString = messageFormatter.FormatMessage(undefined, "Success", true, arr);
-            console.log(jsonString);
-            res.send(jsonString);
-            res.end(jsonString);
+
+
         }
+
+        console.log(jsonString);
+        res.write(jsonString)
+        res.end();
     });
+
+    next();
 });
 
 RestServer.get('/DVP/API/1.0/DialerApi/GetCampaignCount',function(req,res,next){
