@@ -76,7 +76,7 @@ RestServer.get('/DVP/API/1.0/DialerApi/GetCampaign',function(req,res,next)
         }
 
         console.log(jsonString);
-        res.write(jsonString)
+        res.write(jsonString);
         res.end();
     });
 
@@ -129,12 +129,17 @@ RestServer.get('/DVP/API/1.0/DialerApi/FillCampaignPhones/:CampName/:Max',functi
     {
         if(err)
         {
-
+            var jsonString = messageFormatter.FormatMessage(err, "Error", false, resp);
         }else
         {
-            res.send(resp);
-            res.end(resp);
+            var jsonString = messageFormatter.FormatMessage(undefined, "Success", true, resp);
+
         }
+
+        console.log(jsonString);
+        res.write(jsonString);
+        res.end();
     });
-    res.end();
+
+    next();
 });

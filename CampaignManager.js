@@ -239,72 +239,47 @@ function SetCampaignMaxMin(MXMN,value,CampName)
 
 function FillCampaignPhones(campId,Max,callback)
 {
-    var Phnarr=[];
+
 
     var CID= campId.split("_");
 
     DbConn.Campaign.find({where:[{id:CID[1]}]}).complete(function(err,campRes)
     {
         if(err) {
-
+            callback(err,undefined);
         }else
         {
             if(campRes !=null)
             {
                 //console.log("Found "+campRes);
-                if(Max==-1){
-                DbConn.CampaignPhones.findAll({where:[{CampaignId:CID[1]},{Enable:"1"}]},{limit:campRes.Max}).complete(function(errPhn,resultPhn) {
-                    if(errPhn)
-                    {
 
-                    }
-                    else
-                    {
-                        if(resultPhn.length==0)
-                        {
-
-                        }
-                        else
-                        {
-                            for(var index in resultPhn)
-                            {
-                                Phnarr.push(resultPhn.Phone);
-                            }
-                            callback(undefined,Phnarr);
-                        }
-                    }
-
-                })
-
-            }else
-                {
-                    DbConn.CampaignPhones.findAll({where:[{CampaignId:CID[1]},{Enable:"1"}]},{limit:campRes.Max}).complete(function(errPhn,resultPhn) {
+                    //DbConn.CampaignPhones.findAll([{attributes:["Phone"]},{where:[{CampaignId:CID[1]},{Enable:"1"}]},{limit:Max}]).complete(function(errPhn,resultPhn) {
+                    DbConn.CampaignPhones.findAll({attributes:["Phone"],where:[{CampaignId:CID[1]},{Enable:'true'}],limit:Max}).complete(function(errPhn,resultPhn) {
                         if(errPhn)
                         {
-
+                            callback(errPhn,undefined);
                         }
                         else
                         {
                             if(resultPhn.length==0)
                             {
 
+                                callback(new Error("No phones"),undefined);
+
                             }
                             else
                             {
-                                for(var index in resultPhn)
-                                {
-                                    Phnarr.push(resultPhn.Phone);
-                                }
-                                callback(undefined,Phnarr);
+
+                                callback(undefined,resultPhn);
                             }
                         }
 
                     })
-                }
+
             }
             else
             {
-                console.log("Not Found "+campRes);
+                callback("No campaign found",undefined);
             }
         }
     });
@@ -400,12 +375,13 @@ function ReturnPhones(CampName,Max,callback)
 }
 
 function GetCampaign(callback) {
-    var Camparr=[];
+
     try
     {
        var nowTm= moment().format("YYYY-MM-DD HH:mm");
+        var upTime=moment().format("YYYY-MM-DD HH:mm:ss");
 
-        DbConn.Campaign.findAll({attributes:["id","CampaignName","Min","Max","StartTime","EndTime"],where:[{"StartTime":{lt:nowTm}}]}).complete(function (err,result)
+        DbConn.Campaign.findAll({attributes:["id","CampaignName","Min","Max","StartTime","EndTime","LastUpdate"],where:[{"StartTime":{lt:nowTm}},{"EndTime":{gt:nowTm}}]}).complete(function (err,result)
         {
             if(err)
             {
