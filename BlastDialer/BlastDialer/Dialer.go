@@ -8,6 +8,10 @@ import (
 	//"strconv"
 	//	"bufio"
 	//	"io/ioutil"
+	//"strconv"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -69,58 +73,77 @@ func GetCampaignCount() int {
 	return count
 }
 
-func GetNumbers(CampName string, CampId int, Max int) {
+func GetNumbers(CampName string, Max int, st int) {
 
 	//Nums := []string{}
-	var p ResPhone
-	fmt.Println("Camp array created")
-	//cName := fmt.Sprintf("%s", CampName)
-	//cMax := fmt.Sprintf("%d", Max)
+	for {
+		cnt := GetPhoneCount(CampName)
+		if cnt > 0 {
+			fmt.Println("HIT GET NUMS...................")
+			var p ResPhone
 
-	url := fmt.Sprintf("http://localhost:8083/DVP/API/1.0/DialerApi/FillCampaignPhones/acv_1/2")
-	fmt.Println("URL hit")
-	r := restclient.RequestResponse{
-		Url:    url,
-		Method: "GET",
-		Result: &p,
+			if Max == 0 {
+				SetCampaignStatus(CampName, "0")
+				return
+			}
+
+			url := fmt.Sprintf("http://localhost:8083/DVP/API/1.0/DialerApi/FillCampaignPhones/%s/%d", CampName, Max)
+			fmt.Println("URL hit ", url)
+			r := restclient.RequestResponse{
+				Url:    url,
+				Method: "GET",
+				Result: &p,
+			}
+			_, err := restclient.Do(&r)
+			if err != nil {
+
+				fmt.Println("Err", err)
+
+			}
+			if p.IsSuccess != true {
+				SetCampaignStatus(CampName, "0")
+				fmt.Printf("Error returns from service ", p.CustomMessage)
+				return
+			}
+
+			c, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
+			if err == nil {
+
+			} else {
+				fmt.Println("GetFrom List Error ", err.Error())
+			}
+			for _, val := range p.Result {
+
+				fmt.Println("Campname :", CampName)
+				fmt.Println("Number :", val.Phone)
+				Phn := c.Cmd("LPUSH", CampName, val.Phone)
+				fmt.Println(Phn)
+
+			}
+
+			if st != 0 {
+				fmt.Println("Not initial")
+				GetPhonesFromList(CampName)
+			} else {
+				return
+				fmt.Println("Initial")
+			}
+
+		} else {
+			return
+		}
+
+		time.Sleep(1000 * time.Millisecond)
 	}
-	_, err := restclient.Do(&r)
-	if err != nil {
-		//panic(err)
-		fmt.Println("Err", err)
-	}
-
-	//if p.Exception != nil {
-
-	//fmt.Println(p.Exception)
-	//}
-	c, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
-	if err == nil {
-		//fmt.Println("Redis client connected for GetFrom List. ", ListName)
-
-	} else {
-		fmt.Println("GetFrom List Error ", err.Error())
-	}
-	for _, val := range p.Result {
-
-		fmt.Println("Num :", val)
-		fmt.Println("Campname :", CampName)
-		Phn := c.Cmd("LPUSH", CampName, val.Phone)
-		fmt.Println(Phn)
-
-	}
-	//fmt.Println("element : ", campz[0])
-	//camp[0] = "pp"
-	//camp[1] = "cc"
-	//fmt.Println(campz[0])
-	//fmt.Println("Going to return %s", r.RawText)
-	//return campz
 
 }
 
 func GetPhonesFromList(CampName string) {
 
-	fmt.Println("Hit")
+	//CampSt := GetCampaignStatus(CampName)
+	//need while loop to check status of campaign
+
+	fmt.Println("Hit list", CampName)
 	c, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
 	if err == nil {
 		//fmt.Println("Redis client connected for GetFrom List. ", ListName)
@@ -130,7 +153,10 @@ func GetPhonesFromList(CampName string) {
 	}
 	CmpMn := fmt.Sprintf("%s_Min", CampName)
 	CmpMx := fmt.Sprintf("%s_Max", CampName)
-	LPhns := c.Cmd("LPOP", CampName)
+	LPhns := c.Cmd("LPOP", CampName).String()
+	uuid := GetUuid()
+	go DialServer(LPhns, uuid)
+
 	fmt.Println("Poped ", LPhns)
 	LenPhns, _ := c.Cmd("LLEN", CampName).Int()
 
@@ -139,9 +165,24 @@ func GetPhonesFromList(CampName string) {
 
 	if LenPhns <= MinPhns {
 		NewFill := MaxPhns - LenPhns
+		fmt.Println("Max %d- Length %d of %s", MaxPhns, LenPhns, CampName)
 		fmt.Println("NewFill", NewFill)
-		go GetNumbers(CampName, 0, NewFill)
+		if GetPhoneCount(CampName) > 0 {
+			GetNumbers(CampName, NewFill, 1)
+		} else {
+			if LenPhns > 0 {
+				GetPhonesFromList(CampName)
+			} else {
+				return
+			}
+
+		}
+
+		//GetPhonesFromList(CampName)
+	} else {
+		GetPhonesFromList(CampName)
 	}
+
 }
 
 /*
@@ -203,7 +244,86 @@ func SetMaxMin(Campaign string, Min int, Max int) {
 	fmt.Println("Min ", MnName, "Mx ", MxName)
 	SetMin := c.Cmd("SET", MnName, Min)
 	SetMax := c.Cmd("SET", MxName, Max)
-	fmt.Println(SetMax)
-	fmt.Println(SetMin)
+	fmt.Println("Campaign Max ", SetMax)
+	fmt.Println("Campaign Min ", SetMin)
 
+}
+func SetCampaignStatus(Campaign string, St string) {
+
+	c, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
+	if err == nil {
+		//fmt.Println("Redis client connected for GetFrom List. ", ListName)
+
+	} else {
+		fmt.Println("GetFrom List Error ", err.Error())
+	}
+
+	CampSt := fmt.Sprintf("%s_St", Campaign)
+	s := c.Cmd("SET", CampSt, St)
+	fmt.Println(s)
+}
+func GetCampaignStatus(Campaign string) string {
+
+	c, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
+	if err == nil {
+		//fmt.Println("Redis client connected for GetFrom List. ", ListName)
+
+	} else {
+		fmt.Println("GetFrom List Error ", err.Error())
+	}
+
+	CampSt := fmt.Sprintf("%s_St", Campaign)
+	st := c.Cmd("GET", CampSt).String()
+	return st
+}
+func GetPhoneCount(CampName string) int {
+	var pCount ResultPCount
+	url := fmt.Sprintf("http://localhost:8083/DVP/API/1.0/DialerApi/PhoneCount/%s", CampName)
+	fmt.Println("URL hit ", url)
+	r := restclient.RequestResponse{
+		Url:    url,
+		Method: "GET",
+		Result: &pCount,
+	}
+	_, err := restclient.Do(&r)
+	if err != nil {
+		//panic(err)
+		fmt.Println("Err", err)
+		//fmt.Println("Raw ", r.RawText)
+	}
+	//fmt.Println("Count ", pCount.Result)
+	fmt.Println("Raw ", r.RawText)
+	//I, _ := strconv.Atoi(pCount.Result)
+	return pCount.Result
+
+}
+func GetUuid() string {
+	resp, _ := http.Get(uuidService)
+	defer resp.Body.Close()
+	response, _ := ioutil.ReadAll(resp.Body)
+	tmx := string(response[:])
+	fmt.Println(tmx)
+	return tmx
+}
+func DialServer(phoneNumber string, uuid string) {
+	request := fmt.Sprintf("http://%s", callServer)
+	path := fmt.Sprintf("api/originate?")
+	param := fmt.Sprintf(" {return_ring_ready=true,origination_uuid=%s,origination_caller_id_number=%s}sofia/gateway/%s/%s %s", uuid, fromNumber, trunkCode, phoneNumber, extention)
+
+	u, _ := url.Parse(request)
+	u.Path += path
+	u.Path += param
+
+	fmt.Println(u.String())
+
+	resp, _ := http.Get(u.String())
+	defer resp.Body.Close()
+
+	if resp != nil {
+
+		response, _ := ioutil.ReadAll(resp.Body)
+		tmx := string(response[:])
+		fmt.Println(tmx)
+		//go AddPhoneNumberToCouch(numberListKey, phoneNumber)
+	}
 }

@@ -17,7 +17,8 @@ type Campaign struct {
 	LastUpdate   string
 }
 type Phones struct {
-	Phone string
+	Phone      string
+	CampaignId string
 }
 
 type Result struct {
@@ -27,14 +28,21 @@ type Result struct {
 	Result        []Campaign
 }
 type ResPhone struct {
-	Exception     string
 	CustomMessage string
 	IsSuccess     bool
 	Result        []Phones
 }
 
+type ResultPCount struct {
+	Exception     string
+	CustomMessage string
+	IsSuccess     bool
+	Result        int
+}
+
 func main() {
 
+	//go ptr("PAwan")
 	//var camp string //= make([]string, cnt)
 	var Camps Result
 	//camp := GetCampaign()
@@ -56,18 +64,31 @@ func main() {
 	*/
 
 	for i, value := range Camps.Result {
-		fmt.Println("Rsult ", Camps.Result[i].id, " Name ", value.CampaignName)
-		CampName := fmt.Sprintf("%s_%d", Camps.Result[i].CampaignName, Camps.Result[i].id)
-		fmt.Println(CampName)
-		SetMaxMin(CampName, Camps.Result[i].Min, Camps.Result[i].Max)
-		GetNumbers(Camps.Result[i].CampaignName, Camps.Result[i].id, Camps.Result[i].Max)
 
-		go GetPhonesFromList(Camps.Result[i].CampaignName)
+		CampName := value.CampaignName
+		fmt.Println("Campaign ", CampName)
+		SetMaxMin(CampName, Camps.Result[i].Min, Camps.Result[i].Max)
+		SetCampaignStatus(CampName, "1")
+		GetNumbers(CampName, value.Max, 0)
+
 	}
+	for _, val := range Camps.Result {
+
+		cnt := GetPhoneCount(val.CampaignName)
+		if cnt > 0 {
+			fmt.Println("Getting phones from redis ", val)
+			go GetPhonesFromList(val.CampaignName)
+		} else {
+			return
+		}
+	}
+
+	fmt.Scanln()
 
 }
 
 //func GetCampaign() []string {
+
 func GetCampaign() Result {
 	//campz := []string{}
 	var s Result

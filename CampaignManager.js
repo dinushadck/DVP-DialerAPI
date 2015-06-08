@@ -243,7 +243,7 @@ function FillCampaignPhones(campId,Max,callback)
 
     var CID= campId.split("_");
 
-    DbConn.Campaign.find({where:[{id:CID[1]}]}).complete(function(err,campRes)
+    DbConn.Campaign.find({attributes:["id"],where:[{CampaignName:campId}]}).complete(function(err,campRes)
     {
         if(err) {
             callback(err,undefined);
@@ -253,28 +253,35 @@ function FillCampaignPhones(campId,Max,callback)
             {
                 //console.log("Found "+campRes);
 
-                    //DbConn.CampaignPhones.findAll([{attributes:["Phone"]},{where:[{CampaignId:CID[1]},{Enable:"1"}]},{limit:Max}]).complete(function(errPhn,resultPhn) {
-                    DbConn.CampaignPhones.findAll({attributes:["Phone"],where:[{CampaignId:CID[1]},{Enable:'true'}],limit:Max}).complete(function(errPhn,resultPhn) {
-                        if(errPhn)
+                //DbConn.CampaignPhones.findAll([{attributes:["Phone"]},{where:[{CampaignId:CID[1]},{Enable:"1"}]},{limit:Max}]).complete(function(errPhn,resultPhn) {
+                DbConn.CampaignPhones.findAll({attributes:["Phone","CampaignId"],where:[{CampaignId:campRes.id.toString()},{Enable:'true'}],limit:Max}).complete(function(errPhn,resultPhn) {
+                    if(errPhn)
+                    {
+                        callback(errPhn,undefined);
+                    }
+                    else
+                    {
+                        if(resultPhn.length==0)
                         {
-                            callback(errPhn,undefined);
+
+                            callback(new Error("No phones"),undefined);
+
                         }
                         else
                         {
-                            if(resultPhn.length==0)
+                            for(var index in resultPhn)
                             {
+                                DbConn.CampaignPhones.update({Enable:"FALSE"},{where:[{Phone:resultPhn[index].Phone},{CampaignId:resultPhn[index].CampaignId}]}).complete(function(err)
+                                {
 
-                                callback(new Error("No phones"),undefined);
-
+                                });
                             }
-                            else
-                            {
 
-                                callback(undefined,resultPhn);
-                            }
+                            callback(undefined,resultPhn);
                         }
+                    }
 
-                    })
+                })
 
             }
             else
@@ -283,23 +290,23 @@ function FillCampaignPhones(campId,Max,callback)
             }
         }
     });
-/*
-    DbConn.CampaignPhones.findAll({where:[{CampaignId:campId},{Enable:"1"}]},{limit:Max}).complete(function(err,result)
-    {
-        if(err)
-        {
+    /*
+     DbConn.CampaignPhones.findAll({where:[{CampaignId:campId},{Enable:"1"}]},{limit:Max}).complete(function(err,result)
+     {
+     if(err)
+     {
 
-        }
-        else
-        {
+     }
+     else
+     {
 
-            for(var index in result)
-            {
-                client.lpush(campName,result[index].Phone.toString())
-            }
-        }
-    })
-    */
+     for(var index in result)
+     {
+     client.lpush(campName,result[index].Phone.toString())
+     }
+     }
+     })
+     */
 }
 
 function CheckFillCount(CampName)
@@ -378,7 +385,7 @@ function GetCampaign(callback) {
 
     try
     {
-       var nowTm= moment().format("YYYY-MM-DD HH:mm");
+        var nowTm= moment().format("YYYY-MM-DD HH:mm");
         var upTime=moment().format("YYYY-MM-DD HH:mm:ss");
 
         DbConn.Campaign.findAll({attributes:["id","CampaignName","Min","Max","StartTime","EndTime","LastUpdate"],where:[{"StartTime":{lt:nowTm}},{"EndTime":{gt:nowTm}}]}).complete(function (err,result)
@@ -400,20 +407,20 @@ function GetCampaign(callback) {
                 else
                 {
                     /*
-                    for(var index in result)
-                    {
-                        if(CheckValidCampaign(result[index].StartTime.toString(),result[index].EndTime.toString()))
-                        {
-                            var CampName=result[index].CampaignName+"_"+result[index].id;
-                            Camparr.push(result[index].toJSON());
+                     for(var index in result)
+                     {
+                     if(CheckValidCampaign(result[index].StartTime.toString(),result[index].EndTime.toString()))
+                     {
+                     var CampName=result[index].CampaignName+"_"+result[index].id;
+                     Camparr.push(result[index].toJSON());
 
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-*/
+                     }
+                     else
+                     {
+                     continue;
+                     }
+                     }
+                     */
                     //console.log(typeof (reu));
                     console.log(JSON.stringify(result));
                     callback(undefined,result);
@@ -483,6 +490,40 @@ function GetCampaignCount(callback)
         callback(ex, undefined);
     }
 }
+
+function GetPhoneCount(campId,callback)
+{
+    DbConn.Campaign.find({attributes:["id"],where:[{CampaignName:campId}]}).complete(function(err,campRes)
+    {
+        if(err)
+        {
+
+        }
+        else
+        {
+            if(campRes!=null)
+            {
+                DbConn.CampaignPhones.count({where:[{CampaignId:campRes.id.toString()},{Enable:'TRUE'}]}).complete(function(errCnt,PhnCnt)
+                {
+                    if(errCnt)
+                    {
+                        callback(errCnt,undefined);
+                    }else
+                    {
+                        callback(undefined,PhnCnt)
+                    }
+                });
+            }
+
+        }
+
+        //DbConn.CampaignPhones.Count({where:[{CampaignId:campRes.id},{Enable:'TRUE'}]}).complete(function(err,campRes)
+
+
+
+
+    });
+}
 module.exports.AddCampaign = AddCampaign;
 module.exports.LoadCampaigns = LoadCampaigns;
 module.exports.PickCurrentCampaign = PickCurrentCampaign;
@@ -491,4 +532,4 @@ module.exports.ReturnPhones = ReturnPhones;
 module.exports.GetCampaign = GetCampaign;
 module.exports.GetCampaignCount = GetCampaignCount;
 module.exports.FillCampaignPhones = FillCampaignPhones;
-
+module.exports.GetPhoneCount = GetPhoneCount;

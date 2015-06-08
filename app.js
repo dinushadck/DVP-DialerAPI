@@ -143,3 +143,27 @@ RestServer.get('/DVP/API/1.0/DialerApi/FillCampaignPhones/:CampName/:Max',functi
 
     next();
 });
+
+RestServer.get('/DVP/API/1.0/DialerApi/PhoneCount/:CampName',function(req,res,next)
+{
+
+    camp.GetPhoneCount(req.params.CampName,function(err,resp)
+    {
+        if(err)
+        {
+            var jsonString = messageFormatter.FormatMessage(err, "Error", false, resp);
+        }else
+        {
+
+
+            var jsonString = messageFormatter.FormatMessage(undefined, "Success", true, resp);
+
+        }
+
+        console.log(jsonString);
+        res.write(jsonString);
+        res.end();
+    });
+
+    next();
+});
