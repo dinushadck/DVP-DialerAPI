@@ -75,6 +75,7 @@ func GetCampaignCount() int {
 
 func GetNumbers(CampName string, Max int, st int) {
 
+	fmt.Println("Get numbers hit of campaign ", CampName)
 	//Nums := []string{}
 	for {
 		cnt := GetPhoneCount(CampName)
@@ -125,8 +126,9 @@ func GetNumbers(CampName string, Max int, st int) {
 				fmt.Println("Not initial")
 				GetPhonesFromList(CampName)
 			} else {
-				return
 				fmt.Println("Initial")
+				return
+
 			}
 
 		} else {
@@ -154,8 +156,8 @@ func GetPhonesFromList(CampName string) {
 	CmpMn := fmt.Sprintf("%s_Min", CampName)
 	CmpMx := fmt.Sprintf("%s_Max", CampName)
 	LPhns := c.Cmd("LPOP", CampName).String()
-	uuid := GetUuid()
-	go DialServer(LPhns, uuid)
+	//uuid := GetUuid()
+	//go DialServer(LPhns, uuid)
 
 	fmt.Println("Poped ", LPhns)
 	LenPhns, _ := c.Cmd("LLEN", CampName).Int()
@@ -277,6 +279,7 @@ func GetCampaignStatus(Campaign string) string {
 	return st
 }
 func GetPhoneCount(CampName string) int {
+	fmt.Println("Getting phone count ", CampName)
 	var pCount ResultPCount
 	url := fmt.Sprintf("http://localhost:8083/DVP/API/1.0/DialerApi/PhoneCount/%s", CampName)
 	fmt.Println("URL hit ", url)
@@ -306,6 +309,8 @@ func GetUuid() string {
 	return tmx
 }
 func DialServer(phoneNumber string, uuid string) {
+
+	fmt.Println("Dial Server ", phoneNumber)
 	request := fmt.Sprintf("http://%s", callServer)
 	path := fmt.Sprintf("api/originate?")
 	param := fmt.Sprintf(" {return_ring_ready=true,origination_uuid=%s,origination_caller_id_number=%s}sofia/gateway/%s/%s %s", uuid, fromNumber, trunkCode, phoneNumber, extention)

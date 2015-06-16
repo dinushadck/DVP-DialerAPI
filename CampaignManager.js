@@ -79,7 +79,20 @@ function LoadCampaigns(req,callback)
     {
         var obj=req.body;
         var CTime=moment().format("YYYY-MM-DD HH:mm");
-        DbConn.Campaign.findAll({where: [{Enable: '1'}]}).complete(function (err,result)
+        var dt=new Date();
+        var xx=new Date(dt.valueOf() + dt.getTimezoneOffset() * 60000);
+        console.log(xx);
+        var conditionalData = {
+            StartTime: {
+                lt: [xx]
+            },
+            EndTime:
+            {
+                gt:[xx]
+            },
+            Enable:'1'
+        };
+        DbConn.Campaign.findAll({where: conditionalData}).complete(function (err,result)
         {
             if(err)
             {
@@ -99,8 +112,8 @@ function LoadCampaigns(req,callback)
                 {
                     for(var index in result)
                     {
-                        if(CheckValidCampaign(result[index].StartTime.toString(),result[index].EndTime.toString()))
-                        {
+                        //if(CheckValidCampaign(result[index].StartTime.toString(),result[index].EndTime.toString()))
+                        //{
                             var CampName=result[index].CampaignName+"_"+result[index].id;
                             client.lpush("CMPLIST",CampName,function(err,reply)
                             {
@@ -125,11 +138,11 @@ function LoadCampaigns(req,callback)
                                 }
 
                             })
-                        }
-                        else
-                        {
-                            continue;
-                        }
+                        //}
+                        //else
+                        //{
+                        //    continue;
+                        //}
                     }
                 }
 
@@ -437,7 +450,7 @@ function GetCampaign(callback) {
         callback(ex, undefined);
     }
 }
-
+/*
 function GetCampaignCount(callback)
 {
     var Count=0;
@@ -490,7 +503,7 @@ function GetCampaignCount(callback)
         callback(ex, undefined);
     }
 }
-
+*/
 function GetPhoneCount(campId,callback)
 {
     DbConn.Campaign.find({attributes:["id"],where:[{CampaignName:campId}]}).complete(function(err,campRes)
@@ -530,6 +543,6 @@ module.exports.PickCurrentCampaign = PickCurrentCampaign;
 module.exports.GetPhonesOfCampaign = GetPhonesOfCampaign;
 module.exports.ReturnPhones = ReturnPhones;
 module.exports.GetCampaign = GetCampaign;
-module.exports.GetCampaignCount = GetCampaignCount;
+//module.exports.GetCampaignCount = GetCampaignCount;
 module.exports.FillCampaignPhones = FillCampaignPhones;
 module.exports.GetPhoneCount = GetPhoneCount;

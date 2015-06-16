@@ -107,11 +107,12 @@ func GetCampaign() Result {
 		fmt.Println(r)
 	}
 
+
 	//fmt.Println("element : ", campz[0])
 	//camp[0] = "pp"
 	//camp[1] = "cc"
 	//fmt.Println(campz[0])
-	//fmt.Println("Going to return Exception", s.Result[1].Min)
+	fmt.Println("Getting campagns Done")
 	return s
 	//return campz
 
