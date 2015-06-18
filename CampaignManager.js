@@ -401,7 +401,7 @@ function GetCampaign(callback) {
         var nowTm= moment().format("YYYY-MM-DD HH:mm");
         var upTime=moment().format("YYYY-MM-DD HH:mm:ss");
 
-        DbConn.Campaign.findAll({attributes:["id","CampaignName","Min","Max","StartTime","EndTime","LastUpdate"],where:[{"StartTime":{lt:nowTm}},{"EndTime":{gt:nowTm}}]}).complete(function (err,result)
+        DbConn.Campaign.findAll({attributes:["id","CampaignName","Min","Max","StartTime","EndTime","LastUpdate","ConcurrentLimit"],where:[{"StartTime":{lt:nowTm}},{"EndTime":{gt:nowTm}}]}).complete(function (err,result)
         {
             if(err)
             {

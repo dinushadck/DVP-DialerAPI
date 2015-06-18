@@ -156,7 +156,7 @@ RestServer.get('/DVP/API/1.0/DialerApi/PhoneCount/:CampName',function(req,res,ne
         {
 
 
-            var jsonString = messageFormatter.FormatMessage(undefined, "Success", true, resp);
+            var jsonString = messageFormatter.FormatMessage(undefined, "Success "+req.params.CampName, true, resp);
 
         }
 

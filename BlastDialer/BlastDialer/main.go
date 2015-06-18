@@ -5,16 +5,19 @@ import (
 	//"encoding/json"
 	"fmt"
 	"github.com/jmcvetta/restclient"
+	//"strconv"
+	//	"time"
 )
 
 type Campaign struct {
-	id           int
-	CampaignName string
-	Min          int
-	Max          int
-	StartTime    string
-	EndTime      string
-	LastUpdate   string
+	id              int
+	CampaignName    string
+	Min             int
+	Max             int
+	StartTime       string
+	EndTime         string
+	LastUpdate      string
+	ConcurrentLimit int
 }
 type Phones struct {
 	Phone      string
@@ -44,9 +47,11 @@ func main() {
 
 	//go ptr("PAwan")
 	//var camp string //= make([]string, cnt)
+
 	var Camps Result
 	//camp := GetCampaign()
 	Camps = GetCampaign()
+	//	var x = 0
 
 	/*
 		fmt.Println(camp)
@@ -66,23 +71,37 @@ func main() {
 	for i, value := range Camps.Result {
 
 		CampName := value.CampaignName
-		fmt.Println("Campaign ", CampName)
+		fmt.Println("Selected Campaign ", CampName)
+		fmt.Println()
 		SetMaxMin(CampName, Camps.Result[i].Min, Camps.Result[i].Max)
 		SetCampaignStatus(CampName, "1")
-		GetNumbers(CampName, value.Max, 0)
-
+		SetCampaignConLimit(CampName, Camps.Result[i].ConcurrentLimit)
+		GetNumbers(CampName, value.Max)
+		go Dial(CampName)
+		//time.Sleep(1000 * time.Millisecond)
 	}
-	for _, val := range Camps.Result {
 
-		cnt := GetPhoneCount(val.CampaignName)
-		if cnt > 0 {
-			fmt.Println("Getting phones from redis ", val)
+	/*
+		for _, val := range Camps.Result {
+
+			//cnt := GetPhoneCount(val.CampaignName)
+			fmt.Println("New Campaign ", val.CampaignName)
+			//if cnt > 0 {
+			fmt.Println()
+			fmt.Println("Getting phones from redis ", val.CampaignName)
+			fmt.Println()
+			x = x + 1
+			fmt.Println("Range is ", x)
 			go GetPhonesFromList(val.CampaignName)
-		} else {
-			return
-		}
-	}
 
+			//} else {
+			//return
+			//}
+
+		}
+	*/
+	//var x = GetListPhoneSet("a")
+	//fmt.Println(x)
 	fmt.Scanln()
 
 }
@@ -106,7 +125,6 @@ func GetCampaign() Result {
 		fmt.Println("Errz", err)
 		fmt.Println(r)
 	}
-
 
 	//fmt.Println("element : ", campz[0])
 	//camp[0] = "pp"
