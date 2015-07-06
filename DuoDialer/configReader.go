@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 var redisIp string
@@ -12,7 +13,11 @@ var dialerId string
 var campaignLimit int
 var hostIpAddress string
 var campaignService string
-var campaignRequestFrequency int
+var campaignRequestFrequency time.Duration
+var uuidService string
+var callServer string
+var callRuleService string
+var scheduleService string
 
 func LoadConfiguration() {
 	file, _ := os.Open("conf.json")
@@ -28,6 +33,10 @@ func LoadConfiguration() {
 		hostIpAddress = "127.0.0.1"
 		campaignRequestFrequency = 300
 		campaignService = "http://localhost:7777/campaign"
+		uuidService = "http://192.168.2.101:8080/api/create_uuid"
+		callServer = "192.168.2.101:8080"
+		callRuleService = "http://ip:port/DVP/API/:version/CallRule/Outbound/"
+		scheduleService = "http://192.168.0.51:8083/DVP/API/6.0/LimitAPI"
 	} else {
 		redisIp = configuration.RedisIp
 		redisDb = configuration.RedisDb
@@ -36,6 +45,10 @@ func LoadConfiguration() {
 		hostIpAddress = configuration.HostIpAddress
 		campaignRequestFrequency = configuration.CampaignRequestFrequency
 		campaignService = configuration.CampaignService
+		uuidService = configuration.UuidService
+		callServer = configuration.CallServer
+		callRuleService = configuration.CallRuleService
+		scheduleService = configuration.ScheduleService
 	}
 
 	fmt.Println("redisIp:", redisIp)

@@ -110,6 +110,46 @@ func RedisIncr(key string) int {
 	return result
 }
 
+func RedisIncrBy(key string, value int) int {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisSet", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	// select database
+	r := client.Cmd("select", redisDb)
+	errHndlr(r.Err)
+
+	result, sErr := client.Cmd("incrby", key, value).Int()
+	errHndlr(sErr)
+	fmt.Println(result)
+	return result
+}
+
+func RedisRemove(key string) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisRemove", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	// select database
+	r := client.Cmd("select", redisDb)
+	errHndlr(r.Err)
+
+	result, sErr := client.Cmd("del", key).Bool()
+	errHndlr(sErr)
+	fmt.Println(result)
+	return result
+}
+
 // Redis Hashes Methods
 
 func RedisHashGetAll(hkey string) map[string]string {
@@ -202,5 +242,23 @@ func RedisListLpush(lname, value string) bool {
 	errHndlr(r.Err)
 
 	result, _ := client.Cmd("lpush", lname, value).Bool()
+	return result
+}
+
+func RedisListRpush(lname, value string) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisListLpush", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	// select database
+	r := client.Cmd("select", redisDb)
+	errHndlr(r.Err)
+
+	result, _ := client.Cmd("rpush", lname, value).Bool()
 	return result
 }

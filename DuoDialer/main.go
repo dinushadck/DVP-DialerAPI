@@ -18,8 +18,9 @@ func main() {
 		onGoingCampaignCount := GetOnGoingCampaignCount()
 		if onGoingCampaignCount < campaignLimit {
 			campaign := RequestCampaign()
-			if campaign != Campaign{}{
-				//Start New Campaign
+			defCampaign := Campaign{}
+			if campaign != defCampaign {
+				//Add Campaign
 			}
 		}
 		time.Sleep(campaignRequestFrequency * time.Second)

@@ -5,5 +5,9 @@
 	"CampaignLimit": 10,
 	"HostIpAddress": "192.168.0.45",
 	"CampaignRequestFrequency": 300,
-	"CampaignService": "http://localhost:7777/campaign"
+	"CampaignService": "http://localhost:7777/campaign",
+	"UuidService": "http://192.168.3.200:8080/api/create_uuid",
+	"CallServer": "192.168.2.101:8080",
+	"CallRuleService": "http://ip:port/DVP/API/:version/CallRule/Outbound",
+	"ScheduleService":"http://192.168.0.51:8083/DVP/API/6.0/LimitAPI"
 }
