@@ -5,8 +5,8 @@ import (
 	"fmt"
 	//"io/ioutil"
 	//"net/http"
-	"bufio"
-	"os"
+	//"bufio"
+	//"os"
 )
 
 func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, scheduleId string) []string {
@@ -15,7 +15,18 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, sche
 	pageNumberToRequest := RedisIncr(pageKey)
 	fmt.Println("pageNumber: ", pageNumberToRequest)
 
-	if pageNumberToRequest == 1 {
+	numbers = append(numbers, "0773795991")
+	numbers = append(numbers, "0773795992")
+	numbers = append(numbers, "0773795993")
+	numbers = append(numbers, "0773795994")
+	numbers = append(numbers, "0773795995")
+	numbers = append(numbers, "0773795996")
+	numbers = append(numbers, "0773795997")
+	numbers = append(numbers, "0773795998")
+	numbers = append(numbers, "0773795999")
+	numbers = append(numbers, "0773795990")
+
+	/*if pageNumberToRequest == 1 {
 		file, err := os.Open("D:\\Duo Projects\\Version 5.1\\Documents\\GolangProjects\\CampaignManager\\NumberList4.txt")
 		if err != nil {
 			//log.Fatal(err)
@@ -31,7 +42,7 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, sche
 		if err := scanner.Err(); err != nil {
 			//log.Fatal(err)
 		}
-	}
+	}*/
 
 	/*// Get phone number from campign service and append
 	authToken := fmt.Sprintf("%d#%d", company, tenant)
