@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
+const layout1 = "2006-01-02T15:04:05Z07:00"
+const layout2 = "2006-01-02"
+const layout3 = "15:04"
+
 type Configuration struct {
 	RedisIp                  string
 	RedisDb                  int
@@ -24,16 +28,46 @@ type DialerInfo struct {
 	HostIpAddress string
 }
 
+type CallServerInfo struct {
+	CallServerId    string
+	Url             string
+	MaxChannelCount int
+}
+
+type CampaignResult struct {
+	CustomMessage string
+	IsSuccess     bool
+	Result        []Campaign
+}
+
 type Campaign struct {
-	CampaignId string
-	Company    int
-	Tenant     int
-	Calss      string
-	Type       string
-	Category   string
-	Extention  string
-	StartDate  string
-	EndDate    string
+	CampaignId         string
+	Company            int
+	Tenant             int
+	Calss              string
+	Type               string
+	Category           string
+	Extention          string
+	StartDate          string
+	EndDate            string
+	ScheduleId         string
+	CallServerId       string
+	MaxCmpaignChannels int
+	DefaultANI         string
+}
+
+type ContactInfo struct {
+	ContactId string
+}
+
+type CampaignContactInfo struct {
+	CampContactInfo ContactInfo
+}
+
+type PhoneNumberResult struct {
+	CustomMessage string
+	IsSuccess     bool
+	Result        []CampaignContactInfo
 }
 
 type CallRuleApiResult struct {
@@ -72,4 +106,17 @@ type Appoinment struct {
 	createdAt       string
 	updatedAt       string
 	ScheduleId      int
+}
+
+type SubEvents struct {
+	SwitchName    string
+	CampaignId    string
+	SessionId     string
+	EventClass    string
+	EventType     string
+	EventTime     string
+	EventName     string
+	EventData     string
+	AuthData      string
+	EventCategory string
 }

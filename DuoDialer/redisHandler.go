@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/fzzy/radix/extra/pubsub"
 	"github.com/fzzy/radix/redis"
 	"time"
 )
+
+var subChannelName string
 
 // Redis String Methods
 func RedisAdd(key, value string) string {
@@ -261,4 +265,55 @@ func RedisListRpush(lname, value string) bool {
 
 	result, _ := client.Cmd("rpush", lname, value).Bool()
 	return result
+}
+
+func RedisListLlen(lname string) int {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisListLlen", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	// select database
+	r := client.Cmd("select", redisDb)
+	errHndlr(r.Err)
+
+	result, _ := client.Cmd("llen", lname).Int()
+	return result
+}
+
+// Redis PubSub
+
+func PubSub() {
+	subChannelName = fmt.Sprintf("dialer%s", dialerId)
+	c2, err := redis.Dial("tcp", redisIp)
+	errHndlr(err)
+	defer c2.Close()
+	psc := pubsub.NewSubClient(c2)
+	psr := psc.Subscribe(subChannelName)
+	//ppsr := psc.PSubscribe("*")
+
+	//if ppsr.Err == nil {
+
+	for {
+		psr = psc.Receive()
+		if psr.Err != nil {
+
+			fmt.Println(psr.Err.Error())
+
+			break
+		}
+
+		var subEvent = SubEvents{}
+		json.Unmarshal([]byte(psr.Message), &subEvent)
+		go OnEvent(subEvent)
+	}
+	//s := strings.Split("127.0.0.1:5432", ":")
+	//}
+
+	psc.Unsubscribe(subChannelName)
+
 }
