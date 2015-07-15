@@ -203,7 +203,7 @@ func GetCampMaxChannelLimit(campaignId string) int {
 	}
 }
 
-func StartCampaign(campaignId, scheduleId, callServerId, extention, defaultAni string, company, tenant int, ch chan string) {
+func StartCampaign(campaignId, scheduleId, callServerId, extention, defaultAni string, company, tenant int) {
 	emtAppoinment := Appoinment{}
 	defCallServerInfo := CallServerInfo{}
 	authToken := fmt.Sprintf("%d#%d", company, tenant)
@@ -239,7 +239,10 @@ func StartCampaign(campaignId, scheduleId, callServerId, extention, defaultAni s
 						if number == "" {
 							numberCount := GetNumberCount(company, tenant, campaignId, scheduleId)
 							if numberCount == 0 {
-								ch <- "End"
+								SetCampaignStatus(campaignId, "End", company, tenant)
+								RemoveCampaignFromDialer(campaignId, company, tenant)
+								return
+								//ch <- "End"
 							}
 						} else {
 							trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
@@ -255,24 +258,40 @@ func StartCampaign(campaignId, scheduleId, callServerId, extention, defaultAni s
 						time.Sleep(500 * time.Millisecond)
 					}
 				} else {
-					ch <- "PauseByDialer"
+					SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+					return
+					//ch <- "PauseByDialer"
 				}
 			} else {
 				switch campStatus {
 				case "Stop":
-					ch <- "Stop"
+					SetCampaignStatus(campaignId, "Stop", company, tenant)
+					RemoveCampaignFromDialer(campaignId, company, tenant)
+					return
+					//ch <- "Stop"
 				case "Pause":
-					ch <- "Pause"
+					SetCampaignStatus(campaignId, "Pause", company, tenant)
+					return
+					//ch <- "Pause"
 				case "End":
-					ch <- "End"
+					SetCampaignStatus(campaignId, "End", company, tenant)
+					RemoveCampaignFromDialer(campaignId, company, tenant)
+					return
+					//ch <- "End"
 				case "PauseByDialer":
-					ch <- "PauseByDialer"
+					SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+					return
+					//ch <- "PauseByDialer"
 				default:
-					ch <- "ForceFullyStop"
+					SetCampaignStatus(campaignId, "ForceFullyStop", company, tenant)
+					return
+					//ch <- "ForceFullyStop"
 				}
 			}
 		}
 	} else {
-		ch <- "Waiting for Appoinment"
+		SetCampaignStatus(campaignId, "Waiting for Appoinment", company, tenant)
+		return
+		//ch <- "Waiting for Appoinment"
 	}
 }

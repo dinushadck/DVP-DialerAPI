@@ -54,15 +54,15 @@ func main() {
 						RemoveCampaignFromDialer(campaign.CampaignId, campaign.Company, campaign.Tenant)
 					} else if campaignStartDate.Before(tm) && campaignEndDate.After(tm) {
 						fmt.Println("Continue campaign: ", campaign.CampaignId)
-						ch := make(chan string)
+						//ch := make(chan string)
 						fmt.Println("StartCampaign: ", campaign.CampaignId)
-						go StartCampaign(campaign.CampaignId, campaign.ScheduleId, campaign.CallServerId, campaign.Extention, campaign.DefaultANI, campaign.Company, campaign.Tenant, ch)
-						status := <-ch
+						go StartCampaign(campaign.CampaignId, campaign.ScheduleId, campaign.CallServerId, campaign.Extention, campaign.DefaultANI, campaign.Company, campaign.Tenant)
+						//status := <-ch
 
-						SetCampaignStatus(campaign.CampaignId, status, campaign.Company, campaign.Tenant)
-						if status == "End" || status == "Stop" {
-							//RemoveCampaignFromDialer(campaign.CampaignId, campaign.Company, campaign.Tenant)
-						}
+						//SetCampaignStatus(campaign.CampaignId, status, campaign.Company, campaign.Tenant)
+						//if status == "End" || status == "Stop" {
+						//RemoveCampaignFromDialer(campaign.CampaignId, campaign.Company, campaign.Tenant)
+						//}
 					}
 				}
 			}
