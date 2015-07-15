@@ -93,21 +93,50 @@ func RequestCampaign(requestCount int) []Campaign {
 	//Request campaign from Campaign Manager service
 	campaignDetails := make([]Campaign, 0)
 
-	campaignDetail := Campaign{}
-	campaignDetail.Calss = "Dialer"
-	campaignDetail.CampaignId = "1"
-	campaignDetail.Category = "Call"
-	campaignDetail.Company = 4
-	campaignDetail.EndDate = "2015-08-10T15:10:00.000Z"
-	campaignDetail.Extention = "5000"
-	campaignDetail.ScheduleId = "1"
-	campaignDetail.StartDate = "2015-07-10T11:11:00.000Z"
-	campaignDetail.Tenant = 2
-	campaignDetail.Type = "Callserver"
-	campaignDetail.CallServerId = "2"
-	campaignDetail.MaxCmpaignChannels = 0
-	campaignDetail.DefaultANI = "077555555"
+	campaignDetail1 := Campaign{}
+	campaignDetail1.Calss = "Dialer"
+	campaignDetail1.CampaignId = "1"
+	campaignDetail1.Category = "Call"
+	campaignDetail1.Company = 4
+	campaignDetail1.EndDate = "2015-08-10T15:10:00.000Z"
+	campaignDetail1.Extention = "1001"
+	campaignDetail1.ScheduleId = "1"
+	campaignDetail1.StartDate = "2015-07-10T11:11:00.000Z"
+	campaignDetail1.Tenant = 2
+	campaignDetail1.Type = "Callserver"
+	campaignDetail1.CallServerId = "2"
+	campaignDetail1.MaxCmpaignChannels = 0
+	campaignDetail1.DefaultANI = "0888888881"
 
+	campaignDetail2 := Campaign{}
+	campaignDetail2.Calss = "Dialer"
+	campaignDetail2.CampaignId = "2"
+	campaignDetail2.Category = "Call"
+	campaignDetail2.Company = 4
+	campaignDetail2.EndDate = "2015-08-10T15:10:00.000Z"
+	campaignDetail2.Extention = "1002"
+	campaignDetail2.ScheduleId = "2"
+	campaignDetail2.StartDate = "2015-07-10T11:11:00.000Z"
+	campaignDetail2.Tenant = 2
+	campaignDetail2.Type = "Callserver"
+	campaignDetail2.CallServerId = "2"
+	campaignDetail2.MaxCmpaignChannels = 0
+	campaignDetail2.DefaultANI = "0888888882"
+
+	campaignDetail3 := Campaign{}
+	campaignDetail3.Calss = "Dialer"
+	campaignDetail3.CampaignId = "3"
+	campaignDetail3.Category = "Call"
+	campaignDetail3.Company = 4
+	campaignDetail3.EndDate = "2015-08-10T15:10:00.000Z"
+	campaignDetail3.Extention = "1003"
+	campaignDetail3.ScheduleId = "3"
+	campaignDetail3.StartDate = "2015-07-10T11:11:00.000Z"
+	campaignDetail3.Tenant = 2
+	campaignDetail3.Type = "Callserver"
+	campaignDetail3.CallServerId = "2"
+	campaignDetail3.MaxCmpaignChannels = 0
+	campaignDetail3.DefaultANI = "0888888883"
 	/*authToken := fmt.Sprintf("%d#%d", company, tenant)
 	fmt.Println("Start GetPhoneNumbers Auth: ", authToken, " CampaignId: ", campaignId, " SchedulrId: ", scheduleId)
 	client := &http.Client{}
@@ -132,7 +161,9 @@ func RequestCampaign(requestCount int) []Campaign {
 			campaignDetails = append(campaignDetails, camRes)
 		}
 	}*/
-	campaignDetails = append(campaignDetails, campaignDetail)
+	campaignDetails = append(campaignDetails, campaignDetail1)
+	campaignDetails = append(campaignDetails, campaignDetail2)
+	campaignDetails = append(campaignDetails, campaignDetail3)
 	return campaignDetails
 }
 

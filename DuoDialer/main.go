@@ -75,5 +75,5 @@ func main() {
 func InitiateService() {
 	gorest.RegisterService(new(DialerSelfHost))
 	http.Handle("/", gorest.Handle())
-	http.ListenAndServe(":6565", nil)
+	http.ListenAndServe(":2223", nil)
 }
