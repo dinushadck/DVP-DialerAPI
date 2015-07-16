@@ -285,11 +285,12 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 								return
 							}
 						} else {
-							trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
+							//trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
+							trunkCode, ani, dnis := GetTrunkCode(authToken, defaultAni, number)
 							uuid := GetUuid()
 							if trunkCode != "" && uuid != "" {
-								//go DialNumber(company, tenant, callServerInfo.Url, campaignId, uuid, ani, trunkCode, dnis, extention)
-								go DialNumberFIFO(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
+								go DialNumber(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
+								//go DialNumberFIFO(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
 								time.Sleep(100 * time.Millisecond)
 							}
 						}
@@ -324,7 +325,25 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 			}
 		}
 	} else {
-		SetCampaignStatus(campaignId, "Waiting for Appoinment", company, tenant)
-		return
+		campStatus := GetCampaignStatus(campaignId, company, tenant)
+		switch campStatus {
+		case "Stop":
+			SetCampaignStatus(campaignId, "Stop", company, tenant)
+			RemoveCampaignFromDialer(campaignId, company, tenant)
+			return
+		case "Pause":
+			SetCampaignStatus(campaignId, "Pause", company, tenant)
+			return
+		case "End":
+			SetCampaignStatus(campaignId, "End", company, tenant)
+			RemoveCampaignFromDialer(campaignId, company, tenant)
+			return
+		case "PauseByDialer":
+			SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+			return
+		default:
+			SetCampaignStatus(campaignId, "Waiting for Appoinment", company, tenant)
+			return
+		}
 	}
 }
