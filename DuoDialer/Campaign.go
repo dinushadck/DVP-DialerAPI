@@ -160,12 +160,14 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 				switch state {
 				case "Stop":
 					SetCampaignStatus(campIdStr, "Stop", company, tenant)
+					RemoveCampaignFromDialer(campIdStr, company, tenant)
 					break
 				case "Pause":
 					SetCampaignStatus(campIdStr, "Pause", company, tenant)
 					break
 				case "End":
 					SetCampaignStatus(campIdStr, "End", company, tenant)
+					RemoveCampaignFromDialer(campIdStr, company, tenant)
 					break
 				default:
 					break
