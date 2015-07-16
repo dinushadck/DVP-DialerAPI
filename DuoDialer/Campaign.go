@@ -154,8 +154,7 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 			camId := campaignStatusResult.Result.CampaignId
 			dId := campaignStatusResult.Result.DialerId
 
-			campId64 := int64(camId)
-			campIdStr := strconv.FormatInt(campId64, 32)
+			campIdStr := strconv.Itoa(camId)
 
 			if campaignId == campIdStr && dialerId == dId && currentState != state {
 				switch state {
