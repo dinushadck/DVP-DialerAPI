@@ -13,17 +13,17 @@ func RegisterCallServer(serverId string) CallServerInfo {
 	}
 	//Get CallServer info
 	cs := CallServerInfo{}
-	cs.CallServerId = serverId
-	cs.MaxChannelCount = 100
+	cs.CallServerId = "2"
+	cs.MaxChannelCount = 60
 	cs.Url = callServer
 
-	callServerKey := fmt.Sprintf("CallServer:%s", serverId)
+	callServerKey := fmt.Sprintf("CallServer:%s", cs.CallServerId)
 	callServerjson, _ := json.Marshal(cs)
 	addResult := RedisAdd(callServerKey, string(callServerjson))
 
 	if addResult == "OK" {
-		csck := fmt.Sprintf("CallServerConcurrentCalls:%s", serverId)
-		csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", serverId)
+		csck := fmt.Sprintf("CallServerConcurrentCalls:%s", cs.CallServerId)
+		csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", cs.CallServerId)
 		RedisSet(csck, "0")
 		RedisIncrBy(csmcl, cs.MaxChannelCount)
 		return cs

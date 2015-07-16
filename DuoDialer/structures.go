@@ -40,20 +40,35 @@ type CampaignResult struct {
 	Result        []Campaign
 }
 
+type CampaignConfigInfo struct {
+	ChannelConcurrency int
+	AllowCallBack      bool
+	MaxCallBackCount   int
+	Caller             string
+	StartDate          string
+	EndDate            string
+}
+
+type CampaignShedule struct {
+	ScheduleId    int
+	CamScheduleId int
+}
+
 type Campaign struct {
-	CampaignId         string
-	Company            int
-	Tenant             int
+	CampaignName       string
+	CampaignMode       string
+	CampaignChannel    string
+	DialoutMechanism   string
+	CampaignId         int
+	CompanyId          int
+	TenantId           int
 	Calss              string
 	Type               string
 	Category           string
-	Extention          string
-	StartDate          string
-	EndDate            string
-	ScheduleId         string
-	CallServerId       string
-	MaxCmpaignChannels int
-	DefaultANI         string
+	Extensions         string
+	OperationalStatus  string
+	CampScheduleInfo   []CampaignShedule
+	CampConfigurations CampaignConfigInfo
 }
 
 type ContactInfo struct {
@@ -119,4 +134,20 @@ type SubEvents struct {
 	EventData     string
 	AuthData      string
 	EventCategory string
+}
+
+type CampaignStart struct {
+	CampaignId int
+	DialerId   string
+}
+
+type CampaignState struct {
+	CampaignId    int
+	CampaignState string
+	DialerId      string
+}
+type CampaignStatusResult struct {
+	CustomMessage string
+	IsSuccess     bool
+	Result        CampaignState
 }

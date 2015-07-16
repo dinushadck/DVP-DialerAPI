@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func GetUuid() string {
@@ -55,10 +56,10 @@ func GetTrunkCode(authToken, ani, dnis string) (trunkCode, rAni, rDnis string) {
 	}
 }
 
-func DialNumber(company, tenant int, callServerUrl, campaignId, uuid, fromNumber, trunkCode, phoneNumber, extention string) {
+func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid, fromNumber, trunkCode, phoneNumber, extention string) {
 	fmt.Println("Start DialNumber: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 	customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
-	request := fmt.Sprintf("http://%s", callServerUrl)
+	request := fmt.Sprintf("http://%s", callServer.Url)
 	path := fmt.Sprintf("api/originate?")
 	param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,origination_uuid=%s,origination_caller_id_number=%s}sofia/gateway/%s/%s %s xml dialer", subChannelName, campaignId, customCompanyStr, uuid, fromNumber, trunkCode, phoneNumber, extention)
 
@@ -67,9 +68,10 @@ func DialNumber(company, tenant int, callServerUrl, campaignId, uuid, fromNumber
 	u.Path += param
 
 	fmt.Println(u.String())
-
+	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
 	resp, err := http.Get(u.String())
 	if err != nil {
+		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
 		fmt.Println(err.Error())
 	}
 	defer resp.Body.Close()
@@ -78,24 +80,31 @@ func DialNumber(company, tenant int, callServerUrl, campaignId, uuid, fromNumber
 		response, _ := ioutil.ReadAll(resp.Body)
 		tmx := string(response[:])
 		fmt.Println(tmx)
+		resultInfo := strings.Split(tmx, " ")
+		if len(resultInfo) > 0 {
+			if resultInfo[0] == "-ERR" {
+				DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+			}
+		}
 	}
 }
 
-func DialNumberFIFO(company, tenant int, callServerUrl, campaignId, uuid, fromNumber, trunkCode, phoneNumber, extention string) {
+func DialNumberFIFO(company, tenant int, callServer CallServerInfo, campaignId, uuid, fromNumber, trunkCode, phoneNumber, extention string) {
 	fmt.Println("Start DialNumber: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 	customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
-	request := fmt.Sprintf("http://%s", callServerUrl)
+	request := fmt.Sprintf("http://%s", callServer.Url)
 	path := fmt.Sprintf("api/originate?")
-	param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=false,origination_uuid=%s,origination_caller_id_number=%s}sofia/gateway/%s/%s &callcenter(support@default)", subChannelName, campaignId, customCompanyStr, uuid, fromNumber, trunkCode, phoneNumber)
+	param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=false,origination_uuid=%s,origination_caller_id_number=%s}sofia/gateway/%s/%s %s xml dialer", subChannelName, campaignId, customCompanyStr, uuid, fromNumber, trunkCode, phoneNumber, extention)
 
 	u, _ := url.Parse(request)
 	u.Path += path
 	u.Path += param
 
 	fmt.Println(u.String())
-
+	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
 	resp, err := http.Get(u.String())
 	if err != nil {
+		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
 		fmt.Println(err.Error())
 	}
 	defer resp.Body.Close()
@@ -104,5 +113,11 @@ func DialNumberFIFO(company, tenant int, callServerUrl, campaignId, uuid, fromNu
 		response, _ := ioutil.ReadAll(resp.Body)
 		tmx := string(response[:])
 		fmt.Println(tmx)
+		resultInfo := strings.Split(tmx, " ")
+		if len(resultInfo) > 0 {
+			if resultInfo[0] == "-ERR" {
+				DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+			}
+		}
 	}
 }
