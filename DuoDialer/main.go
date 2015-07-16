@@ -60,6 +60,19 @@ func main() {
 							go StartCampaign(campIdStr, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId)
 						}
 					}
+				} else {
+					switch campStatus {
+					case "Stop":
+						SetCampaignStatus(campIdStr, "Stop", campaign.CompanyId, campaign.TenantId)
+						RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
+						break
+					case "End":
+						SetCampaignStatus(campIdStr, "End", campaign.CompanyId, campaign.TenantId)
+						RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
+						break
+					default:
+						break
+					}
 				}
 			}
 		}
