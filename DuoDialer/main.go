@@ -51,12 +51,9 @@ func main() {
 						RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
 					} else if campaignStartDate.Before(tm) && campaignEndDate.After(tm) {
 						fmt.Println("Continue campaign: ", campIdStr)
-						//ch := make(chan string)
-						fmt.Println("StartCampaign: ", campIdStr)
 						if len(campaign.CampScheduleInfo) > 0 {
 							scheduleId := strconv.Itoa(campaign.CampScheduleInfo[0].ScheduleId)
 							camScheduleId := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
-							fmt.Println("SetscheduleId Pre: ", campaign.CampScheduleInfo[0].ScheduleId, " Post: ", scheduleId)
 							go StartCampaign(campIdStr, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId)
 						}
 					}
