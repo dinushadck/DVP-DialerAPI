@@ -31,10 +31,13 @@ func OnEvent(eventInfo SubEvents) {
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_ANSWER":
+				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_DESTROY":
 				DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
+				SetSessionInfo(eventInfo.SessionId, "reason", eventInfo.DisconnectReason)
+				go UploadSessionInfo(eventInfo.SessionId)
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			default:

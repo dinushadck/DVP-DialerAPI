@@ -124,16 +124,17 @@ type Appoinment struct {
 }
 
 type SubEvents struct {
-	SwitchName    string
-	CampaignId    string
-	SessionId     string
-	EventClass    string
-	EventType     string
-	EventTime     string
-	EventName     string
-	EventData     string
-	AuthData      string
-	EventCategory string
+	SwitchName       string
+	CampaignId       string
+	SessionId        string
+	EventClass       string
+	EventType        string
+	EventTime        string
+	EventName        string
+	EventData        string
+	AuthData         string
+	EventCategory    string
+	DisconnectReason string
 }
 
 type CampaignStart struct {

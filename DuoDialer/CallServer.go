@@ -19,7 +19,7 @@ func RegisterCallServer(serverId string) CallServerInfo {
 
 	callServerKey := fmt.Sprintf("CallServer:%s", cs.CallServerId)
 	callServerjson, _ := json.Marshal(cs)
-	addResult := RedisAdd(callServerKey, string(callServerjson))
+	addResult := RedisSet(callServerKey, string(callServerjson))
 
 	if addResult == "OK" {
 		csck := fmt.Sprintf("CallServerConcurrentCalls:%s", cs.CallServerId)

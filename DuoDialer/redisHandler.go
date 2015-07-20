@@ -169,8 +169,13 @@ func RedisHashGetAll(hkey string) map[string]string {
 	// select database
 	r := client.Cmd("select", redisDb)
 	errHndlr(r.Err)
-
 	strHash, _ := client.Cmd("hgetall", hkey).Hash()
+	bytes, err := json.Marshal(strHash)
+	if err != nil {
+		fmt.Println(err)
+	}
+	text := string(bytes)
+	fmt.Println(text)
 	return strHash
 }
 
@@ -190,6 +195,27 @@ func RedisHashSetField(hkey, field, value string) bool {
 
 	result, _ := client.Cmd("hset", hkey, field, value).Bool()
 	return result
+}
+
+func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisHashSetField", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	// select database
+	r := client.Cmd("select", redisDb)
+	errHndlr(r.Err)
+	fmt.Println(data)
+	for key, value := range data {
+		client.Cmd("hset", hkey, key, value).Bool()
+	}
+	fmt.Println(true)
+	return true
 }
 
 func RedisRemoveHashField(hkey, field string) bool {

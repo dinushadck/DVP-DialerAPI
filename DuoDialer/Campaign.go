@@ -57,9 +57,9 @@ func RemoveCampaignStatus(campaignId string, company, tenant int) {
 }
 
 func AddCampaignToDialer(campaignD Campaign) {
-	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
 	DefCampConfig := CampaignConfigInfo{}
 	if campaignD.CampConfigurations != DefCampConfig {
+		campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
 		campaignJson, _ := json.Marshal(campaignD)
 		result := RedisAdd(campaignKey, string(campaignJson))
 		fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
@@ -213,6 +213,40 @@ func IncrCampChannelMaxLimit(campaignId string) {
 	RedisIncr(cmcl)
 }
 
+func IncrCampaignDialCount(company, tenant int, campaignId string) {
+	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
+	RedisIncr(cmcl)
+}
+
+func GetCampaignDialCount(company, tenant int, campaignId string) int {
+	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
+	value := RedisGet(cmcl)
+	count, _ := strconv.Atoi(value)
+	return count
+}
+
+func RemoveCampaignDialCount(company, tenant int, campaignId string) {
+	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
+	RedisRemove(cmcl)
+}
+
+func IncrCampaignConnectedCount(company, tenant int, campaignId string) {
+	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
+	RedisIncr(cmcl)
+}
+
+func GetCampaignConnectedCount(company, tenant int, campaignId string) int {
+	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
+	value := RedisGet(cmcl)
+	count, _ := strconv.Atoi(value)
+	return count
+}
+
+func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
+	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
+	RedisRemove(cmcl)
+}
+
 func DecrCampChannelMaxLimit(campaignId string) {
 	cmcl := fmt.Sprintf("CampaignMaxCallLimit:%s", campaignId)
 	decValue := RedisIncrBy(cmcl, -1)
@@ -250,6 +284,7 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 	authToken := fmt.Sprintf("%d#%d", company, tenant)
 	appment := CheckAppoinmentForCampaign(authToken, scheduleId)
 	callServerInfos := GetCallServerInfo(callServerId)
+
 	if appment != emtAppoinment && callServerInfos != defCallServerInfo {
 		campStatus := GetCampaignStatus(campaignId, company, tenant)
 		if campStatus == "Start" {

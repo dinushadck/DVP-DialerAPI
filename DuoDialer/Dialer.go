@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 func GetUuid() string {
@@ -69,9 +70,13 @@ func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid
 
 	fmt.Println(u.String())
 	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
+	IncrCampaignDialCount(company, tenant, campaignId)
 	resp, err := http.Get(u.String())
 	if err != nil {
 		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+		SetSessionInfo(uuid, "reason", "dial_failed")
+		SetSessionInfo(uuid, "dialerStatus", "failed")
+		go UploadSessionInfo(uuid)
 		fmt.Println(err.Error())
 	}
 	defer resp.Body.Close()
@@ -84,6 +89,22 @@ func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid
 		if len(resultInfo) > 0 {
 			if resultInfo[0] == "-ERR" {
 				DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+
+				if len(resultInfo) > 1 {
+					reason := resultInfo[1]
+					if reason == "" {
+						SetSessionInfo(uuid, "reason", "not_specified")
+					} else {
+						SetSessionInfo(uuid, "reason", reason)
+					}
+				} else {
+					SetSessionInfo(uuid, "reason", "not_specified")
+				}
+				SetSessionInfo(uuid, "dialerStatus", "not_connected")
+				go UploadSessionInfo(uuid)
+			} else {
+				SetSessionInfo(uuid, "reason", "dial_success")
+				SetSessionInfo(uuid, "dialerStatus", "connected")
 			}
 		}
 	}
@@ -102,9 +123,13 @@ func DialNumberFIFO(company, tenant int, callServer CallServerInfo, campaignId, 
 
 	fmt.Println(u.String())
 	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
+	InitiateSessionInfo(company, tenant, "1", campaignId, uuid, "start", "start", time.Now().String())
 	resp, err := http.Get(u.String())
 	if err != nil {
 		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+		SetSessionInfo(uuid, "reason", "dial_failed")
+		SetSessionInfo(uuid, "dialerStatus", "failed")
+		go UploadSessionInfo(uuid)
 		fmt.Println(err.Error())
 	}
 	defer resp.Body.Close()
@@ -117,6 +142,22 @@ func DialNumberFIFO(company, tenant int, callServer CallServerInfo, campaignId, 
 		if len(resultInfo) > 0 {
 			if resultInfo[0] == "-ERR" {
 				DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+
+				if len(resultInfo) > 1 {
+					reason := resultInfo[1]
+					if reason == "" {
+						SetSessionInfo(uuid, "reason", "not_specified")
+					} else {
+						SetSessionInfo(uuid, "reason", reason)
+					}
+				} else {
+					SetSessionInfo(uuid, "reason", "not_specified")
+				}
+				SetSessionInfo(uuid, "dialerStatus", "not_connected")
+				go UploadSessionInfo(uuid)
+			} else {
+				SetSessionInfo(uuid, "reason", "dial_success")
+				SetSessionInfo(uuid, "dialerStatus", "connected")
 			}
 		}
 	}

@@ -17,6 +17,7 @@ func errHndlr(err error) {
 
 func main() {
 	InitiateDuoDialer()
+
 	go InitiateService()
 	for {
 		onGoingCampaignCount := GetOnGoingCampaignCount()
