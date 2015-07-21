@@ -64,8 +64,7 @@ func AddCampaignToDialer(campaignD Campaign) {
 		result := RedisAdd(campaignKey, string(campaignJson))
 		fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
 		if result == "OK" {
-			campId64 := int64(campaignD.CampaignId)
-			campIdStr := strconv.FormatInt(campId64, 32)
+			campIdStr := strconv.Itoa(campaignD.CampaignId)
 			IncrementOnGoingCampaignCount()
 			SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
 			UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
