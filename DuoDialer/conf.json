@@ -1,7 +1,7 @@
 {
     "RedisIp": "192.168.3.200:6379",
 	"RedisDb": 5,
-	"DialerId": "1",
+	"DialerId": "2",
 	"CampaignLimit": 30,
 	"HostIpAddress": "192.168.0.15",
 	"CampaignRequestFrequency": 10,

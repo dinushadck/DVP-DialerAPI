@@ -7,6 +7,7 @@ import (
 const layout1 = "2006-01-02T15:04:05Z07:00"
 const layout2 = "2006-01-02"
 const layout3 = "15:04"
+const layout4 = "2006-01-02T15:04:05.999999-07:00"
 
 type Configuration struct {
 	RedisIp                  string

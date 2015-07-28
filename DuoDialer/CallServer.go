@@ -24,8 +24,9 @@ func RegisterCallServer(serverId string) CallServerInfo {
 	if addResult == "OK" {
 		csck := fmt.Sprintf("CallServerConcurrentCalls:%s", cs.CallServerId)
 		csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", cs.CallServerId)
+		countStr := strconv.Itoa(cs.MaxChannelCount)
 		RedisSet(csck, "0")
-		RedisIncrBy(csmcl, cs.MaxChannelCount)
+		RedisSet(csmcl, countStr)
 		return cs
 	}
 	return defCallServerInfo
@@ -111,5 +112,13 @@ func GetMaxChannelLimit(serverId string) int {
 		return 0
 	} else {
 		return value
+	}
+}
+
+func RemoveCampConcurrentChannelCount(campaignId string) {
+	SKcsckC := fmt.Sprintf("CallServerConcurrentCalls:*:%s", campaignId)
+	sResult := RedisSearchKeys(SKcsckC)
+	if len(sResult) > 0 {
+		RedisRemove(sResult[0])
 	}
 }

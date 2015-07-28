@@ -20,6 +20,7 @@ func main() {
 
 	go InitiateService()
 	for {
+		go ClearTimeoutChannels()
 		onGoingCampaignCount := GetOnGoingCampaignCount()
 		if onGoingCampaignCount < campaignLimit {
 			campaigns := RequestCampaign(campaignLimit - onGoingCampaignCount)

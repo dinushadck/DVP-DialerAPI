@@ -37,6 +37,15 @@ func DecrementOnGoingCampaignCount() {
 	fmt.Println("DecrementOnGoingCampaignCount: ", dncValue)
 }
 
+func DecrementOnGoingCampaignCountOther(oDialerId string) {
+	dialerCampaignCountSKey := fmt.Sprintf("DialerOnGoingCampaignCount:*:%s", oDialerId)
+	searchdialer := RedisSearchKeys(dialerCampaignCountSKey)
+	if len(searchdialer) > 0 {
+		dncValue := RedisIncrBy(searchdialer[0], -1)
+		fmt.Println("DecrementOnGoingCampaignCountOther: ", dncValue)
+	}
+}
+
 func SetCampaignStatus(campaignId, status string, company, tenant int) {
 	campaignStatusKey := fmt.Sprintf("CampaignStatus:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
 	result := RedisSet(campaignStatusKey, status)
@@ -56,18 +65,45 @@ func RemoveCampaignStatus(campaignId string, company, tenant int) {
 	fmt.Println("GetCampaignStatus CampaignId: ", campaignStatusKey, " Result: ", result)
 }
 
+func RemoveCampaignStatusOther(oDialerId, campaignId string, company, tenant int) {
+	campaignStatusKey := fmt.Sprintf("CampaignStatus:%s:%d:%d:%s", oDialerId, company, tenant, campaignId)
+	result := RedisRemove(campaignStatusKey)
+	fmt.Println("RemoveCampaignStatusOther CampaignId: ", campaignStatusKey, " Result: ", result)
+}
+
 func AddCampaignToDialer(campaignD Campaign) {
 	DefCampConfig := CampaignConfigInfo{}
 	if campaignD.CampConfigurations != DefCampConfig {
 		campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
-		campaignJson, _ := json.Marshal(campaignD)
-		result := RedisAdd(campaignKey, string(campaignJson))
-		fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
-		if result == "OK" {
+		searchCamp := fmt.Sprintf("Campaign:*:%d:%d:%d", campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
+		existingKeys := RedisSearchKeys(searchCamp)
+
+		if len(existingKeys) == 0 {
+			campaignJson, _ := json.Marshal(campaignD)
+			result := RedisAdd(campaignKey, string(campaignJson))
+			fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+			if result == "OK" {
+				campIdStr := strconv.Itoa(campaignD.CampaignId)
+				channelCountStr := strconv.Itoa(campaignD.CampConfigurations.ChannelConcurrency)
+				IncrementOnGoingCampaignCount()
+				SetCampChannelMaxLimitDirect(campIdStr, channelCountStr)
+				SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
+				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
+			}
+		} else {
+			splitVals := strings.Split(existingKeys[0], ":")
+			preDialerId := splitVals[1]
 			campIdStr := strconv.Itoa(campaignD.CampaignId)
-			IncrementOnGoingCampaignCount()
-			SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
-			UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
+			RemoveCampaignFromOtherDialer(preDialerId, campIdStr, campaignD.CompanyId, campaignD.TenantId)
+
+			campaignJson, _ := json.Marshal(campaignD)
+			result := RedisAdd(campaignKey, string(campaignJson))
+			fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+			if result == "OK" {
+				IncrementOnGoingCampaignCount()
+				SetCampaignStatus(campIdStr, "Resume", campaignD.CompanyId, campaignD.TenantId)
+				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
+			}
 		}
 	}
 }
@@ -94,6 +130,20 @@ func RemoveCampaignFromDialer(campaignId string, company, tenant int) {
 		DecrementOnGoingCampaignCount()
 		RemoveCampaignStatus(campaignId, company, tenant)
 		RemoveNumbers(company, tenant, campaignId)
+		RemoveCampChannelMaxLimit(campaignId)
+		RemoveCampaignConnectedCount(company, tenant, campaignId)
+		RemoveCampaignDialCount(company, tenant, campaignId)
+		RemoveCampConcurrentChannelCount(campaignId)
+	}
+}
+
+func RemoveCampaignFromOtherDialer(oDialerId, campaignId string, company, tenant int) {
+	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%s", oDialerId, company, tenant, campaignId)
+	result := RedisRemove(campaignKey)
+	fmt.Println("Remove Campaign from Redis: ", campaignKey, " Result: ", result)
+	if result == true {
+		DecrementOnGoingCampaignCountOther(oDialerId)
+		RemoveCampaignStatusOther(oDialerId, campaignId, company, tenant)
 	}
 }
 
@@ -103,7 +153,7 @@ func RequestCampaign(requestCount int) []Campaign {
 
 	client := &http.Client{}
 
-	request := fmt.Sprintf("%s/CampaignManager/Handler/pending/%d", campaignService, requestCount)
+	request := fmt.Sprintf("%s/CampaignManager/Campaigns/State/Pending/%d", campaignService, requestCount)
 	fmt.Println("Start RequestCampaign request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", "")
@@ -128,12 +178,12 @@ func RequestCampaign(requestCount int) []Campaign {
 
 func UpdateCampaignStatus(company, tenant int, campaignId string) {
 	//Send CampaignStatus to Campaign Manager
-	authToken := fmt.Sprintf("%d#%d", company, tenant)
+	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	fmt.Println("Start UpdateCampaignStatus Auth: ", authToken, " CampaignId: ", campaignId, " DialerId: ", dialerId)
 	client := &http.Client{}
 
 	currentState := GetCampaignStatus(campaignId, company, tenant)
-	request := fmt.Sprintf("%s/CampaignManager/Operations/OperationState/%s/%s/%s", campaignService, campaignId, dialerId, currentState)
+	request := fmt.Sprintf("%s/CampaignManager/Campaign/%s/Operations/State/%s/%s", campaignService, campaignId, dialerId, currentState)
 	fmt.Println("Start UpdateCampaignStatus request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)
@@ -183,8 +233,8 @@ func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 
 	jsonData, _ := json.Marshal(state)
 
-	serviceurl := fmt.Sprintf("%s/CampaignManager/Operations", campaignService)
-	authToken := fmt.Sprintf("%d#%d", company, tenant)
+	serviceurl := fmt.Sprintf("%s/CampaignManager/Campaign/Operations", campaignService)
+	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", authToken)
@@ -262,6 +312,11 @@ func SetCampChannelMaxLimit(campaignId string) {
 	}
 }
 
+func SetCampChannelMaxLimitDirect(campaignId, channelcount string) {
+	cmcl := fmt.Sprintf("CampaignMaxCallLimit:%s", campaignId)
+	RedisSet(cmcl, channelcount)
+}
+
 func GetCampMaxChannelLimit(campaignId string) int {
 	cmcl := fmt.Sprintf("CampaignMaxCallLimit:%s", campaignId)
 	maxChannelCount := RedisGet(cmcl)
@@ -275,6 +330,11 @@ func GetCampMaxChannelLimit(campaignId string) int {
 	} else {
 		return value
 	}
+}
+
+func RemoveCampChannelMaxLimit(campaignId string) {
+	cmcl := fmt.Sprintf("CampaignMaxCallLimit:%s", campaignId)
+	RedisRemove(cmcl)
 }
 
 func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extention, defaultAni string, company, tenant int) {
@@ -297,7 +357,7 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
 			if campStatus == "Running" {
-				tm := time.Now()
+				tm := time.Now().UTC()
 				if appmntEndTime.Before(tm) {
 					cchannelCountS, cchannelCountC := GetConcurrentChannelCount(callServerInfos.CallServerId, campaignId)
 					maxChannelLimit := GetMaxChannelLimit(callServerInfos.CallServerId)

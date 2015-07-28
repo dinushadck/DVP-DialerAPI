@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func OnEvent(eventInfo SubEvents) {
@@ -28,9 +29,11 @@ func OnEvent(eventInfo SubEvents) {
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_CREATE":
+				SetSessionInfo(eventInfo.SessionId, "channelCreatetime", time.Now().Format(layout4))
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_ANSWER":
+				SetSessionInfo(eventInfo.SessionId, "channelAnswertime", time.Now().Format(layout4))
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break

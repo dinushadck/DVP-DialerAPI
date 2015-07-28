@@ -30,7 +30,7 @@ func GetAppoinmentsForSchedule(authToken, schedulrId string) []Appoinment {
 func CheckAppoinments(appoinments []Appoinment) Appoinment {
 	for _, appmnt := range appoinments {
 		fmt.Println("CheckAppoinments: ", appmnt.AppointmentName)
-		timeNow := time.Now()
+		timeNow := time.Now().UTC()
 		fmt.Println("daysOfWeek: ", appmnt.DaysOfWeek)
 		daysOfWeek := strings.Split(appmnt.DaysOfWeek, ",")
 		if stringInSlice(timeNow.Weekday().String(), daysOfWeek) {
@@ -38,8 +38,8 @@ func CheckAppoinments(appoinments []Appoinment) Appoinment {
 			tempstartDate, _ := time.Parse(layout2, appmnt.StartDate)
 			tempendDate, _ := time.Parse(layout2, appmnt.EndDate)
 
-			startDate := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), tempstartDate.Hour(), tempstartDate.Minute(), tempstartDate.Second(), 0, time.Local)
-			endDate := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), tempendDate.Hour(), tempendDate.Minute(), tempendDate.Second(), 0, time.Local)
+			startDate := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), tempstartDate.Hour(), tempstartDate.Minute(), tempstartDate.Second(), 0, time.UTC)
+			endDate := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), tempendDate.Hour(), tempendDate.Minute(), tempendDate.Second(), 0, time.UTC)
 
 			fmt.Println("appoinment startDate: ", startDate.String())
 			fmt.Println("appoinment endDate: ", endDate.String())
@@ -48,9 +48,10 @@ func CheckAppoinments(appoinments []Appoinment) Appoinment {
 				startTime, _ := time.Parse(layout1, appmnt.StartTime)
 				endTime, _ := time.Parse(layout1, appmnt.EndTime)
 
-				localStartTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), startTime.Hour(), startTime.Minute(), startTime.Second(), 0, time.Local)
-				localEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.Local)
+				localStartTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), startTime.Hour(), startTime.Minute(), startTime.Second(), 0, time.UTC)
+				localEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.UTC)
 
+				fmt.Println("serverTimeUTC: ", timeNow.String())
 				fmt.Println("appoinment startTime: ", localStartTime.String())
 				fmt.Println("appoinment enendTimedDate: ", localEndTime.String())
 

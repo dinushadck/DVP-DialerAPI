@@ -14,18 +14,6 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	pageKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	pageNumberToRequest := RedisIncr(pageKey)
 	fmt.Println("pageNumber: ", pageNumberToRequest)
-	/*if pageNumberToRequest == 1 {
-		numbers = append(numbers, "0773795991")
-		numbers = append(numbers, "0773795992")
-		numbers = append(numbers, "0773795993")
-		numbers = append(numbers, "0773795994")
-		numbers = append(numbers, "0773795995")
-		numbers = append(numbers, "0773795996")
-		numbers = append(numbers, "0773795997")
-		numbers = append(numbers, "0773795998")
-		numbers = append(numbers, "0773795999")
-		numbers = append(numbers, "0773795990")
-	}*/
 
 	/*if pageNumberToRequest == 1 {
 		file, err := os.Open("D:\\Duo Projects\\Version 5.1\\Documents\\GolangProjects\\CampaignManager\\NumberList4.txt")
@@ -46,11 +34,11 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	}*/
 
 	// Get phone number from campign service and append
-	authToken := fmt.Sprintf("%d#%d", company, tenant)
+	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	fmt.Println("Start GetPhoneNumbers Auth: ", authToken, " CampaignId: ", campaignId, " camScheduleId: ", camScheduleId)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("%s/CampaignManager/NumberUpload/%s/%s/%d/%d", campaignService, campaignId, camScheduleId, numberLimit, pageNumberToRequest)
+	request := fmt.Sprintf("%s/CampaignManager/Campaign/%s/Numbers/%s/%d/%d", campaignService, campaignId, camScheduleId, numberLimit, pageNumberToRequest)
 	fmt.Println("Start GetPhoneNumbers request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)
@@ -113,6 +101,7 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) stri
 }
 
 func GetNumberCount(company, tenant int, campaignId, camScheduleId string) int {
+	fmt.Println("Start GetNumberCount")
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	return RedisListLlen(listId)
 }
