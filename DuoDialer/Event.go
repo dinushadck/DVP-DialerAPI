@@ -43,10 +43,14 @@ func OnEvent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_DESTROY":
 				LogEvent(eventInfo)
-				DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
-				SetSessionInfo(eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
-				go UploadSessionInfo(eventInfo.SessionId)
-				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
+				hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, eventInfo.SessionId)
+				session := RedisCheckKeyExist(hashKey)
+				if session {
+					DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
+					SetSessionInfo(eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
+					go UploadSessionInfo(eventInfo.SessionId)
+					fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
+				}
 				break
 			default:
 				break

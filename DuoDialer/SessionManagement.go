@@ -39,6 +39,7 @@ func SetSessionInfo(sessionId, filed, value string) {
 func UploadSessionInfo(sessionId string) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
 	sessionInfo := RedisHashGetAll(hashKey)
+	RedisRemove(hashKey)
 	sessionb, err := json.Marshal(sessionInfo)
 	if err != nil {
 		fmt.Println(err)
@@ -69,7 +70,6 @@ func UploadSessionInfo(sessionId string) {
 	} else {
 		result := string(body)
 		fmt.Println("response Body:", result)
-		RedisRemove(hashKey)
 	}
 }
 
