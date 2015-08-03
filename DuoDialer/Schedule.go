@@ -57,8 +57,6 @@ func CheckAppoinments(appoinments []Appoinment) Appoinment {
 
 				if localStartTime.Before(timeNow) && localEndTime.After(timeNow) {
 					fmt.Println("match appoinment date&time: ", timeNow.String())
-					appmnt.StartTime = localStartTime.String()
-					appmnt.EndTime = localEndTime.String()
 
 					return appmnt
 				}

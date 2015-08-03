@@ -213,6 +213,9 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 				case "Pause":
 					SetCampaignStatus(campIdStr, "Pause", company, tenant)
 					break
+				case "Resume":
+					SetCampaignStatus(campIdStr, "Resume", company, tenant)
+					break
 				case "End":
 					SetCampaignStatus(campIdStr, "End", company, tenant)
 					break
@@ -337,10 +340,10 @@ func RemoveCampChannelMaxLimit(campaignId string) {
 	RedisRemove(cmcl)
 }
 
-func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extention, defaultAni string, company, tenant int) {
+func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
 	emtAppoinment := Appoinment{}
 	defCallServerInfo := CallServerInfo{}
-	authToken := fmt.Sprintf("%d#%d", company, tenant)
+	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	appment := CheckAppoinmentForCampaign(authToken, scheduleId)
 	callServerInfos := GetCallServerInfo(callServerId)
 
@@ -351,14 +354,20 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 		}
 
 		SetCampaignStatus(campaignId, "Running", company, tenant)
+		maxChannelLimitStr := strconv.Itoa(campaignMaxChannelCount)
+		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
 
-		appmntEndTime, _ := time.Parse(layout1, appment.EndTime)
+		endTime, _ := time.Parse(layout1, appment.EndTime)
+		timeNow := time.Now().UTC()
+		appmntEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.UTC)
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
 			if campStatus == "Running" {
 				tm := time.Now().UTC()
-				if appmntEndTime.Before(tm) {
+				fmt.Println("endTime: ", appmntEndTime.String())
+				fmt.Println("timeNW: ", tm.String())
+				if tm.Before(appmntEndTime) {
 					cchannelCountS, cchannelCountC := GetConcurrentChannelCount(callServerInfos.CallServerId, campaignId)
 					maxChannelLimit := GetMaxChannelLimit(callServerInfos.CallServerId)
 					maxCampaignChannelLimit := GetCampMaxChannelLimit(campaignId)
@@ -393,6 +402,7 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 					}
 				} else {
 					SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+					SetCampChannelMaxLimitDirect(campaignId, "0")
 					return
 				}
 			} else {

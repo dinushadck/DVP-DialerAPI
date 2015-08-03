@@ -15,18 +15,18 @@ func InitiateSessionInfo(company, tenant int, tryCount, campaignId, sessionId, r
 	tenantStr := strconv.Itoa(tenant)
 
 	data := make(map[string]string)
-	data["companyId"] = companyStr
-	data["tenantId"] = tenantStr
-	data["sessionId"] = sessionId
-	data["dialerId"] = dialerId
-	data["campaignId"] = campaignId
-	data["dialtime"] = dialTime
-	data["channelCreatetime"] = dialTime
-	data["channelAnswertime"] = dialTime
-	data["serverId"] = serverId
-	data["reason"] = reason
-	data["dialerStatus"] = dialerStatus
-	data["tryCount"] = tryCount
+	data["CompanyId"] = companyStr
+	data["TenantId"] = tenantStr
+	data["SessionId"] = sessionId
+	data["DialerId"] = dialerId
+	data["CampaignId"] = campaignId
+	data["Dialtime"] = dialTime
+	data["ChannelCreatetime"] = dialTime
+	data["ChannelAnswertime"] = dialTime
+	data["ServerId"] = serverId
+	data["Reason"] = reason
+	data["DialerStatus"] = dialerStatus
+	data["TryCount"] = tryCount
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
 	RedisHashSetMultipleField(hashKey, data)
 }
@@ -49,7 +49,7 @@ func UploadSessionInfo(sessionId string) {
 
 	//upload to campaign service
 	serviceurl := fmt.Sprintf("%s/CampaignManager/Campaign/Session", campaignService)
-	authToken := fmt.Sprintf("%s#%s", sessionInfo["tenantId"], sessionInfo["companyId"])
+	authToken := fmt.Sprintf("%s#%s", sessionInfo["TenantId"], sessionInfo["CompanyId"])
 
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(sessionb))
 	req.Header.Set("Content-Type", "application/json")
@@ -79,12 +79,12 @@ func ClearTimeoutChannels() {
 	tn := time.Now()
 	for _, session := range ongoingSessions {
 		sessionInfo := RedisHashGetAll(session)
-		dtime := sessionInfo["dialtime"]
-		ctime := sessionInfo["channelCreatetime"]
-		atime := sessionInfo["channelAnswertime"]
-		sid := sessionInfo["serverId"]
-		cid := sessionInfo["campaignId"]
-		sessionid := sessionInfo["sessionId"]
+		dtime := sessionInfo["Dialtime"]
+		ctime := sessionInfo["ChannelCreatetime"]
+		atime := sessionInfo["ChannelAnswertime"]
+		sid := sessionInfo["ServerId"]
+		cid := sessionInfo["CampaignId"]
+		sessionid := sessionInfo["SessionId"]
 
 		dtt, _ := time.Parse(layout4, dtime)
 		ctt, _ := time.Parse(layout4, ctime)

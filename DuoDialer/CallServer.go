@@ -77,11 +77,8 @@ func IncrConcurrentChannelCount(serverId, campaignId string) {
 func DecrConcurrentChannelCount(serverId, campaignId string) {
 	csckC := fmt.Sprintf("CallServerConcurrentCalls:%s:%s", serverId, campaignId)
 	csck := fmt.Sprintf("CallServerConcurrentCalls:%s", serverId)
-	decValueC := RedisIncrBy(csckC, -1)
+	RedisIncrBy(csckC, -1)
 	RedisIncrBy(csck, -1)
-	if decValueC < 0 {
-		RedisSet(csck, "0")
-	}
 }
 
 func IncrMaxLimit(serverId string) {

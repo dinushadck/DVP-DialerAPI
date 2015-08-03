@@ -42,6 +42,10 @@ func main() {
 					tempCampaignStartDate, _ := time.Parse(layout1, campaign.CampConfigurations.StartDate)
 					tempCampaignEndDate, _ := time.Parse(layout1, campaign.CampConfigurations.EndDate)
 
+					if campStatus == "Resume" {
+						UpdateCampaignStartStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
+					}
+
 					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), tempCampaignStartDate.Hour(), tempCampaignStartDate.Minute(), tempCampaignStartDate.Second(), 0, time.Local)
 					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, time.Local)
 					fmt.Println("Check Campaign: ", campIdStr)
@@ -56,7 +60,7 @@ func main() {
 						if len(campaign.CampScheduleInfo) > 0 {
 							scheduleId := strconv.Itoa(campaign.CampScheduleInfo[0].ScheduleId)
 							camScheduleId := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
-							go StartCampaign(campIdStr, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId)
+							go StartCampaign(campIdStr, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency)
 						}
 					}
 				} else {

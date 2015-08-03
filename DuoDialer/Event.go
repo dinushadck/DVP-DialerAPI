@@ -1,11 +1,15 @@
 package main
 
 import (
+	"code.google.com/p/log4go"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var eventLog = log4go.NewLogger()
 
 func OnEvent(eventInfo SubEvents) {
 	defEvent := SubEvents{}
@@ -29,17 +33,18 @@ func OnEvent(eventInfo SubEvents) {
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_CREATE":
-				SetSessionInfo(eventInfo.SessionId, "channelCreatetime", time.Now().Format(layout4))
+				SetSessionInfo(eventInfo.SessionId, "ChannelCreatetime", time.Now().Format(layout4))
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_ANSWER":
-				SetSessionInfo(eventInfo.SessionId, "channelAnswertime", time.Now().Format(layout4))
+				SetSessionInfo(eventInfo.SessionId, "ChannelAnswertime", time.Now().Format(layout4))
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_DESTROY":
+				LogEvent(eventInfo)
 				DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
-				SetSessionInfo(eventInfo.SessionId, "reason", eventInfo.DisconnectReason)
+				SetSessionInfo(eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
 				go UploadSessionInfo(eventInfo.SessionId)
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
@@ -53,4 +58,13 @@ func OnEvent(eventInfo SubEvents) {
 	} else {
 		fmt.Println("Empty Event")
 	}
+}
+
+func LogEvent(eventInfo SubEvents) {
+	eventLog.AddFilter("file", log4go.FINE, log4go.NewFileLogWriter("EventLog.txt", false))
+	logData, _ := json.Marshal(eventInfo)
+
+	eventLog.Info("------------------------------------------\n")
+	eventLog.Info(string(logData), "\n")
+	eventLog.Close()
 }
