@@ -11,11 +11,29 @@ const layout4 = "2006-01-02T15:04:05.999999-07:00"
 
 type Configuration struct {
 	RedisIp                  string
+	RedisPort                string
 	RedisDb                  int
 	DialerId                 string
 	CampaignLimit            int
 	HostIpAddress            string
+	Port                     string
 	CampaignRequestFrequency time.Duration
+	CampaignService          string
+	UuidService              string
+	CallServer               string
+	CallRuleService          string
+	ScheduleService          string
+}
+
+type EnvConfiguration struct {
+	RedisIp                  string
+	RedisPort                string
+	RedisDb                  string
+	DialerId                 string
+	CampaignLimit            string
+	HostIpAddress            string
+	Port                     string
+	CampaignRequestFrequency string
 	CampaignService          string
 	UuidService              string
 	CallServer               string

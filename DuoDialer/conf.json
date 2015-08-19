@@ -1,9 +1,11 @@
 {
-    "RedisIp": "192.168.3.200:6379",
+    "RedisIp": "192.168.3.200",
+	"RedisPort": "6379",
 	"RedisDb": 5,
 	"DialerId": "2",
 	"CampaignLimit": 30,
 	"HostIpAddress": "192.168.0.15",
+	"Port":"2226",
 	"CampaignRequestFrequency": 10,
 	"CampaignService": "http://192.168.3.200:2222/DVP/API/6.0",
 	"UuidService": "http://192.168.0.53:8080/api/create_uuid",

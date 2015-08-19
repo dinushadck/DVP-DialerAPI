@@ -87,5 +87,6 @@ func main() {
 func InitiateService() {
 	gorest.RegisterService(new(DialerSelfHost))
 	http.Handle("/", gorest.Handle())
-	http.ListenAndServe(":2223", nil)
+	addr := fmt.Sprintf(":%s", port)
+	http.ListenAndServe(addr, nil)
 }
