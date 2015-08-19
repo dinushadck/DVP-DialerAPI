@@ -128,7 +128,7 @@ func DialNumberFIFO(company, tenant int, callServer CallServerInfo, campaignId, 
 	IncrCampaignDialCount(company, tenant, campaignId)
 	resp, err := http.Get(u.String())
 	if err != nil {
-		//DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
 		SetSessionInfo(uuid, "Reason", "dial_failed")
 		SetSessionInfo(uuid, "DialerStatus", "failed")
 		go UploadSessionInfo(uuid)
@@ -156,7 +156,7 @@ func DialNumberFIFO(company, tenant int, callServer CallServerInfo, campaignId, 
 					SetSessionInfo(uuid, "Reason", "not_specified")
 				}
 				SetSessionInfo(uuid, "DialerStatus", "not_connected")
-				go UploadSessionInfo(uuid)
+				//go UploadSessionInfo(uuid)
 			} else {
 				SetSessionInfo(uuid, "Reason", "dial_success")
 				SetSessionInfo(uuid, "DialerStatus", "connected")

@@ -15,24 +15,6 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	pageNumberToRequest := RedisIncr(pageKey)
 	fmt.Println("pageNumber: ", pageNumberToRequest)
 
-	/*if pageNumberToRequest == 1 {
-		file, err := os.Open("D:\\Duo Projects\\Version 5.1\\Documents\\GolangProjects\\CampaignManager\\NumberList4.txt")
-		if err != nil {
-			//log.Fatal(err)
-		}
-		defer file.Close()
-
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			RedisListLpush("CampaignNumbers:4:2:1:1", scanner.Text())
-			fmt.Println(scanner.Text())
-		}
-
-		if err := scanner.Err(); err != nil {
-			//log.Fatal(err)
-		}
-	}*/
-
 	// Get phone number from campign service and append
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	fmt.Println("Start GetPhoneNumbers Auth: ", authToken, " CampaignId: ", campaignId, " camScheduleId: ", camScheduleId)
