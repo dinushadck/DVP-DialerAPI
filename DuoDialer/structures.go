@@ -59,10 +59,32 @@ type CampaignResult struct {
 	Result        []Campaign
 }
 
+type CampaignCallbackInfoResult struct {
+	CustomMessage string
+	IsSuccess     bool
+	Result        []CampaignCallbackConfigInfo
+}
+
+type CampaignCallbackReason struct {
+	Reason string
+}
+
+type CampaignCallbackInfo struct {
+	CallBackConfId      int
+	MaxCallBackCount    int
+	CallBackInterval    int
+	ReasonId            string
+	CampCallBackReasons CampaignCallbackReason
+}
+
+type CampaignCallbackConfigInfo struct {
+	CampCallbackConfigurations []CampaignCallbackInfo
+}
+
 type CampaignConfigInfo struct {
+	ConfigureId        int
 	ChannelConcurrency int
 	AllowCallBack      bool
-	MaxCallBackCount   int
 	Caller             string
 	StartDate          string
 	EndDate            string
@@ -166,6 +188,7 @@ type CampaignState struct {
 	CampaignState string
 	DialerId      string
 }
+
 type CampaignStatusResult struct {
 	CustomMessage string
 	IsSuccess     bool

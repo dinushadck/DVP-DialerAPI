@@ -199,6 +199,27 @@ func RedisHashGetAll(hkey string) map[string]string {
 	return strHash
 }
 
+func RedisHashGetField(hkey, field string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisHashGetAll", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	// select database
+	r := client.Cmd("select", redisDb)
+	errHndlr(r.Err)
+	strValue, _ := client.Cmd("hget", hkey, field).Str()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(strValue)
+	return strValue
+}
+
 func RedisHashSetField(hkey, field, value string) bool {
 	defer func() {
 		if r := recover(); r != nil {

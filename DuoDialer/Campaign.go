@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+//----------Ongoing Campaign Count-----------------------
 func AddOnGoingCampaignCount() {
 	dialerCampaignCountKey := fmt.Sprintf("DialerOnGoingCampaignCount:%s:%s", hostIpAddress, dialerId)
 	result := RedisAdd(dialerCampaignCountKey, "0")
@@ -46,6 +47,7 @@ func DecrementOnGoingCampaignCountOther(oDialerId string) {
 	}
 }
 
+//----------Campaign Status-----------------------
 func SetCampaignStatus(campaignId, status string, company, tenant int) {
 	campaignStatusKey := fmt.Sprintf("CampaignStatus:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
 	result := RedisSet(campaignStatusKey, status)
@@ -71,39 +73,38 @@ func RemoveCampaignStatusOther(oDialerId, campaignId string, company, tenant int
 	fmt.Println("RemoveCampaignStatusOther CampaignId: ", campaignStatusKey, " Result: ", result)
 }
 
+//----------Campaign-----------------------
 func AddCampaignToDialer(campaignD Campaign) {
-	DefCampConfig := CampaignConfigInfo{}
-	if campaignD.CampConfigurations != DefCampConfig {
-		campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
-		searchCamp := fmt.Sprintf("Campaign:*:%d:%d:%d", campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
-		existingKeys := RedisSearchKeys(searchCamp)
+	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
+	searchCamp := fmt.Sprintf("Campaign:*:%d:%d:%d", campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
+	existingKeys := RedisSearchKeys(searchCamp)
 
-		if len(existingKeys) == 0 {
-			campaignJson, _ := json.Marshal(campaignD)
-			result := RedisAdd(campaignKey, string(campaignJson))
-			fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
-			if result == "OK" {
-				campIdStr := strconv.Itoa(campaignD.CampaignId)
-				channelCountStr := strconv.Itoa(campaignD.CampConfigurations.ChannelConcurrency)
-				IncrementOnGoingCampaignCount()
-				SetCampChannelMaxLimitDirect(campIdStr, channelCountStr)
-				SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
-				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
-			}
-		} else {
-			splitVals := strings.Split(existingKeys[0], ":")
-			preDialerId := splitVals[1]
+	if len(existingKeys) == 0 {
+		campaignJson, _ := json.Marshal(campaignD)
+		result := RedisAdd(campaignKey, string(campaignJson))
+		fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+		if result == "OK" {
 			campIdStr := strconv.Itoa(campaignD.CampaignId)
-			RemoveCampaignFromOtherDialer(preDialerId, campIdStr, campaignD.CompanyId, campaignD.TenantId)
+			channelCountStr := strconv.Itoa(campaignD.CampConfigurations.ChannelConcurrency)
+			IncrementOnGoingCampaignCount()
+			SetCampChannelMaxLimitDirect(campIdStr, channelCountStr)
+			AddCampaignCallbackConfigInfo(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId)
+			SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
+			UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
+		}
+	} else {
+		splitVals := strings.Split(existingKeys[0], ":")
+		preDialerId := splitVals[1]
+		campIdStr := strconv.Itoa(campaignD.CampaignId)
+		RemoveCampaignFromOtherDialer(preDialerId, campIdStr, campaignD.CompanyId, campaignD.TenantId)
 
-			campaignJson, _ := json.Marshal(campaignD)
-			result := RedisAdd(campaignKey, string(campaignJson))
-			fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
-			if result == "OK" {
-				IncrementOnGoingCampaignCount()
-				SetCampaignStatus(campIdStr, "Resume", campaignD.CompanyId, campaignD.TenantId)
-				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
-			}
+		campaignJson, _ := json.Marshal(campaignD)
+		result := RedisAdd(campaignKey, string(campaignJson))
+		fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+		if result == "OK" {
+			IncrementOnGoingCampaignCount()
+			SetCampaignStatus(campIdStr, "Resume", campaignD.CompanyId, campaignD.TenantId)
+			UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
 		}
 	}
 }
@@ -134,6 +135,7 @@ func RemoveCampaignFromDialer(campaignId string, company, tenant int) {
 		RemoveCampaignConnectedCount(company, tenant, campaignId)
 		RemoveCampaignDialCount(company, tenant, campaignId)
 		RemoveCampConcurrentChannelCount(campaignId)
+		RemoveCampaignCallbackConfigInfo(company, tenant, campaignId)
 	}
 }
 
@@ -147,6 +149,7 @@ func RemoveCampaignFromOtherDialer(oDialerId, campaignId string, company, tenant
 	}
 }
 
+//----------Campaign Manager Service-----------------------
 func RequestCampaign(requestCount int) []Campaign {
 	//Request campaign from Campaign Manager service
 	campaignDetails := make([]Campaign, 0)
@@ -260,43 +263,10 @@ func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 	}
 }
 
+//----------Campaign Channel Max Limit-----------------------
 func IncrCampChannelMaxLimit(campaignId string) {
 	cmcl := fmt.Sprintf("CampaignMaxCallLimit:%s", campaignId)
 	RedisIncr(cmcl)
-}
-
-func IncrCampaignDialCount(company, tenant int, campaignId string) {
-	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
-	RedisIncr(cmcl)
-}
-
-func GetCampaignDialCount(company, tenant int, campaignId string) int {
-	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
-	value := RedisGet(cmcl)
-	count, _ := strconv.Atoi(value)
-	return count
-}
-
-func RemoveCampaignDialCount(company, tenant int, campaignId string) {
-	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
-	RedisRemove(cmcl)
-}
-
-func IncrCampaignConnectedCount(company, tenant int, campaignId string) {
-	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
-	RedisIncr(cmcl)
-}
-
-func GetCampaignConnectedCount(company, tenant int, campaignId string) int {
-	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
-	value := RedisGet(cmcl)
-	count, _ := strconv.Atoi(value)
-	return count
-}
-
-func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
-	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
-	RedisRemove(cmcl)
 }
 
 func DecrCampChannelMaxLimit(campaignId string) {
@@ -340,6 +310,43 @@ func RemoveCampChannelMaxLimit(campaignId string) {
 	RedisRemove(cmcl)
 }
 
+//----------Campaign Dial Count-----------------------
+func IncrCampaignDialCount(company, tenant int, campaignId string) {
+	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
+	RedisIncr(cmcl)
+}
+
+func GetCampaignDialCount(company, tenant int, campaignId string) int {
+	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
+	value := RedisGet(cmcl)
+	count, _ := strconv.Atoi(value)
+	return count
+}
+
+func RemoveCampaignDialCount(company, tenant int, campaignId string) {
+	cmcl := fmt.Sprintf("CampaignDialCount:%d:%d:%s", company, tenant, campaignId)
+	RedisRemove(cmcl)
+}
+
+//----------Campaign Connected Count-----------------------
+func IncrCampaignConnectedCount(company, tenant int, campaignId string) {
+	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
+	RedisIncr(cmcl)
+}
+
+func GetCampaignConnectedCount(company, tenant int, campaignId string) int {
+	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
+	value := RedisGet(cmcl)
+	count, _ := strconv.Atoi(value)
+	return count
+}
+
+func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
+	cmcl := fmt.Sprintf("CampaignConnectedCount:%d:%d:%s", company, tenant, campaignId)
+	RedisRemove(cmcl)
+}
+
+//----------Run Campaign-----------------------
 func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
 	emtAppoinment := Appoinment{}
 	defCallServerInfo := CallServerInfo{}
