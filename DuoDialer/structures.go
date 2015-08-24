@@ -78,7 +78,15 @@ type CampaignCallbackInfo struct {
 }
 
 type CampaignCallbackConfigInfo struct {
+	AllowCallBack              bool
 	CampCallbackConfigurations []CampaignCallbackInfo
+}
+
+type CampaignCallback struct {
+	CampaignId    int
+	ContactId     string
+	DialoutTime   time.Time
+	CallBackCount int
 }
 
 type CampaignConfigInfo struct {

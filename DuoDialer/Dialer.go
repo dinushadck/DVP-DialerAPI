@@ -71,7 +71,7 @@ func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid
 	fmt.Println(u.String())
 	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, "1", campaignId, uuid, "start", "start", time.Now().Format(layout4), callServer.CallServerId)
+	InitiateSessionInfo(company, tenant, "1", campaignId, uuid, phoneNumber, "start", "start", time.Now().Format(layout4), callServer.CallServerId)
 	resp, err := http.Get(u.String())
 	if err != nil {
 		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
@@ -124,7 +124,7 @@ func DialNumberFIFO(company, tenant int, callServer CallServerInfo, campaignId, 
 
 	fmt.Println(u.String())
 	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
-	InitiateSessionInfo(company, tenant, "1", campaignId, uuid, "start", "start", time.Now().Format(layout4), callServer.CallServerId)
+	InitiateSessionInfo(company, tenant, "1", campaignId, uuid, phoneNumber, "start", "start", time.Now().Format(layout4), callServer.CallServerId)
 	IncrCampaignDialCount(company, tenant, campaignId)
 	resp, err := http.Get(u.String())
 	if err != nil {

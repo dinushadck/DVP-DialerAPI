@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func InitiateSessionInfo(company, tenant int, tryCount, campaignId, sessionId, reason, dialerStatus, dialTime, serverId string) {
+func InitiateSessionInfo(company, tenant int, tryCount, campaignId, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 
@@ -18,6 +18,7 @@ func InitiateSessionInfo(company, tenant int, tryCount, campaignId, sessionId, r
 	data["CompanyId"] = companyStr
 	data["TenantId"] = tenantStr
 	data["SessionId"] = sessionId
+	data["Number"] = number
 	data["DialerId"] = dialerId
 	data["CampaignId"] = campaignId
 	data["Dialtime"] = dialTime
@@ -98,4 +99,17 @@ func ClearTimeoutChannels() {
 			go UploadSessionInfo(sessionid)
 		}
 	}
+}
+
+func GetSpecificSessionFiled(sessionId, field string) string {
+	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
+	return RedisHashGetField(hashKey, field)
+}
+
+func GetPhoneNumberAndTryCount(sessionId string) (string, int) {
+	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
+	sessionInfo := RedisHashGetAll(hashKey)
+	number := sessionInfo["Number"]
+	tryCount, _ := strconv.Atoi(sessionInfo["TryCount"])
+	return number, tryCount
 }

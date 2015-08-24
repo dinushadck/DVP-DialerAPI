@@ -28,6 +28,8 @@ func OnEvent(eventInfo SubEvents) {
 			fmt.Println("company: ", company)
 			fmt.Println("tenant: ", tenant)
 
+			AddPhoneNumberToCallback(company, tenant, eventInfo.CampaignId, eventInfo.SessionId, eventInfo.EventCategory)
+
 			switch eventInfo.EventCategory {
 			case "CHANNEL_BRIDGE":
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
