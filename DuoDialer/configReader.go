@@ -110,8 +110,6 @@ func LoadDefaultConfig() {
 }
 
 func LoadConfiguration() {
-	dirPathtest, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	fmt.Println(dirPathtest)
 	dirPath = GetDirPath()
 	confPath := filepath.Join(dirPath, "custom-environment-variables.json")
 	fmt.Println("InitiateRedis config path: ", confPath)
@@ -192,4 +190,28 @@ func LoadConfiguration() {
 	fmt.Println("redisDb:", redisDb)
 	fmt.Println("dialerId:", dialerId)
 	fmt.Println("campaignLimit:", campaignLimit)
+}
+
+func LoadCallbackConfiguration() {
+	dirPath = GetDirPath()
+	confPath := filepath.Join(dirPath, "callbackConf.json")
+	fmt.Println("InitiateCallback config path: ", confPath)
+
+	content, operr := ioutil.ReadFile(confPath)
+	if operr != nil {
+		fmt.Println(operr)
+	}
+
+	callbackConf := CallbackConfiguration{}
+	err := json.Unmarshal(content, &callbackConf)
+	if err != nil {
+		fmt.Println("error:", err)
+	} else {
+		for _, conf := range callbackConf.DisconnectReasons {
+			for _, reason := range conf.Values {
+				confKey := fmt.Sprintf("CallbackReason:%s", reason)
+				RedisSetNx(confKey, conf.Reason)
+			}
+		}
+	}
 }

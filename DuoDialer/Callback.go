@@ -140,10 +140,10 @@ func RemoveCampaignCallbackConfigInfo(company, tenant int, campaignId string) {
 	}
 }
 
-func AddPhoneNumberToCallback(company, tenant int, campaignId, sessionId, callbackReason string) {
+func AddPhoneNumberToCallback(company, tenant int, campaignId, sessionId, disConnectkReason string) {
 	isAllowCallback := GetAllowCallback(company, tenant, campaignId)
 	if isAllowCallback == true {
-		maxCallbackCount, callbackInterval, isReasonExists := GetCallbackDetails(company, tenant, campaignId, callbackReason)
+		maxCallbackCount, callbackInterval, isReasonExists := GetCallbackDetails(company, tenant, campaignId, disConnectkReason)
 		if isReasonExists {
 			number, tryCount := GetPhoneNumberAndTryCount(sessionId)
 			if maxCallbackCount > 0 && number != "" && tryCount > 0 && tryCount < maxCallbackCount {

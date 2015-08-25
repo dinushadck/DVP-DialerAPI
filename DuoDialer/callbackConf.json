@@ -1,0 +1,12 @@
+{
+	"DisconnectReasons":[
+		{
+			"Reason":"NO_ANSWER",
+			"Values":["NO_ANSWER","SUBSCRIBER_ABSENT"]
+		},
+		{
+			"Reason":"BUSY",
+			"Values":["USER_BUSY","SUBSCRIBER_ABSENT","CALL_REJECTED"]
+		}
+	]
+}

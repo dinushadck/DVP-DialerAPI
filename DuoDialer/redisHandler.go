@@ -57,6 +57,26 @@ func RedisSet(key, value string) string {
 	return result
 }
 
+func RedisSetNx(key, value string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisSet", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	// select database
+	r := client.Cmd("select", redisDb)
+	errHndlr(r.Err)
+
+	result, sErr := client.Cmd("setnx", key, value).Str()
+	errHndlr(sErr)
+	fmt.Println(result)
+	return result
+}
+
 func RedisGet(key string) string {
 	defer func() {
 		if r := recover(); r != nil {

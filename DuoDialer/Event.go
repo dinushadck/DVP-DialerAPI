@@ -28,8 +28,6 @@ func OnEvent(eventInfo SubEvents) {
 			fmt.Println("company: ", company)
 			fmt.Println("tenant: ", tenant)
 
-			AddPhoneNumberToCallback(company, tenant, eventInfo.CampaignId, eventInfo.SessionId, eventInfo.EventCategory)
-
 			switch eventInfo.EventCategory {
 			case "CHANNEL_BRIDGE":
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
@@ -50,6 +48,7 @@ func OnEvent(eventInfo SubEvents) {
 				if session {
 					DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
 					SetSessionInfo(eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
+					AddPhoneNumberToCallback(company, tenant, eventInfo.CampaignId, eventInfo.SessionId, eventInfo.DisconnectReason)
 					go UploadSessionInfo(eventInfo.SessionId)
 					fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				}

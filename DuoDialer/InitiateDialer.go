@@ -7,6 +7,7 @@ import (
 
 func InitiateDuoDialer() {
 	LoadConfiguration()
+	LoadCallbackConfiguration()
 	AddDialerInfoToRedis()
 	go PubSub()
 }

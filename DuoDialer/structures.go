@@ -41,6 +41,15 @@ type EnvConfiguration struct {
 	ScheduleService          string
 }
 
+type CallbackConfiguration struct {
+	DisconnectReasons []DisconnectReason
+}
+
+type DisconnectReason struct {
+	Reason string
+	Values []string
+}
+
 type DialerInfo struct {
 	DialerId      string
 	CampaignLimit int
