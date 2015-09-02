@@ -102,7 +102,7 @@ func RemoveNumbers(company, tenant int, campaignId string) {
 	}
 }
 
-func AddNumberToFront(company, tenant int, campaignId, camScheduleId, number string) {
+func AddNumberToFront(company, tenant int, campaignId, camScheduleId, number string) bool {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
-	RedisListLpush(listId, number)
+	return RedisListLpush(listId, number)
 }

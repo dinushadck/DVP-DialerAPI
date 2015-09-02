@@ -407,8 +407,8 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 								return
 							}
 						} else {
-							trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
-							//trunkCode, ani, dnis := GetTrunkCode(authToken, defaultAni, number)
+							//trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
+							trunkCode, ani, dnis := GetTrunkCode(authToken, defaultAni, number)
 							uuid := GetUuid()
 							if trunkCode != "" && uuid != "" {
 								go DialNumber(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, tryCount, extention)
