@@ -23,6 +23,7 @@ type Configuration struct {
 	CallServer               string
 	CallRuleService          string
 	ScheduleService          string
+	CallbackServerSelfHost   string
 }
 
 type EnvConfiguration struct {
@@ -39,6 +40,7 @@ type EnvConfiguration struct {
 	CallServer               string
 	CallRuleService          string
 	ScheduleService          string
+	CallbackServerSelfHost   string
 }
 
 type CallbackConfiguration struct {
@@ -92,10 +94,24 @@ type CampaignCallbackConfigInfo struct {
 }
 
 type CampaignCallback struct {
-	CampaignId    int
-	ContactId     string
-	DialoutTime   time.Time
-	CallBackCount int
+	Company     int
+	Tenant      int
+	Class       string
+	Type        string
+	Category    string
+	DialoutTime time.Time
+	CallbackUrl string
+	CallbackObj string
+}
+
+type CampaignCallbackObj struct {
+	CampaignId       int
+	CallbackClass    string
+	CallbackType     string
+	CallbackCategory string
+	ContactId        string
+	CallBackCount    int
+	DialoutTime      time.Time
 }
 
 type CampaignConfigInfo struct {
@@ -120,7 +136,7 @@ type Campaign struct {
 	CampaignId         int
 	CompanyId          int
 	TenantId           int
-	Calss              string
+	Class              string
 	Type               string
 	Category           string
 	Extensions         string

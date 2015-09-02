@@ -57,7 +57,7 @@ func GetTrunkCode(authToken, ani, dnis string) (trunkCode, rAni, rDnis string) {
 	}
 }
 
-func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid, fromNumber, trunkCode, phoneNumber, extention string) {
+func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid, fromNumber, trunkCode, phoneNumber, tryCount, extention string) {
 	fmt.Println("Start DialNumber: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 	customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
 	request := fmt.Sprintf("http://%s", callServer.Url)
@@ -71,13 +71,13 @@ func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid
 	fmt.Println(u.String())
 	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, "1", campaignId, uuid, phoneNumber, "start", "start", time.Now().Format(layout4), callServer.CallServerId)
+	InitiateSessionInfo(company, tenant, tryCount, campaignId, uuid, phoneNumber, "start", "start", time.Now().UTC().Format(layout4), callServer.CallServerId)
 	resp, err := http.Get(u.String())
 	if err != nil {
 		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
-		SetSessionInfo(uuid, "Reason", "dial_failed")
-		SetSessionInfo(uuid, "DialerStatus", "failed")
-		go UploadSessionInfo(uuid)
+		SetSessionInfo(campaignId, uuid, "Reason", "dial_failed")
+		SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
+		go UploadSessionInfo(campaignId, uuid)
 		fmt.Println(err.Error())
 	}
 	defer resp.Body.Close()
@@ -94,18 +94,18 @@ func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid
 				if len(resultInfo) > 1 {
 					reason := resultInfo[1]
 					if reason == "" {
-						SetSessionInfo(uuid, "Reason", "not_specified")
+						SetSessionInfo(campaignId, uuid, "Reason", "not_specified")
 					} else {
-						SetSessionInfo(uuid, "Reason", reason)
+						SetSessionInfo(campaignId, uuid, "Reason", reason)
 					}
 				} else {
-					SetSessionInfo(uuid, "Reason", "not_specified")
+					SetSessionInfo(campaignId, uuid, "Reason", "not_specified")
 				}
-				SetSessionInfo(uuid, "DialerStatus", "not_connected")
-				go UploadSessionInfo(uuid)
+				SetSessionInfo(campaignId, uuid, "DialerStatus", "not_connected")
+				go UploadSessionInfo(campaignId, uuid)
 			} else {
-				SetSessionInfo(uuid, "Reason", "dial_success")
-				SetSessionInfo(uuid, "DialerStatus", "connected")
+				SetSessionInfo(campaignId, uuid, "Reason", "dial_success")
+				SetSessionInfo(campaignId, uuid, "DialerStatus", "connected")
 			}
 		}
 	}
@@ -129,9 +129,9 @@ func DialNumberFIFO(company, tenant int, callServer CallServerInfo, campaignId, 
 	resp, err := http.Get(u.String())
 	if err != nil {
 		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
-		SetSessionInfo(uuid, "Reason", "dial_failed")
-		SetSessionInfo(uuid, "DialerStatus", "failed")
-		go UploadSessionInfo(uuid)
+		SetSessionInfo(campaignId, uuid, "Reason", "dial_failed")
+		SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
+		go UploadSessionInfo(campaignId, uuid)
 		fmt.Println(err.Error())
 	}
 	defer resp.Body.Close()
@@ -148,18 +148,18 @@ func DialNumberFIFO(company, tenant int, callServer CallServerInfo, campaignId, 
 				if len(resultInfo) > 1 {
 					reason := resultInfo[1]
 					if reason == "" {
-						SetSessionInfo(uuid, "Reason", "not_specified")
+						SetSessionInfo(campaignId, uuid, "Reason", "not_specified")
 					} else {
-						SetSessionInfo(uuid, "Reason", reason)
+						SetSessionInfo(campaignId, uuid, "Reason", reason)
 					}
 				} else {
-					SetSessionInfo(uuid, "Reason", "not_specified")
+					SetSessionInfo(campaignId, uuid, "Reason", "not_specified")
 				}
-				SetSessionInfo(uuid, "DialerStatus", "not_connected")
+				SetSessionInfo(campaignId, uuid, "DialerStatus", "not_connected")
 				//go UploadSessionInfo(uuid)
 			} else {
-				SetSessionInfo(uuid, "Reason", "dial_success")
-				SetSessionInfo(uuid, "DialerStatus", "connected")
+				SetSessionInfo(campaignId, uuid, "Reason", "dial_success")
+				SetSessionInfo(campaignId, uuid, "DialerStatus", "connected")
 			}
 		}
 	}

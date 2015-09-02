@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -44,20 +45,27 @@ func RequestCampaignCallbackConfig(tenant, company, configureId int) ([]Campaign
 	return campaignCallbackInfo, false
 }
 
-func UploadCallbackInfo(company, tenant, callBackCount, callbackInterval int, campaignId, contactId string) {
+//----------CallbackServer Self Host-----------------------
+func UploadCallbackInfo(company, tenant int, callbackTime time.Time, cbClass, cbType, cbCategory, cbUrl, cbObj string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in UploadCallbackInfo", r)
+		}
+	}()
 	callback := CampaignCallback{}
-	camIdInt, _ := strconv.Atoi(campaignId)
-	tmNow := time.Now()
-	secCount := tmNow.Second() + callbackInterval
 
-	callback.CampaignId = camIdInt
-	callback.CallBackCount = callBackCount
-	callback.ContactId = contactId
-	callback.DialoutTime = time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), secCount, 0, tmNow.Location())
+	callback.Company = company
+	callback.Tenant = tenant
+	callback.Class = cbClass
+	callback.Type = cbType
+	callback.Category = cbCategory
+	callback.DialoutTime = callbackTime
+	callback.CallbackUrl = cbUrl
+	callback.CallbackObj = cbObj
 
 	jsonData, _ := json.Marshal(callback)
 
-	serviceurl := fmt.Sprintf("%s/CampaignManager/Callback", campaignService)
+	serviceurl := fmt.Sprintf("%s/Callback/AddCallback", callbackServerSelfHost)
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
@@ -140,15 +148,79 @@ func RemoveCampaignCallbackConfigInfo(company, tenant int, campaignId string) {
 	}
 }
 
-func AddPhoneNumberToCallback(company, tenant int, campaignId, sessionId, disConnectkReason string) {
-	isAllowCallback := GetAllowCallback(company, tenant, campaignId)
-	if isAllowCallback == true {
-		maxCallbackCount, callbackInterval, isReasonExists := GetCallbackDetails(company, tenant, campaignId, disConnectkReason)
+func ValidateDisconnectReason(disconnectReason string) bool {
+	confKey := fmt.Sprintf("CallbackReason:%s", disconnectReason)
+	return RedisCheckKeyExist(confKey)
+}
+
+func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber, disConnectkReason string) {
+	fmt.Println("start AddPhoneNumberToCallback")
+	_company, _ := strconv.Atoi(company)
+	_tenant, _ := strconv.Atoi(tenant)
+	_tryCount, _ := strconv.Atoi(tryCount)
+	isAllowCallback := GetAllowCallback(_company, _tenant, campaignId)
+	//isAllowCallback = true
+	isdisconnectReasonAllowed := ValidateDisconnectReason(disConnectkReason)
+	//isdisconnectReasonAllowed = true
+	if isAllowCallback && isdisconnectReasonAllowed {
+		maxCallbackCount, callbackInterval, isReasonExists := GetCallbackDetails(_company, _tenant, campaignId, disConnectkReason)
+		//maxCallbackCount, callbackInterval, isReasonExists = 3, 50, true
 		if isReasonExists {
-			number, tryCount := GetPhoneNumberAndTryCount(sessionId)
-			if maxCallbackCount > 0 && number != "" && tryCount > 0 && tryCount < maxCallbackCount {
-				go UploadCallbackInfo(company, tenant, tryCount, callbackInterval, campaignId, number)
+			if maxCallbackCount > 0 && phoneNumber != "" && _tryCount > 0 && _tryCount < maxCallbackCount {
+				camIdInt, _ := strconv.Atoi(campaignId)
+
+				campaignInfo, isCamExists := GetCampaign(_company, _tenant, camIdInt)
+				if isCamExists {
+					tmNow := time.Now()
+					tmNowUTC := tmNow.UTC()
+					secCount := tmNow.Second() + callbackInterval
+					secCountUTC := tmNowUTC.Second() + callbackInterval
+					callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), secCount, 0, time.Local)
+					callbackTimeUTC := time.Date(tmNowUTC.Year(), tmNowUTC.Month(), tmNowUTC.Day(), tmNowUTC.Hour(), tmNowUTC.Minute(), secCountUTC, 0, time.UTC)
+
+					tempCampaignEndDate, _ := time.Parse(layout1, campaignInfo.CampConfigurations.EndDate)
+					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, time.UTC)
+
+					if campaignEndDate.After(callbackTimeUTC) {
+						scheduleIdStr := strconv.Itoa(campaignInfo.CampScheduleInfo[0].ScheduleId)
+						validateAppoinment := CheckAppoinmentForCallback(_company, _tenant, scheduleIdStr, callbackTimeUTC)
+						if validateAppoinment {
+							callbackObj := CampaignCallbackObj{}
+							callbackObj.CampaignId = camIdInt
+							callbackObj.CallbackClass = "DIALER"
+							callbackObj.CallbackType = "CALLBACK"
+							callbackObj.CallbackCategory = "INTERNAL"
+							callbackObj.CallBackCount = _tryCount
+							callbackObj.ContactId = phoneNumber
+							callbackObj.DialoutTime = callbackTime
+
+							dialerAPIUrl := fmt.Sprintf("http://%s:%s", hostIpAddress, port)
+							path := fmt.Sprintf("DVP/DialerAPI/ResumeCallback")
+
+							u, _ := url.Parse(dialerAPIUrl)
+							u.Path += path
+
+							fmt.Println(u.String())
+							cbUrl := u.String()
+
+							jsonData, _ := json.Marshal(callbackObj)
+							go UploadCallbackInfo(_company, _tenant, callbackTimeUTC, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+						}
+					}
+				}
 			}
 		}
+	}
+}
+
+func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string) {
+	fmt.Println("Start ResumeCampaignCallback")
+	campaignIdStr := strconv.Itoa(campaignId)
+	_tryCount := callbackCount + 1
+	campaign, isCampaignExists := GetCampaign(company, tenant, campaignId)
+	if isCampaignExists {
+		camScheduleStr := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
+		numberWithTryCount := fmt.Sprintf("%s:%d", number, _tryCount)
+		AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
 	}
 }

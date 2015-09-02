@@ -27,10 +27,9 @@ func GetAppoinmentsForSchedule(authToken, schedulrId string) []Appoinment {
 	return apiResult.Result
 }
 
-func CheckAppoinments(appoinments []Appoinment) Appoinment {
+func CheckAppoinments(appoinments []Appoinment, timeNow time.Time) Appoinment {
 	for _, appmnt := range appoinments {
 		fmt.Println("CheckAppoinments: ", appmnt.AppointmentName)
-		timeNow := time.Now().UTC()
 		fmt.Println("daysOfWeek: ", appmnt.DaysOfWeek)
 		daysOfWeek := strings.Split(appmnt.DaysOfWeek, ",")
 		if stringInSlice(timeNow.Weekday().String(), daysOfWeek) {
@@ -69,5 +68,18 @@ func CheckAppoinments(appoinments []Appoinment) Appoinment {
 
 func CheckAppoinmentForCampaign(authToken, schedulrId string) Appoinment {
 	appionments := GetAppoinmentsForSchedule(authToken, schedulrId)
-	return CheckAppoinments(appionments)
+	timeNow := time.Now().UTC()
+	return CheckAppoinments(appionments, timeNow)
+}
+
+func CheckAppoinmentForCallback(company, tenant int, schedulrId string, timeToCheck time.Time) bool {
+	defaultAppoinment := Appoinment{}
+	authToken := fmt.Sprintf("%d#%d", tenant, company)
+	appionments := GetAppoinmentsForSchedule(authToken, schedulrId)
+	machingAppoinment := CheckAppoinments(appionments, timeToCheck)
+	if machingAppoinment == defaultAppoinment {
+		return false
+	} else {
+		return true
+	}
 }

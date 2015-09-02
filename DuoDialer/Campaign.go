@@ -109,6 +109,19 @@ func AddCampaignToDialer(campaignD Campaign) {
 	}
 }
 
+func GetCampaign(company, tenant, campaignId int) (Campaign, bool) {
+	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, company, tenant, campaignId)
+	isExists := RedisCheckKeyExist(campaignKey)
+	if isExists {
+		campJson := RedisGet(campaignKey)
+		var camp Campaign
+		json.Unmarshal([]byte(campJson), &camp)
+		return camp, isExists
+	} else {
+		return Campaign{}, isExists
+	}
+}
+
 func GetAllRunningCampaign() []Campaign {
 	searchKey := fmt.Sprintf("Campaign:%s:*", dialerId)
 	allCampaignKeys := RedisSearchKeys(searchKey)
@@ -385,7 +398,7 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 					fmt.Println("ConcurrentCampaignChannel: ", cchannelCountC)
 
 					if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
-						number := GetNumberToDial(company, tenant, campaignId, camScheduleId)
+						number, tryCount := GetNumberToDial(company, tenant, campaignId, camScheduleId)
 						if number == "" {
 							numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 							if numberCount == 0 {
@@ -398,8 +411,8 @@ func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extentio
 							//trunkCode, ani, dnis := GetTrunkCode(authToken, defaultAni, number)
 							uuid := GetUuid()
 							if trunkCode != "" && uuid != "" {
-								//go DialNumber(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
-								go DialNumberFIFO(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
+								go DialNumber(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, tryCount, extention)
+								//go DialNumberFIFO(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
 								time.Sleep(100 * time.Millisecond)
 							}
 						}

@@ -33,11 +33,11 @@ func OnEvent(eventInfo SubEvents) {
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_CREATE":
-				SetSessionInfo(eventInfo.SessionId, "ChannelCreatetime", time.Now().Format(layout4))
+				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelCreatetime", time.Now().Format(layout4))
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
 			case "CHANNEL_ANSWER":
-				SetSessionInfo(eventInfo.SessionId, "ChannelAnswertime", time.Now().Format(layout4))
+				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelAnswertime", time.Now().Format(layout4))
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break
@@ -47,9 +47,8 @@ func OnEvent(eventInfo SubEvents) {
 				session := RedisCheckKeyExist(hashKey)
 				if session {
 					DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
-					SetSessionInfo(eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
-					AddPhoneNumberToCallback(company, tenant, eventInfo.CampaignId, eventInfo.SessionId, eventInfo.DisconnectReason)
-					go UploadSessionInfo(eventInfo.SessionId)
+					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
+					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				}
 				break

@@ -7,9 +7,10 @@
 	"HostIpAddress": "192.168.0.15",
 	"Port":"2226",
 	"CampaignRequestFrequency": 10,
-	"CampaignService": "http://192.168.3.200:2222/DVP/API/6.0",
+	"CampaignService": "http://192.168.0.143:2222/DVP/API/6.0",
 	"UuidService": "http://192.168.0.53:8080/api/create_uuid",
 	"CallServer": "192.168.0.53:8080",
 	"CallRuleService":"http://192.168.0.89/CallRuleRestApi/api/CallRuleOutbound",
-	"ScheduleService":"http://192.168.3.200:2224/DVP/API/6.0/LimitAPI"
+	"ScheduleService":"http://192.168.3.200:2224/DVP/API/6.0/LimitAPI",
+	"CallbackServerSelfHost":"http://192.168.0.15:2227/CallbackServerSelfHost"
 }

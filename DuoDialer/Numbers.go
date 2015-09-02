@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	//"bufio"
-	//"os"
+	"strings"
 )
 
 func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camScheduleId string) []string {
@@ -53,7 +52,8 @@ func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId str
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 		RedisSet(numLoadingStatusKey, "waiting")
 		for _, number := range numbers {
-			RedisListRpush(listId, number)
+			numberWithTryCount := fmt.Sprintf("%s:%s", number, "1")
+			RedisListRpush(listId, numberWithTryCount)
 		}
 	}
 }
@@ -64,7 +64,7 @@ func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string)
 	RedisSet(numLoadingStatusKey, "waiting")
 }
 
-func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) string {
+func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (string, string) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	numberCount := RedisListLlen(listId)
@@ -79,7 +79,13 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) stri
 		RedisRemove(numLoadingStatusKey)
 		RedisRemove(pageKey)
 	}
-	return RedisListLpop(listId)
+	numberWithTryCount := RedisListLpop(listId)
+	numberInfos := strings.Split(numberWithTryCount, ":")
+	if len(numberInfos) == 2 {
+		return numberInfos[0], numberInfos[1]
+	} else {
+		return "", ""
+	}
 }
 
 func GetNumberCount(company, tenant int, campaignId, camScheduleId string) int {
@@ -94,4 +100,9 @@ func RemoveNumbers(company, tenant int, campaignId string) {
 	for _, key := range relatedNumberList {
 		RedisRemove(key)
 	}
+}
+
+func AddNumberToFront(company, tenant int, campaignId, camScheduleId, number string) {
+	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
+	RedisListLpush(listId, number)
 }

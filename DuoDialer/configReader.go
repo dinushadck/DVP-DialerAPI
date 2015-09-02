@@ -23,6 +23,7 @@ var uuidService string
 var callServer string
 var callRuleService string
 var scheduleService string
+var callbackServerSelfHost string
 var port string
 
 func GetDirPath() string {
@@ -60,6 +61,7 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.CallServer = "127.0.0.1:8080"
 		defconfiguration.CallRuleService = "http://127.0.0.1/CallRuleRestApi/api/CallRuleOutbound"
 		defconfiguration.ScheduleService = "http://127.0.0.1:2224/DVP/API/6.0/LimitAPI"
+		defconfiguration.CallbackServerSelfHost = "http://127.0.0.1:2227/CallbackServerSelfHost"
 	}
 
 	return defconfiguration
@@ -92,6 +94,7 @@ func LoadDefaultConfig() {
 		callServer = "127.0.0.1:8080"
 		callRuleService = "http://127.0.0.1/CallRuleRestApi/api/CallRuleOutbound"
 		scheduleService = "http://127.0.0.1:2224/DVP/API/6.0/LimitAPI"
+		callbackServerSelfHost = "http://127.0.0.1:2227/CallbackServerSelfHost"
 	} else {
 		redisIp = fmt.Sprintf("%s:%s", defconfiguration.RedisIp, defconfiguration.RedisPort)
 		redisPort = defconfiguration.RedisPort
@@ -106,6 +109,7 @@ func LoadDefaultConfig() {
 		callServer = defconfiguration.CallServer
 		callRuleService = defconfiguration.CallRuleService
 		scheduleService = defconfiguration.ScheduleService
+		callbackServerSelfHost = defconfiguration.CallbackServerSelfHost
 	}
 }
 
@@ -140,6 +144,7 @@ func LoadConfiguration() {
 		callServer = os.Getenv(envconfiguration.CallServer)
 		callRuleService = os.Getenv(envconfiguration.CallRuleService)
 		scheduleService = os.Getenv(envconfiguration.ScheduleService)
+		callbackServerSelfHost = os.Getenv(envconfiguration.CallbackServerSelfHost)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -181,6 +186,9 @@ func LoadConfiguration() {
 		}
 		if scheduleService == "" {
 			scheduleService = defConfig.ScheduleService
+		}
+		if callbackServerSelfHost == "" {
+			callbackServerSelfHost = defConfig.CallbackServerSelfHost
 		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)

@@ -28,19 +28,66 @@ func InitiateSessionInfo(company, tenant int, tryCount, campaignId, sessionId, n
 	data["Reason"] = reason
 	data["DialerStatus"] = dialerStatus
 	data["TryCount"] = tryCount
-	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
+	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetMultipleField(hashKey, data)
+	//RedisHashSetNxField(hashKey, "TryCount", tryCount)
 }
 
-func SetSessionInfo(sessionId, filed, value string) {
-	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
+func SetSessionInfo(campaignId, sessionId, filed, value string) {
+	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetField(hashKey, filed, value)
 }
 
-func UploadSessionInfo(sessionId string) {
-	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
+func UploadSessionInfo(campaignId, sessionId string) {
+	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	sessionInfo := RedisHashGetAll(hashKey)
 	RedisRemove(hashKey)
+	AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["Number"], sessionInfo["Reason"])
+	UploadSessionInfoToCampaignManager(sessionInfo)
+}
+
+func ClearTimeoutChannels(campaignId string) {
+	sHashKey := fmt.Sprintf("sessionInfo:%s:*", campaignId)
+	ongoingSessions := RedisSearchKeys(sHashKey)
+	tn := time.Now()
+	for _, session := range ongoingSessions {
+		sessionInfo := RedisHashGetAll(session)
+		dtime := sessionInfo["Dialtime"]
+		ctime := sessionInfo["ChannelCreatetime"]
+		atime := sessionInfo["ChannelAnswertime"]
+		sid := sessionInfo["ServerId"]
+		cid := sessionInfo["CampaignId"]
+		sessionid := sessionInfo["SessionId"]
+
+		dtt, _ := time.Parse(layout4, dtime)
+		ctt, _ := time.Parse(layout4, ctime)
+		if ctime == "" && tn.Sub(dtt).Seconds() > 240 {
+			DecrConcurrentChannelCount(sid, cid)
+			SetSessionInfo(cid, sessionid, "reason", "ChannelCreate timeout")
+			go UploadSessionInfo(cid, sessionid)
+		} else if atime == "" && ctime != "" && tn.Sub(ctt).Seconds() > 240 {
+			DecrConcurrentChannelCount(sid, cid)
+			SetSessionInfo(cid, sessionid, "reason", "ChannelAnswer timeout")
+			go UploadSessionInfo(cid, sessionid)
+		}
+	}
+}
+
+func GetSpecificSessionFiled(campaignId, sessionId, field string) string {
+	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+	return RedisHashGetField(hashKey, field)
+}
+
+func GetPhoneNumberAndTryCount(campaignId, sessionId string) (string, int) {
+	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+	sessionInfo := RedisHashGetAll(hashKey)
+	number := sessionInfo["Number"]
+	tryCount, _ := strconv.Atoi(sessionInfo["TryCount"])
+	return number, tryCount
+}
+
+//----------------Campaign Manager Service------------------------
+func UploadSessionInfoToCampaignManager(sessionInfo map[string]string) {
 	sessionb, err := json.Marshal(sessionInfo)
 	if err != nil {
 		fmt.Println(err)
@@ -48,7 +95,6 @@ func UploadSessionInfo(sessionId string) {
 	}
 	text := string(sessionb)
 	fmt.Println(text)
-
 	//upload to campaign service
 	serviceurl := fmt.Sprintf("%s/CampaignManager/Campaign/Session", campaignService)
 	authToken := fmt.Sprintf("%s#%s", sessionInfo["TenantId"], sessionInfo["CompanyId"])
@@ -72,44 +118,4 @@ func UploadSessionInfo(sessionId string) {
 		result := string(body)
 		fmt.Println("response Body:", result)
 	}
-}
-
-func ClearTimeoutChannels() {
-	sHashKey := fmt.Sprintf("sessionInfo:%s:*", dialerId)
-	ongoingSessions := RedisSearchKeys(sHashKey)
-	tn := time.Now()
-	for _, session := range ongoingSessions {
-		sessionInfo := RedisHashGetAll(session)
-		dtime := sessionInfo["Dialtime"]
-		ctime := sessionInfo["ChannelCreatetime"]
-		atime := sessionInfo["ChannelAnswertime"]
-		sid := sessionInfo["ServerId"]
-		cid := sessionInfo["CampaignId"]
-		sessionid := sessionInfo["SessionId"]
-
-		dtt, _ := time.Parse(layout4, dtime)
-		ctt, _ := time.Parse(layout4, ctime)
-		if ctime == "" && tn.Sub(dtt).Seconds() > 240 {
-			DecrConcurrentChannelCount(sid, cid)
-			SetSessionInfo(sessionid, "reason", "ChannelCreate timeout")
-			go UploadSessionInfo(sessionid)
-		} else if atime == "" && ctime != "" && tn.Sub(ctt).Seconds() > 240 {
-			DecrConcurrentChannelCount(sid, cid)
-			SetSessionInfo(sessionid, "reason", "ChannelAnswer timeout")
-			go UploadSessionInfo(sessionid)
-		}
-	}
-}
-
-func GetSpecificSessionFiled(sessionId, field string) string {
-	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
-	return RedisHashGetField(hashKey, field)
-}
-
-func GetPhoneNumberAndTryCount(sessionId string) (string, int) {
-	hashKey := fmt.Sprintf("sessionInfo:%s:%s", dialerId, sessionId)
-	sessionInfo := RedisHashGetAll(hashKey)
-	number := sessionInfo["Number"]
-	tryCount, _ := strconv.Atoi(sessionInfo["TryCount"])
-	return number, tryCount
 }

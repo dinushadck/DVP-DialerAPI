@@ -3,43 +3,81 @@ package main
 import (
 	"code.google.com/p/gorest"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
-type DialerSelfHost struct {
-	gorest.RestService     `root:"/DialerSelfHost/" consumes:"application/json" produces:"application/json"`
-	incrMaxChannelLimit    gorest.EndPoint `method:"POST" path:"/Campaign/IncrMaxChannelLimit/" postdata:"string"`
-	decrMaxChannelLimit    gorest.EndPoint `method:"POST" path:"/Campaign/DecrMaxChannelLimit/" postdata:"string"`
-	setMaxChannelLimit     gorest.EndPoint `method:"POST" path:"/Campaign/SetMaxChannelLimit/" postdata:"string"`
-	getTotalDialCount      gorest.EndPoint `method:"GET" path:"/Campaign/GetTotalDialCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
-	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/Campaign/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
+type DVP struct {
+	gorest.RestService     `root:"/DVP/" consumes:"application/json" produces:"application/json"`
+	incrMaxChannelLimit    gorest.EndPoint `method:"POST" path:"/DialerAPI/IncrMaxChannelLimit/" postdata:"string"`
+	decrMaxChannelLimit    gorest.EndPoint `method:"POST" path:"/DialerAPI/DecrMaxChannelLimit/" postdata:"string"`
+	setMaxChannelLimit     gorest.EndPoint `method:"POST" path:"/DialerAPI/SetMaxChannelLimit/" postdata:"string"`
+	getTotalDialCount      gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalDialCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
+	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
+	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CampaignCallbackObj"`
 }
 
-func (dialerSelfHost DialerSelfHost) IncrMaxChannelLimit(campaignId string) {
+func (dvp DVP) IncrMaxChannelLimit(campaignId string) {
 	fmt.Println("Start IncrMaxChannelLimit ServerId: ", campaignId)
 	go IncrCampChannelMaxLimit(campaignId)
 	return
 }
 
-func (dialerSelfHost DialerSelfHost) DecrMaxChannelLimit(campaignId string) {
+func (dvp DVP) DecrMaxChannelLimit(campaignId string) {
 	fmt.Println("Start IncrMaxChannelLimit ServerId: ", campaignId)
 	go DecrCampChannelMaxLimit(campaignId)
 	return
 }
 
-func (dialerSelfHost DialerSelfHost) SetMaxChannelLimit(campaignId string) {
+func (dvp DVP) SetMaxChannelLimit(campaignId string) {
 	fmt.Println("Start IncrMaxChannelLimit ServerId: ", campaignId)
 	go SetCampChannelMaxLimit(campaignId)
 	return
 }
 
-func (dialerSelfHost DialerSelfHost) GetTotalDialCount(companyId, tenantId int, campaignId string) int {
+func (dvp DVP) GetTotalDialCount(companyId, tenantId int, campaignId string) int {
 	fmt.Println("Start GetTotalDialCount CampaignId: ", campaignId)
-	count := GetCampaignDialCount(companyId, tenantId, campaignId)
+	count := 0
+	authHeaderStr := dvp.Context.Request().Header.Get("Authorization")
+	fmt.Println(authHeaderStr)
+
+	authHeaderInfo := strings.Split(authHeaderStr, "#")
+	if len(authHeaderInfo) == 2 {
+		tenant, _ := strconv.Atoi(authHeaderInfo[0])
+		company, _ := strconv.Atoi(authHeaderInfo[1])
+		count = GetCampaignDialCount(company, tenant, campaignId)
+	}
 	return count
 }
 
-func (dialerSelfHost DialerSelfHost) GetTotalConnectedCount(companyId, tenantId int, campaignId string) int {
+func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string) int {
 	fmt.Println("Start GetTotalConnectedCount CampaignId: ", campaignId)
-	count := GetCampaignConnectedCount(companyId, tenantId, campaignId)
+	count := 0
+	authHeaderStr := dvp.Context.Request().Header.Get("Authorization")
+	fmt.Println(authHeaderStr)
+
+	authHeaderInfo := strings.Split(authHeaderStr, "#")
+	if len(authHeaderInfo) == 2 {
+		tenant, _ := strconv.Atoi(authHeaderInfo[0])
+		company, _ := strconv.Atoi(authHeaderInfo[1])
+		count = GetCampaignConnectedCount(company, tenant, campaignId)
+	}
 	return count
+}
+
+func (dvp DVP) ResumeCallback(callbackInfo CampaignCallbackObj) {
+	log := fmt.Sprintf("Start ResumeCallback CampaignId:%d # ContactId:%s ", callbackInfo.CampaignId, callbackInfo.ContactId)
+	fmt.Println(log)
+	authHeaderStr := dvp.Context.Request().Header.Get("Authorization")
+	fmt.Println(authHeaderStr)
+
+	authHeaderInfo := strings.Split(authHeaderStr, "#")
+	if len(authHeaderInfo) == 2 {
+		tenant, _ := strconv.Atoi(authHeaderInfo[0])
+		company, _ := strconv.Atoi(authHeaderInfo[1])
+		fmt.Println("Company: ", company)
+		fmt.Println("Tenant: ", tenant)
+		ResumeCampaignCallback(company, tenant, callbackInfo.CallBackCount, callbackInfo.CampaignId, callbackInfo.ContactId)
+	}
+	return
 }

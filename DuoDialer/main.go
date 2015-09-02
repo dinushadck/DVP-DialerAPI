@@ -19,8 +19,9 @@ func main() {
 	InitiateDuoDialer()
 
 	go InitiateService()
+
+	//AddPhoneNumberToCallback("1", "1", "1", "1", "0112546969", "USER_BUSY")
 	for {
-		go ClearTimeoutChannels()
 		onGoingCampaignCount := GetOnGoingCampaignCount()
 		if onGoingCampaignCount < campaignLimit {
 			campaigns := RequestCampaign(campaignLimit - onGoingCampaignCount)
@@ -30,10 +31,14 @@ func main() {
 		}
 
 		if onGoingCampaignCount > 0 {
-			tm := time.Now()
+
+			tm := time.Now().UTC()
 			runningCampaigns := GetAllRunningCampaign()
 			for _, campaign := range runningCampaigns {
 				campIdStr := strconv.Itoa(campaign.CampaignId)
+
+				go ClearTimeoutChannels(campIdStr)
+
 				campStatus := GetCampaignStatus(campIdStr, campaign.CompanyId, campaign.TenantId)
 				fmt.Println("campStatus: ", campStatus)
 				UpdateCampaignStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
@@ -46,8 +51,8 @@ func main() {
 						UpdateCampaignStartStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 					}
 
-					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), tempCampaignStartDate.Hour(), tempCampaignStartDate.Minute(), tempCampaignStartDate.Second(), 0, time.Local)
-					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, time.Local)
+					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), tempCampaignStartDate.Hour(), tempCampaignStartDate.Minute(), tempCampaignStartDate.Second(), 0, time.UTC)
+					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, time.UTC)
 					fmt.Println("Check Campaign: ", campIdStr)
 					fmt.Println("campaignStartDate: ", campaignStartDate.String())
 					fmt.Println("campaignEndDate: ", campaignEndDate.String())
@@ -85,7 +90,7 @@ func main() {
 }
 
 func InitiateService() {
-	gorest.RegisterService(new(DialerSelfHost))
+	gorest.RegisterService(new(DVP))
 	http.Handle("/", gorest.Handle())
 	addr := fmt.Sprintf(":%s", port)
 	http.ListenAndServe(addr, nil)
