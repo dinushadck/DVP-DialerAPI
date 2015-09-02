@@ -1,0 +1,10 @@
+{
+    "RedisIp": "SYS_REDIS_HOST",
+	"RedisPort": "SYS_REDIS_PORT",
+	"RedisDb": "SYS_REDIS_DB",
+	"CallbackServerId": "SYS_CALLBACK_SERVER_ID",
+	"HostIpAddress": "HOST_DIALER",
+	"Port":"HOST_DIALER_PORT",
+	"ExternalCallbackRequestFrequency": "SYS_CALLBACK_REQUEST_FREQUENCY",
+	"CampaignService": "SYS_SERVICE_CAMPSERVICE"
+}

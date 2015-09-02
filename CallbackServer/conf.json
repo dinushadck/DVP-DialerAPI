@@ -1,0 +1,10 @@
+{
+    "RedisIp": "192.168.3.200",
+	"RedisPort": "6379",
+	"RedisDb": 5,
+	"CallbackServerId": "1",
+	"HostIpAddress": "192.168.0.15",
+	"Port":"2227",
+	"ExternalCallbackRequestFrequency": 10,
+	"CampaignService": "http://192.168.0.143:2222/DVP/API/6.0"
+}
