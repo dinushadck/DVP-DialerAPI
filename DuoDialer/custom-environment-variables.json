@@ -12,5 +12,6 @@
 	"CallServer": "SYS_SERVICE_CS",
 	"CallRuleService":"SYS_SERVICE_CALLRULE",
 	"ScheduleService":"SYS_SERVICE_SCHEDULE",
-	"CallbackServerSelfHost":"SYS_SERVICE_CALLBACK"
+	"CallbackServerSelfHost":"SYS_SERVICE_CALLBACK",
+	"ArdsService":"SYS_SERVICE_ARDS"
 }

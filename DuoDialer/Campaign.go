@@ -164,6 +164,11 @@ func RemoveCampaignFromOtherDialer(oDialerId, campaignId string, company, tenant
 
 //----------Campaign Manager Service-----------------------
 func RequestCampaign(requestCount int) []Campaign {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RequestCampaign", r)
+		}
+	}()
 	//Request campaign from Campaign Manager service
 	campaignDetails := make([]Campaign, 0)
 
@@ -360,7 +365,7 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 }
 
 //----------Run Campaign-----------------------
-func StartCampaign(campaignId, scheduleId, camScheduleId, callServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
+func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, scheduleId, camScheduleId, callServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
 	emtAppoinment := Appoinment{}
 	defCallServerInfo := CallServerInfo{}
 	authToken := fmt.Sprintf("%d#%d", tenant, company)

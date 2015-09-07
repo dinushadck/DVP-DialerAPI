@@ -65,7 +65,7 @@ func main() {
 						if len(campaign.CampScheduleInfo) > 0 {
 							scheduleId := strconv.Itoa(campaign.CampScheduleInfo[0].ScheduleId)
 							camScheduleId := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
-							go StartCampaign(campIdStr, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency)
+							go StartCampaign(campIdStr, campaign.DialoutMechanism, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency)
 						}
 					}
 				} else {

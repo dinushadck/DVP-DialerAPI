@@ -2,7 +2,7 @@
     "RedisIp": "192.168.3.200",
 	"RedisPort": "6379",
 	"RedisDb": 5,
-	"DialerId": "2",
+	"DialerId": "Dialer2",
 	"CampaignLimit": 30,
 	"HostIpAddress": "192.168.0.15",
 	"Port":"2226",
@@ -12,5 +12,6 @@
 	"CallServer": "192.168.0.53:8080",
 	"CallRuleService":"http://192.168.0.89/CallRuleRestApi/api/CallRuleOutbound",
 	"ScheduleService":"http://192.168.3.200:2224/DVP/API/6.0/LimitAPI",
-	"CallbackServerSelfHost":"http://192.168.0.15:2227/CallbackServerSelfHost"
+	"CallbackServerSelfHost":"http://192.168.0.15:2227/CallbackServerSelfHost",
+	"ArdsService":"http://192.168.0.15:2225/DVP/API/1.0.0.0/ARDS"
 }

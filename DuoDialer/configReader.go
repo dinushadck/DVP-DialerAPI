@@ -24,6 +24,7 @@ var callServer string
 var callRuleService string
 var scheduleService string
 var callbackServerSelfHost string
+var ardsService string
 var port string
 
 func GetDirPath() string {
@@ -62,6 +63,7 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.CallRuleService = "http://127.0.0.1/CallRuleRestApi/api/CallRuleOutbound"
 		defconfiguration.ScheduleService = "http://127.0.0.1:2224/DVP/API/6.0/LimitAPI"
 		defconfiguration.CallbackServerSelfHost = "http://127.0.0.1:2227/CallbackServerSelfHost"
+		defconfiguration.ArdsService = "http://192.168.0.15:2225/DVP/API/1.0.0.0/ARDS"
 	}
 
 	return defconfiguration
@@ -95,6 +97,7 @@ func LoadDefaultConfig() {
 		callRuleService = "http://127.0.0.1/CallRuleRestApi/api/CallRuleOutbound"
 		scheduleService = "http://127.0.0.1:2224/DVP/API/6.0/LimitAPI"
 		callbackServerSelfHost = "http://127.0.0.1:2227/CallbackServerSelfHost"
+		ardsService = "http://192.168.0.15:2225/DVP/API/1.0.0.0/ARDS"
 	} else {
 		redisIp = fmt.Sprintf("%s:%s", defconfiguration.RedisIp, defconfiguration.RedisPort)
 		redisPort = defconfiguration.RedisPort
@@ -110,6 +113,7 @@ func LoadDefaultConfig() {
 		callRuleService = defconfiguration.CallRuleService
 		scheduleService = defconfiguration.ScheduleService
 		callbackServerSelfHost = defconfiguration.CallbackServerSelfHost
+		ardsService = defconfiguration.ArdsService
 	}
 }
 
@@ -145,6 +149,7 @@ func LoadConfiguration() {
 		callRuleService = os.Getenv(envconfiguration.CallRuleService)
 		scheduleService = os.Getenv(envconfiguration.ScheduleService)
 		callbackServerSelfHost = os.Getenv(envconfiguration.CallbackServerSelfHost)
+		ardsService = os.Getenv(envconfiguration.ArdsService)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -189,6 +194,9 @@ func LoadConfiguration() {
 		}
 		if callbackServerSelfHost == "" {
 			callbackServerSelfHost = defConfig.CallbackServerSelfHost
+		}
+		if ardsService == "" {
+			ardsService = defConfig.ArdsService
 		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)

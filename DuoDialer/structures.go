@@ -9,6 +9,7 @@ const layout2 = "2006-01-02"
 const layout3 = "15:04"
 const layout4 = "2006-01-02T15:04:05.999999-07:00"
 
+//--------------------Dialer Configurations--------------------
 type Configuration struct {
 	RedisIp                  string
 	RedisPort                string
@@ -24,6 +25,7 @@ type Configuration struct {
 	CallRuleService          string
 	ScheduleService          string
 	CallbackServerSelfHost   string
+	ArdsService              string
 }
 
 type EnvConfiguration struct {
@@ -41,27 +43,25 @@ type EnvConfiguration struct {
 	CallRuleService          string
 	ScheduleService          string
 	CallbackServerSelfHost   string
+	ArdsService              string
 }
 
-type CallbackConfiguration struct {
-	DisconnectReasons []DisconnectReason
-}
-
-type DisconnectReason struct {
-	Reason string
-	Values []string
-}
-
-type DialerInfo struct {
-	DialerId      string
-	CampaignLimit int
-	HostIpAddress string
-}
-
-type CallServerInfo struct {
-	CallServerId    string
-	Url             string
-	MaxChannelCount int
+//--------------------Campaign--------------------
+type Campaign struct {
+	CampaignName       string
+	CampaignMode       string
+	CampaignChannel    string
+	DialoutMechanism   string
+	CampaignId         int
+	CompanyId          int
+	TenantId           int
+	Class              string
+	Type               string
+	Category           string
+	Extensions         string
+	OperationalStatus  string
+	CampScheduleInfo   []CampaignShedule
+	CampConfigurations CampaignConfigInfo
 }
 
 type CampaignResult struct {
@@ -128,23 +128,6 @@ type CampaignShedule struct {
 	CamScheduleId int
 }
 
-type Campaign struct {
-	CampaignName       string
-	CampaignMode       string
-	CampaignChannel    string
-	DialoutMechanism   string
-	CampaignId         int
-	CompanyId          int
-	TenantId           int
-	Class              string
-	Type               string
-	Category           string
-	Extensions         string
-	OperationalStatus  string
-	CampScheduleInfo   []CampaignShedule
-	CampConfigurations CampaignConfigInfo
-}
-
 type ContactInfo struct {
 	ContactId string
 }
@@ -159,6 +142,47 @@ type PhoneNumberResult struct {
 	Result        []CampaignContactInfo
 }
 
+type CallbackConfiguration struct {
+	DisconnectReasons []DisconnectReason
+}
+
+type DisconnectReason struct {
+	Reason string
+	Values []string
+}
+
+type CampaignStart struct {
+	CampaignId int
+	DialerId   string
+}
+
+type CampaignState struct {
+	CampaignId    int
+	CampaignState string
+	DialerId      string
+}
+
+type CampaignStatusResult struct {
+	CustomMessage string
+	IsSuccess     bool
+	Result        CampaignState
+}
+
+//--------------------Dialer--------------------
+type DialerInfo struct {
+	DialerId      string
+	CampaignLimit int
+	HostIpAddress string
+}
+
+//--------------------Call Server--------------------
+type CallServerInfo struct {
+	CallServerId    string
+	Url             string
+	MaxChannelCount int
+}
+
+//--------------------Rule API--------------------
 type CallRuleApiResult struct {
 	CustomMessage string
 	IsSuccess     bool
@@ -171,6 +195,7 @@ type CallRule struct {
 	ANI         string
 }
 
+//--------------------Limit API--------------------
 type ScheduleDetails struct {
 	CustomMessage string
 	IsSuccess     bool
@@ -197,6 +222,7 @@ type Appoinment struct {
 	ScheduleId      int
 }
 
+//--------------------Events--------------------
 type SubEvents struct {
 	SwitchName       string
 	CampaignId       string
@@ -211,19 +237,22 @@ type SubEvents struct {
 	DisconnectReason string
 }
 
-type CampaignStart struct {
-	CampaignId int
-	DialerId   string
+//--------------------Ards--------------------
+type RequestServer struct {
+	Class       string
+	Type        string
+	Category    string
+	CallbackUrl string
+	ServerID    string
 }
 
-type CampaignState struct {
-	CampaignId    int
-	CampaignState string
-	DialerId      string
-}
-
-type CampaignStatusResult struct {
-	CustomMessage string
-	IsSuccess     bool
-	Result        CampaignState
+type Request struct {
+	Class           string
+	Type            string
+	Category        string
+	SessionId       string
+	Attributes      []string
+	RequestServerId string
+	Priority        string
+	OtherInfo       string
 }
