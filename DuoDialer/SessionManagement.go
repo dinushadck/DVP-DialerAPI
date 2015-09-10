@@ -10,9 +10,10 @@ import (
 	"time"
 )
 
-func InitiateSessionInfo(company, tenant int, tryCount, campaignId, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
+func InitiateSessionInfo(company, tenant, sessionExprTime int, tryCount, campaignId, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
+	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
 
 	data := make(map[string]string)
 	data["CompanyId"] = companyStr
@@ -28,6 +29,7 @@ func InitiateSessionInfo(company, tenant int, tryCount, campaignId, sessionId, n
 	data["Reason"] = reason
 	data["DialerStatus"] = dialerStatus
 	data["TryCount"] = tryCount
+	data["ExpireTime"] = sessionExprTimeStr
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetMultipleField(hashKey, data)
 	//RedisHashSetNxField(hashKey, "TryCount", tryCount)

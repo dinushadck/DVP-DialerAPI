@@ -58,7 +58,7 @@ func AddRequestServer() {
 
 }
 
-func AddRequest(company, tenant int, uuid string, attributes []string) {
+func AddRequest(company, tenant int, uuid, DialoutMechanism string, attributes []string) (*http.Response, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in AddRequest", r)
@@ -73,7 +73,7 @@ func AddRequest(company, tenant int, uuid string, attributes []string) {
 	ardsReq.Priority = "L"
 	ardsReq.RequestServerId = dialerId
 	ardsReq.Attributes = attributes
-	ardsReq.OtherInfo = ""
+	ardsReq.OtherInfo = DialoutMechanism
 
 	jsonData, _ := json.Marshal(ardsReq)
 
@@ -94,14 +94,7 @@ func AddRequest(company, tenant int, uuid string, attributes []string) {
 
 	fmt.Println("response Status:", resp.Status)
 	fmt.Println("response Headers:", resp.Header)
-	body, errb := ioutil.ReadAll(resp.Body)
-	if errb != nil {
-		fmt.Println(err.Error())
-	} else {
-		result := string(body)
-		fmt.Println("response Body:", result)
-	}
-
+	return resp, err
 }
 
 func RemoveRequest(company, tenant int, sessionId string) {

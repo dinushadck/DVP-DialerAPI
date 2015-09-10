@@ -133,6 +133,7 @@ type ContactInfo struct {
 }
 
 type CampaignContactInfo struct {
+	ExtraData       string
 	CampContactInfo ContactInfo
 }
 
@@ -255,4 +256,20 @@ type Request struct {
 	RequestServerId string
 	Priority        string
 	OtherInfo       string
+}
+
+type ArdsResult struct {
+	CustomMessage string
+	IsSuccess     bool
+}
+
+type ResourceDetails struct {
+	Extention    int
+	DialHostName string
+}
+
+type ArdsCallback struct {
+	SessionID    string
+	OtherInfo    string
+	ResourceInfo ResourceDetails
 }

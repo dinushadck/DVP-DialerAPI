@@ -403,7 +403,7 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 					fmt.Println("ConcurrentCampaignChannel: ", cchannelCountC)
 
 					if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
-						number, tryCount := GetNumberToDial(company, tenant, campaignId, camScheduleId)
+						number, tryCount, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId)
 						if number == "" {
 							numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 							if numberCount == 0 {
@@ -416,8 +416,18 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 							trunkCode, ani, dnis := GetTrunkCode(authToken, defaultAni, number)
 							uuid := GetUuid()
 							if trunkCode != "" && uuid != "" {
-								go DialNumber(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, tryCount, extention)
-								//go DialNumberFIFO(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
+								switch dialoutMec {
+								case "BLAST":
+									go DialNumber(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, tryCount, extention)
+									break
+								case "FIFO":
+									go DialNumberFIFO(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
+									break
+								case "PREVIEW":
+									go AddPreviewDialRequest(company, tenant, callServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, tryCount, extention)
+									break
+								}
+
 								time.Sleep(100 * time.Millisecond)
 							}
 						}

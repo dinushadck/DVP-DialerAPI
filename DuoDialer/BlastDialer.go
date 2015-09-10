@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"strings"
 	"time"
 )
 
@@ -16,42 +14,8 @@ func DialNumber(company, tenant int, callServer CallServerInfo, campaignId, uuid
 
 	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, tryCount, campaignId, uuid, phoneNumber, "start", "start", time.Now().UTC().Format(layout4), callServer.CallServerId)
+	InitiateSessionInfo(company, tenant, 240, tryCount, campaignId, uuid, phoneNumber, "start", "start", time.Now().UTC().Format(layout4), callServer.CallServerId)
 
 	resp, err := Dial(callServer.Url, param, furl, data)
-	if err != nil {
-		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
-		SetSessionInfo(campaignId, uuid, "Reason", "dial_failed")
-		SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
-		go UploadSessionInfo(campaignId, uuid)
-		fmt.Println(err.Error())
-	}
-
-	if resp != nil {
-		response, _ := ioutil.ReadAll(resp.Body)
-		tmx := string(response[:])
-		fmt.Println(tmx)
-		resultInfo := strings.Split(tmx, " ")
-		if len(resultInfo) > 0 {
-			if resultInfo[0] == "-ERR" {
-				DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
-
-				if len(resultInfo) > 1 {
-					reason := resultInfo[1]
-					if reason == "" {
-						SetSessionInfo(campaignId, uuid, "Reason", "not_specified")
-					} else {
-						SetSessionInfo(campaignId, uuid, "Reason", reason)
-					}
-				} else {
-					SetSessionInfo(campaignId, uuid, "Reason", "not_specified")
-				}
-				SetSessionInfo(campaignId, uuid, "DialerStatus", "not_connected")
-				go UploadSessionInfo(campaignId, uuid)
-			} else {
-				SetSessionInfo(campaignId, uuid, "Reason", "dial_success")
-				SetSessionInfo(campaignId, uuid, "DialerStatus", "connected")
-			}
-		}
-	}
+	HandleDialResponse(resp, err, callServer, campaignId, uuid)
 }

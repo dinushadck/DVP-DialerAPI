@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func GetUuid() string {
@@ -73,4 +74,42 @@ func Dial(server, params, furl, data string) (*http.Response, error) {
 	resp, err := http.Get(u.String())
 	defer resp.Body.Close()
 	return resp, err
+}
+
+func HandleDialResponse(resp *http.Response, err error, server CallServerInfo, campaignId, sessionId string) {
+	if err != nil {
+		DecrConcurrentChannelCount(server.CallServerId, campaignId)
+		SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
+		SetSessionInfo(campaignId, sessionId, "DialerStatus", "failed")
+		go UploadSessionInfo(campaignId, sessionId)
+		fmt.Println(err.Error())
+	}
+
+	if resp != nil {
+		response, _ := ioutil.ReadAll(resp.Body)
+		tmx := string(response[:])
+		fmt.Println(tmx)
+		resultInfo := strings.Split(tmx, " ")
+		if len(resultInfo) > 0 {
+			if resultInfo[0] == "-ERR" {
+				DecrConcurrentChannelCount(server.CallServerId, campaignId)
+
+				if len(resultInfo) > 1 {
+					reason := resultInfo[1]
+					if reason == "" {
+						SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
+					} else {
+						SetSessionInfo(campaignId, sessionId, "Reason", reason)
+					}
+				} else {
+					SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
+				}
+				SetSessionInfo(campaignId, sessionId, "DialerStatus", "not_connected")
+				go UploadSessionInfo(campaignId, sessionId)
+			} else {
+				SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
+				SetSessionInfo(campaignId, sessionId, "DialerStatus", "connected")
+			}
+		}
+	}
 }
