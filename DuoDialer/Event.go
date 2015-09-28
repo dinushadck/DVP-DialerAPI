@@ -72,3 +72,32 @@ func LogEvent(eventInfo SubEvents) {
 	eventLog.Info(string(logData), "\n")
 	eventLog.Close()
 }
+
+func PublishEvent(campaignId, sessionId string) {
+	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+	if RedisCheckKeyExist(sessionInfoKey) {
+		sessionInfo := RedisHashGetAll(sessionInfoKey)
+
+		tenant, _ := strconv.Atoi(sessionInfo["TenantId"])
+		company, _ := strconv.Atoi(sessionInfo["CompanyId"])
+
+		pubEventData := PubEvents{}
+
+		pubEventData.SessionId = sessionId
+		pubEventData.TenantId = tenant
+		pubEventData.CompanyId = company
+		pubEventData.EventClass = sessionInfo["Class"]
+		pubEventData.EventType = sessionInfo["Type"]
+		pubEventData.EventCategory = sessionInfo["Category"]
+		pubEventData.EventName = "DialInfo"
+		pubEventData.EventData = sessionInfo["DialerStatus"]
+		pubEventData.EventParams = sessionInfo["Reason"]
+		pubEventData.EventTime = time.Now().Local().String()
+
+		jvalue, _ := json.Marshal(pubEventData)
+		jvalueStr := string(jvalue)
+		fmt.Println("Event Pub value: ", jvalueStr)
+
+		Publish("SYS:MONITORING:DVPEVENTS", jvalueStr)
+	}
+}

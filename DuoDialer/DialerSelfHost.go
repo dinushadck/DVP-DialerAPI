@@ -15,7 +15,8 @@ type DVP struct {
 	getTotalDialCount      gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalDialCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CampaignCallbackObj"`
-	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{CampaignId:int}/{ContactNumber:string}" output:"bool"`
+	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
+	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ContactNumber:string}" output:"bool"`
 }
 
 func (dvp DVP) IncrMaxChannelLimit(campaignId string) {
@@ -83,8 +84,8 @@ func (dvp DVP) ResumeCallback(callbackInfo CampaignCallbackObj) {
 	return
 }
 
-func (dvp DVP) Dial(campaignId int, contactNumber string) bool {
-	log := fmt.Sprintf("Start Direct Dial CampaignId:%d # DNIS:%s ", campaignId, contactNumber)
+func (dvp DVP) DialCampaign(campaignId int, contactNumber string) bool {
+	log := fmt.Sprintf("Start Direct DialCampaign CampaignId:%d # DNIS:%s ", campaignId, contactNumber)
 	fmt.Println(log)
 	authHeaderStr := dvp.Context.Request().Header.Get("Authorization")
 	fmt.Println(authHeaderStr)
@@ -95,7 +96,24 @@ func (dvp DVP) Dial(campaignId int, contactNumber string) bool {
 		company, _ := strconv.Atoi(authHeaderInfo[1])
 		fmt.Println("Company: ", company)
 		fmt.Println("Tenant: ", tenant)
-		return DirectDialNumber(company, tenant, campaignId, contactNumber)
+		return DirectDialCampaign(company, tenant, campaignId, contactNumber)
+	}
+	return false
+}
+
+func (dvp DVP) Dial(AniNumber, DnisNumber, Extention, CallserverId string) bool {
+	log := fmt.Sprintf("Start Direct Dial ANI:%s # DNIS:%s ", AniNumber, DnisNumber)
+	fmt.Println(log)
+	authHeaderStr := dvp.Context.Request().Header.Get("Authorization")
+	fmt.Println(authHeaderStr)
+
+	authHeaderInfo := strings.Split(authHeaderStr, "#")
+	if len(authHeaderInfo) == 2 {
+		tenant, _ := strconv.Atoi(authHeaderInfo[0])
+		company, _ := strconv.Atoi(authHeaderInfo[1])
+		fmt.Println("Company: ", company)
+		fmt.Println("Tenant: ", tenant)
+		return DirectDial(company, tenant, AniNumber, DnisNumber, Extention, CallserverId)
 	}
 	return false
 }

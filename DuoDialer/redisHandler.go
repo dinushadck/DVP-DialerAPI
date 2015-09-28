@@ -422,3 +422,16 @@ func PubSub() {
 	psc.Unsubscribe(subChannelName)
 
 }
+
+func Publish(channel, message string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisListLlen", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	client.Cmd("publish", channel, message)
+}

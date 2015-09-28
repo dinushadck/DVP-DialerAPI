@@ -10,12 +10,15 @@ import (
 	"time"
 )
 
-func InitiateSessionInfo(company, tenant, sessionExprTime int, tryCount, campaignId, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
+func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
 
 	data := make(map[string]string)
+	data["Class"] = sclass
+	data["Type"] = stype
+	data["Category"] = scategory
 	data["CompanyId"] = companyStr
 	data["TenantId"] = tenantStr
 	data["SessionId"] = sessionId
@@ -32,12 +35,14 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, tryCount, campaig
 	data["ExpireTime"] = sessionExprTimeStr
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetMultipleField(hashKey, data)
+	PublishEvent(campaignId, sessionId)
 	//RedisHashSetNxField(hashKey, "TryCount", tryCount)
 }
 
 func SetSessionInfo(campaignId, sessionId, filed, value string) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetField(hashKey, filed, value)
+	PublishEvent(campaignId, sessionId)
 }
 
 func UploadSessionInfo(campaignId, sessionId string) {
@@ -45,6 +50,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	sessionInfo := RedisHashGetAll(hashKey)
 	RedisRemove(hashKey)
 	AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["Number"], sessionInfo["Reason"])
+	PublishEvent(campaignId, sessionId)
 	UploadSessionInfoToCampaignManager(sessionInfo)
 }
 

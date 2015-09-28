@@ -32,8 +32,8 @@ func GetTrunkCode(authToken, ani, dnis string) (trunkCode, rAni, rDnis string) {
 	fmt.Println("Start GetTrunkCode: ", authToken, ": ", ani, ": ", dnis)
 	client := &http.Client{}
 
-	//request := fmt.Sprintf("%s/ANI/%s/DNIS/%s", callRuleService, ani, dnis)
-	request := fmt.Sprintf("%s?ANI=%s&DNIS=%s", callRuleService, ani, dnis)
+	request := fmt.Sprintf("%s/ANI/%s/DNIS/%s", callRuleService, ani, dnis)
+	//request := fmt.Sprintf("%s?ANI=%s&DNIS=%s", callRuleService, ani, dnis)
 	fmt.Println("Start GetTrunkCode request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)

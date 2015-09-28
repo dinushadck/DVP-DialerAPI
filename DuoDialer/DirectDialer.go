@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func DirectDialNumber(company, tenant, campaignId int, number string) bool {
+func DirectDialCampaign(company, tenant, campaignId int, number string) bool {
 	fmt.Println("start DialNumber")
 	campaignIdStr := strconv.Itoa(campaignId)
 	campaignInfo, isCamExists := GetCampaign(company, tenant, campaignId)
@@ -25,6 +25,39 @@ func DirectDialNumber(company, tenant, campaignId int, number string) bool {
 				return AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
 			}
 		}
+	}
+	return false
+}
+
+func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, callServerId string) bool {
+
+	authToken := fmt.Sprintf("%d#%d", tenant, company)
+	trunkCode, ani, dnis := GetTrunkCode(authToken, fromNumber, phoneNumber)
+	uuid := GetUuid()
+	if trunkCode != "" && uuid != "" {
+		fmt.Println("Start AddDirectDialRequest: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
+		campaignId := "DirectDial"
+		callServer := GetCallServerInfo(callServerId)
+
+		IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
+		IncrCampaignDialCount(company, tenant, campaignId)
+		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, uuid, dnis, "direct dial", "start", time.Now().UTC().Format(layout4), callServerId)
+		SetSessionInfo(campaignId, uuid, "FromNumber", ani)
+		SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
+		SetSessionInfo(campaignId, uuid, "Extention", extention)
+
+		fmt.Println("Start DialDirectNumber: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
+		customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
+		param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, uuid, ani)
+		furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, dnis, extention)
+		data := " xml dialer"
+
+		SetSessionInfo(campaignId, uuid, "Reason", "Dial Number")
+
+		resp, err := Dial(callServer.Url, param, furl, data)
+		HandleDialResponse(resp, err, callServer, campaignId, uuid)
+		return true
+		//}
 	}
 	return false
 }

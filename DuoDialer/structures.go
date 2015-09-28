@@ -238,6 +238,19 @@ type SubEvents struct {
 	DisconnectReason string
 }
 
+type PubEvents struct {
+	EventClass    string
+	EventType     string
+	EventCategory string
+	EventName     string
+	EventData     string
+	EventParams   string
+	SessionId     string
+	EventTime     string
+	CompanyId     int
+	TenantId      int
+}
+
 //--------------------Ards--------------------
 type RequestServer struct {
 	Class       string
