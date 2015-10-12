@@ -10,6 +10,7 @@ import (
 )
 
 func GetUuid() string {
+	uuidService := fmt.Sprintf("http://%s:%s/api/create_uuid", callServerHost, callServerPort)
 	resp, err := http.Get(uuidService)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -32,7 +33,7 @@ func GetTrunkCode(authToken, ani, dnis string) (trunkCode, rAni, rDnis string) {
 	fmt.Println("Start GetTrunkCode: ", authToken, ": ", ani, ": ", dnis)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("%s/ANI/%s/DNIS/%s", callRuleService, ani, dnis)
+	request := fmt.Sprintf("http://%s:%s/DVP/API/6.0/CallRuleApi/CallRule/Outbound/ANI/%s/DNIS/%s", callRuleServiceHost, callRuleServicePort, ani, dnis)
 	//request := fmt.Sprintf("%s?ANI=%s&DNIS=%s", callRuleService, ani, dnis)
 	fmt.Println("Start GetTrunkCode request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)

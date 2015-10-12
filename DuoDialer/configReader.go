@@ -17,15 +17,20 @@ var redisDb int
 var dialerId string
 var campaignLimit int
 var hostIpAddress string
-var campaignService string
-var campaignRequestFrequency time.Duration
-var uuidService string
-var callServer string
-var callRuleService string
-var scheduleService string
-var callbackServerSelfHost string
-var ardsService string
 var port string
+var campaignRequestFrequency time.Duration
+var campaignServiceHost string
+var campaignServicePort string
+var callServerHost string
+var callServerPort string
+var callRuleServiceHost string
+var callRuleServicePort string
+var scheduleServiceHost string
+var scheduleServicePort string
+var callbackServerHost string
+var callbackServerPort string
+var ardsServiceHost string
+var ardsServicePort string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -49,72 +54,57 @@ func GetDefaultConfig() Configuration {
 
 	if deferr != nil {
 		fmt.Println("error:", deferr)
-		defconfiguration.RedisIp = "127.0.0.1"
+		defconfiguration.RedisIp = "192.168.3.200"
 		defconfiguration.RedisPort = "6379"
-		defconfiguration.RedisDb = 6
-		defconfiguration.DialerId = "1"
+		defconfiguration.RedisDb = 5
+		defconfiguration.DialerId = "Dialer2"
 		defconfiguration.CampaignLimit = 30
-		defconfiguration.HostIpAddress = "127.0.0.1"
+		defconfiguration.HostIpAddress = "192.168.0.15"
 		defconfiguration.Port = "2226"
 		defconfiguration.CampaignRequestFrequency = 300
-		defconfiguration.CampaignService = "http://127.0.0.1:2222/DVP/API/6.0"
-		defconfiguration.UuidService = "http://127.0.0.1:8080/api/create_uuid"
-		defconfiguration.CallServer = "127.0.0.1:8080"
-		defconfiguration.CallRuleService = "http://127.0.0.1/CallRuleRestApi/api/CallRuleOutbound"
-		defconfiguration.ScheduleService = "http://127.0.0.1:2224/DVP/API/6.0/LimitAPI"
-		defconfiguration.CallbackServerSelfHost = "http://127.0.0.1:2227/CallbackServerSelfHost"
-		defconfiguration.ArdsService = "http://192.168.0.15:2225/DVP/API/1.0.0.0/ARDS"
+		defconfiguration.CampaignServiceHost = "192.168.0.143"
+		defconfiguration.CampaignServicePort = "2222"
+		defconfiguration.CallServerHost = "192.168.0.53"
+		defconfiguration.CallServerPort = "8080"
+		defconfiguration.CallRuleServiceHost = "192.168.0.89"
+		defconfiguration.CallRuleServicePort = "2220"
+		defconfiguration.ScheduleServiceHost = "192.168.3.200"
+		defconfiguration.ScheduleServicePort = "2224"
+		defconfiguration.CallbackServerHost = "192.168.0.15"
+		defconfiguration.CallbackServerPort = "2227"
+		defconfiguration.ArdsServiceHost = "192.168.0.15"
+		defconfiguration.ArdsServicePort = "2225"
 	}
 
 	return defconfiguration
 }
 
 func LoadDefaultConfig() {
-	confPath := filepath.Join(dirPath, "conf.json")
-	fmt.Println("LoadDefaultConfig config path: ", confPath)
 
-	content, operr := ioutil.ReadFile(confPath)
-	if operr != nil {
-		fmt.Println(operr)
-	}
+	defconfiguration := GetDefaultConfig()
 
-	defconfiguration := Configuration{}
-	deferr := json.Unmarshal(content, &defconfiguration)
+	redisIp = defconfiguration.RedisIp
+	redisPort = defconfiguration.RedisPort
+	redisDb = defconfiguration.RedisDb
+	dialerId = defconfiguration.DialerId
+	campaignLimit = defconfiguration.CampaignLimit
+	hostIpAddress = defconfiguration.HostIpAddress
+	port = defconfiguration.Port
+	campaignRequestFrequency = defconfiguration.CampaignRequestFrequency
+	campaignServiceHost = defconfiguration.CampaignServiceHost
+	campaignServicePort = defconfiguration.CampaignServicePort
+	callServerHost = defconfiguration.CallServerHost
+	callServerPort = defconfiguration.CallServerPort
+	callRuleServiceHost = defconfiguration.CallRuleServiceHost
+	callRuleServicePort = defconfiguration.CallRuleServicePort
+	scheduleServiceHost = defconfiguration.ScheduleServiceHost
+	scheduleServicePort = defconfiguration.ScheduleServicePort
+	callbackServerHost = defconfiguration.CallbackServerHost
+	callbackServerPort = defconfiguration.CallbackServerPort
+	ardsServiceHost = defconfiguration.ArdsServiceHost
+	ardsServicePort = defconfiguration.ArdsServicePort
 
-	if deferr != nil {
-		fmt.Println("error:", deferr)
-		redisIp = "127.0.0.1:6379"
-		redisPort = "6379"
-		redisDb = 6
-		dialerId = "1"
-		campaignLimit = 30
-		hostIpAddress = "127.0.0.1"
-		port = "2226"
-		campaignRequestFrequency = 300
-		campaignService = "http://127.0.0.1:2222/DVP/API/6.0"
-		uuidService = "http://127.0.0.1:8080/api/create_uuid"
-		callServer = "127.0.0.1:8080"
-		callRuleService = "http://127.0.0.1/CallRuleRestApi/api/CallRuleOutbound"
-		scheduleService = "http://127.0.0.1:2224/DVP/API/6.0/LimitAPI"
-		callbackServerSelfHost = "http://127.0.0.1:2227/CallbackServerSelfHost"
-		ardsService = "http://192.168.0.15:2225/DVP/API/1.0.0.0/ARDS"
-	} else {
-		redisIp = fmt.Sprintf("%s:%s", defconfiguration.RedisIp, defconfiguration.RedisPort)
-		redisPort = defconfiguration.RedisPort
-		redisDb = defconfiguration.RedisDb
-		dialerId = defconfiguration.DialerId
-		campaignLimit = defconfiguration.CampaignLimit
-		hostIpAddress = defconfiguration.HostIpAddress
-		port = defconfiguration.Port
-		campaignRequestFrequency = defconfiguration.CampaignRequestFrequency
-		campaignService = defconfiguration.CampaignService
-		uuidService = defconfiguration.UuidService
-		callServer = defconfiguration.CallServer
-		callRuleService = defconfiguration.CallRuleService
-		scheduleService = defconfiguration.ScheduleService
-		callbackServerSelfHost = defconfiguration.CallbackServerSelfHost
-		ardsService = defconfiguration.ArdsService
-	}
+	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
 
 func LoadConfiguration() {
@@ -135,21 +125,27 @@ func LoadConfiguration() {
 	} else {
 		var converr error
 		defConfig := GetDefaultConfig()
+
 		redisIp = os.Getenv(envconfiguration.RedisIp)
-		redisPort = os.Getenv(envconfiguration.RedisPort)
+		redisPort = os.Getenv(envconfiguration.RedisIp)
 		redisDb, converr = strconv.Atoi(os.Getenv(envconfiguration.RedisDb))
 		dialerId = os.Getenv(envconfiguration.DialerId)
 		campaignLimit, converr = strconv.Atoi(os.Getenv(envconfiguration.CampaignLimit))
 		hostIpAddress = os.Getenv(envconfiguration.HostIpAddress)
 		port = os.Getenv(envconfiguration.Port)
 		campaignRequestFrequencytemp := os.Getenv(envconfiguration.CampaignRequestFrequency)
-		campaignService = os.Getenv(envconfiguration.CampaignService)
-		uuidService = os.Getenv(envconfiguration.UuidService)
-		callServer = os.Getenv(envconfiguration.CallServer)
-		callRuleService = os.Getenv(envconfiguration.CallRuleService)
-		scheduleService = os.Getenv(envconfiguration.ScheduleService)
-		callbackServerSelfHost = os.Getenv(envconfiguration.CallbackServerSelfHost)
-		ardsService = os.Getenv(envconfiguration.ArdsService)
+		campaignServiceHost = os.Getenv(envconfiguration.CampaignServiceHost)
+		campaignServicePort = os.Getenv(envconfiguration.CampaignServicePort)
+		callServerHost = os.Getenv(envconfiguration.CallServerHost)
+		callServerPort = os.Getenv(envconfiguration.CallServerPort)
+		callRuleServiceHost = os.Getenv(envconfiguration.CallRuleServiceHost)
+		callRuleServicePort = os.Getenv(envconfiguration.CallRuleServicePort)
+		scheduleServiceHost = os.Getenv(envconfiguration.ScheduleServiceHost)
+		scheduleServicePort = os.Getenv(envconfiguration.ScheduleServicePort)
+		callbackServerHost = os.Getenv(envconfiguration.CallbackServerHost)
+		callbackServerPort = os.Getenv(envconfiguration.CallbackServerPort)
+		ardsServiceHost = os.Getenv(envconfiguration.ArdsServiceHost)
+		ardsServicePort = os.Getenv(envconfiguration.ArdsServiceHost)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -177,26 +173,41 @@ func LoadConfiguration() {
 		} else {
 			campaignRequestFrequency, _ = time.ParseDuration(campaignRequestFrequencytemp)
 		}
-		if campaignService == "" {
-			campaignService = defConfig.CampaignService
+		if campaignServiceHost == "" {
+			campaignServiceHost = defConfig.CampaignServiceHost
 		}
-		if uuidService == "" {
-			uuidService = defConfig.UuidService
+		if campaignServicePort == "" {
+			campaignServicePort = defConfig.CampaignServicePort
 		}
-		if callServer == "" {
-			callServer = defConfig.CallServer
+		if callServerHost == "" {
+			callServerHost = defConfig.CallServerHost
 		}
-		if callRuleService == "" {
-			callRuleService = defConfig.CallRuleService
+		if callServerPort == "" {
+			callServerPort = defConfig.CallServerPort
 		}
-		if scheduleService == "" {
-			scheduleService = defConfig.ScheduleService
+		if callRuleServiceHost == "" {
+			callRuleServiceHost = defConfig.CallRuleServiceHost
 		}
-		if callbackServerSelfHost == "" {
-			callbackServerSelfHost = defConfig.CallbackServerSelfHost
+		if callRuleServicePort == "" {
+			callRuleServicePort = defConfig.CallRuleServicePort
 		}
-		if ardsService == "" {
-			ardsService = defConfig.ArdsService
+		if scheduleServiceHost == "" {
+			scheduleServiceHost = defConfig.ScheduleServiceHost
+		}
+		if scheduleServicePort == "" {
+			scheduleServicePort = defConfig.ScheduleServicePort
+		}
+		if callbackServerHost == "" {
+			callbackServerHost = defConfig.CallbackServerHost
+		}
+		if callbackServerPort == "" {
+			callbackServerPort = defConfig.CallbackServerPort
+		}
+		if ardsServiceHost == "" {
+			ardsServiceHost = defConfig.ArdsServiceHost
+		}
+		if ardsServicePort == "" {
+			ardsServicePort = defConfig.ArdsServicePort
 		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)

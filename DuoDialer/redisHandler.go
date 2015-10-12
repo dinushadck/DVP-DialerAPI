@@ -57,7 +57,7 @@ func RedisSet(key, value string) string {
 	return result
 }
 
-func RedisSetNx(key, value string) string {
+func RedisSetNx(key, value string) int {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisSet", r)
@@ -71,7 +71,7 @@ func RedisSetNx(key, value string) string {
 	r := client.Cmd("select", redisDb)
 	errHndlr(r.Err)
 
-	result, sErr := client.Cmd("setnx", key, value).Str()
+	result, sErr := client.Cmd("setnx", key, value).Int()
 	errHndlr(sErr)
 	fmt.Println(result)
 	return result

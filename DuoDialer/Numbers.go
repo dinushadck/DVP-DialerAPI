@@ -19,7 +19,7 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	fmt.Println("Start GetPhoneNumbers Auth: ", authToken, " CampaignId: ", campaignId, " camScheduleId: ", camScheduleId)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("%s/CampaignManager/Campaign/%s/Numbers/%s/%d/%d", campaignService, campaignId, camScheduleId, numberLimit, pageNumberToRequest)
+	request := fmt.Sprintf("http://%s:%s/DVP/API/6.0/CampaignManager/Campaign/%s/Numbers/%s/%d/%d", campaignServiceHost, campaignServicePort, campaignId, camScheduleId, numberLimit, pageNumberToRequest)
 	fmt.Println("Start GetPhoneNumbers request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)

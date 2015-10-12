@@ -18,7 +18,7 @@ func RequestCampaignCallbackConfig(tenant, company, configureId int) ([]Campaign
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("%s/CampaignManager/Campaign/Configuration/%d/all", campaignService, configureId)
+	request := fmt.Sprintf("http://%s:%s/DVP/API/6.0/CampaignManager/Campaign/Configuration/%d/all", campaignServiceHost, campaignServicePort, configureId)
 	fmt.Println("Start RequestCampaignCallbackConfig request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)
@@ -65,7 +65,7 @@ func UploadCallbackInfo(company, tenant int, callbackTime time.Time, cbClass, cb
 
 	jsonData, _ := json.Marshal(callback)
 
-	serviceurl := fmt.Sprintf("%s/Callback/AddCallback", callbackServerSelfHost)
+	serviceurl := fmt.Sprintf("http://%s:%s/CallbackServerSelfHost/Callback/AddCallback", callbackServerHost, callbackServerPort)
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")

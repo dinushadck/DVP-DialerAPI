@@ -19,13 +19,18 @@ type Configuration struct {
 	HostIpAddress            string
 	Port                     string
 	CampaignRequestFrequency time.Duration
-	CampaignService          string
-	UuidService              string
-	CallServer               string
-	CallRuleService          string
-	ScheduleService          string
-	CallbackServerSelfHost   string
-	ArdsService              string
+	CampaignServiceHost      string
+	CampaignServicePort      string
+	CallServerHost           string
+	CallServerPort           string
+	CallRuleServiceHost      string
+	CallRuleServicePort      string
+	ScheduleServiceHost      string
+	ScheduleServicePort      string
+	CallbackServerHost       string
+	CallbackServerPort       string
+	ArdsServiceHost          string
+	ArdsServicePort          string
 }
 
 type EnvConfiguration struct {
@@ -37,13 +42,18 @@ type EnvConfiguration struct {
 	HostIpAddress            string
 	Port                     string
 	CampaignRequestFrequency string
-	CampaignService          string
-	UuidService              string
-	CallServer               string
-	CallRuleService          string
-	ScheduleService          string
-	CallbackServerSelfHost   string
-	ArdsService              string
+	CampaignServiceHost      string
+	CampaignServicePort      string
+	CallServerHost           string
+	CallServerPort           string
+	CallRuleServiceHost      string
+	CallRuleServicePort      string
+	ScheduleServiceHost      string
+	ScheduleServicePort      string
+	CallbackServerHost       string
+	CallbackServerPort       string
+	ArdsServiceHost          string
+	ArdsServicePort          string
 }
 
 //--------------------Campaign--------------------
