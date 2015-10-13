@@ -31,6 +31,8 @@ type Configuration struct {
 	CallbackServerPort       string
 	ArdsServiceHost          string
 	ArdsServicePort          string
+	NotificationServiceHost  string
+	NotificationServicePort  string
 }
 
 type EnvConfiguration struct {
@@ -54,6 +56,8 @@ type EnvConfiguration struct {
 	CallbackServerPort       string
 	ArdsServiceHost          string
 	ArdsServicePort          string
+	NotificationServiceHost  string
+	NotificationServicePort  string
 }
 
 //--------------------Campaign--------------------
@@ -270,6 +274,11 @@ type RequestServer struct {
 	ServerID    string
 }
 
+type PreviewRequestOtherData struct {
+	CampaignId  string
+	PreviewData string
+}
+
 type Request struct {
 	Class           string
 	Type            string
@@ -289,10 +298,35 @@ type ArdsResult struct {
 type ResourceDetails struct {
 	Extention    int
 	DialHostName string
+	ResourceId   string
 }
 
-type ArdsCallback struct {
+type ArdsCallbackInfo struct {
+	Company      string
+	Tenant       string
+	Class        string
+	Type         string
+	Category     string
 	SessionID    string
 	OtherInfo    string
 	ResourceInfo ResourceDetails
+}
+
+//--------------------Notification--------------------
+type PushData struct {
+	To        string
+	Direction string
+	message   string
+	clbk      string
+	Ref       string
+}
+
+type ReplyData struct {
+	Tkey    string
+	message string
+}
+
+type ReceiveData struct {
+	reply ReplyData
+	ref   string
 }

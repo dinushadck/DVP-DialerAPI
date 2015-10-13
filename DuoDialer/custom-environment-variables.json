@@ -18,5 +18,7 @@
 	"CallbackServerHost":"SYS_CALLBACKSERVICE_HOST",
 	"CallbackServerPort":"SYS_CALLBACKSERVICE_PORT",
 	"ArdsServiceHost":"SYS_ARDSLITESERVICE_HOST",
-	"ArdsServicePort":"SYS_ARDSLITESERVICE_PORT"
+	"ArdsServicePort":"SYS_ARDSLITESERVICE_PORT",
+	"NotificationServiceHost":"SYS_NOTIFICATIONSERVICE_HOST",
+	"NotificationServicePort":"SYS_NOTIFICATIONSERVICE_PORT"
 }

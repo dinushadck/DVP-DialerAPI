@@ -58,7 +58,7 @@ func AddRequestServer() {
 
 }
 
-func AddRequest(company, tenant int, uuid, DialoutMechanism string, attributes []string) (*http.Response, error) {
+func AddRequest(company, tenant int, uuid, otherData string, attributes []string) (*http.Response, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in AddRequest", r)
@@ -73,7 +73,7 @@ func AddRequest(company, tenant int, uuid, DialoutMechanism string, attributes [
 	ardsReq.Priority = "L"
 	ardsReq.RequestServerId = dialerId
 	ardsReq.Attributes = attributes
-	ardsReq.OtherInfo = DialoutMechanism
+	ardsReq.OtherInfo = otherData
 
 	jsonData, _ := json.Marshal(ardsReq)
 

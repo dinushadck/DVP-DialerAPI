@@ -2,6 +2,7 @@ package main
 
 import (
 	"code.google.com/p/gorest"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -17,6 +18,8 @@ type DVP struct {
 	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CampaignCallbackObj"`
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
 	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ContactNumber:string}" output:"bool"`
+	ardsCallback           gorest.EndPoint `method:"POST" path:"/DialerAPI/ArdsCallback/" postdata:"ArdsCallbackInfo"`
+	previewCallBack        gorest.EndPoint `method:"POST" path:"/DialerAPI/PreviewCallBack/" postdata:"ReceiveData"`
 }
 
 func (dvp DVP) IncrMaxChannelLimit(campaignId string) {
@@ -116,4 +119,30 @@ func (dvp DVP) Dial(AniNumber, DnisNumber, Extention, CallserverId string) bool 
 		return DirectDial(company, tenant, AniNumber, DnisNumber, Extention, CallserverId)
 	}
 	return false
+}
+
+func (dvp DVP) ArdsCallback(ardsCallbackInfo ArdsCallbackInfo) {
+	log := fmt.Sprintf("Start ArdsCallback :%s ", ardsCallbackInfo)
+	fmt.Println(log)
+
+	SendPreviewDataToAgent(ardsCallbackInfo)
+	return
+}
+
+func (dvp DVP) PreviewCallBack(receivedata ReceiveData) {
+	log := fmt.Sprintf("Start PreviewCallBack :%s ", receivedata)
+	fmt.Println(log)
+
+	var refData ArdsCallbackInfo
+	json.Unmarshal([]byte(receivedata.ref), &refData)
+
+	var reqOData PreviewRequestOtherData
+	json.Unmarshal([]byte(refData.OtherInfo), &reqOData)
+
+	if receivedata.reply.message == "ACCEPT" {
+		DialPreviewNumber(refData.ResourceInfo.Extention, refData.Company, refData.Tenant, reqOData.CampaignId, refData.Class, refData.Type, refData.Category, refData.SessionID, refData.ResourceInfo.ResourceId, refData.ResourceInfo.DialHostName)
+	} else {
+		RejectPreviewNumber(reqOData.CampaignId, refData.SessionID, "AgentRejected")
+	}
+	return
 }

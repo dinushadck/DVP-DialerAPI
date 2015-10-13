@@ -31,6 +31,8 @@ var callbackServerHost string
 var callbackServerPort string
 var ardsServiceHost string
 var ardsServicePort string
+var notificationServiceHost string
+var notificationServicePort string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -74,6 +76,8 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.CallbackServerPort = "2227"
 		defconfiguration.ArdsServiceHost = "192.168.0.15"
 		defconfiguration.ArdsServicePort = "2225"
+		defconfiguration.NotificationServiceHost = "192.168.0.77"
+		defconfiguration.NotificationServicePort = "8086"
 	}
 
 	return defconfiguration
@@ -103,6 +107,8 @@ func LoadDefaultConfig() {
 	callbackServerPort = defconfiguration.CallbackServerPort
 	ardsServiceHost = defconfiguration.ArdsServiceHost
 	ardsServicePort = defconfiguration.ArdsServicePort
+	notificationServiceHost = defconfiguration.NotificationServiceHost
+	notificationServicePort = defconfiguration.NotificationServicePort
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -146,6 +152,8 @@ func LoadConfiguration() {
 		callbackServerPort = os.Getenv(envconfiguration.CallbackServerPort)
 		ardsServiceHost = os.Getenv(envconfiguration.ArdsServiceHost)
 		ardsServicePort = os.Getenv(envconfiguration.ArdsServiceHost)
+		notificationServiceHost = os.Getenv(envconfiguration.NotificationServiceHost)
+		notificationServicePort = os.Getenv(envconfiguration.NotificationServicePort)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -208,6 +216,12 @@ func LoadConfiguration() {
 		}
 		if ardsServicePort == "" {
 			ardsServicePort = defConfig.ArdsServicePort
+		}
+		if notificationServiceHost == "" {
+			notificationServiceHost = defConfig.NotificationServiceHost
+		}
+		if notificationServicePort == "" {
+			notificationServicePort = defConfig.NotificationServicePort
 		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)

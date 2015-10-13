@@ -403,7 +403,7 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 					fmt.Println("ConcurrentCampaignChannel: ", cchannelCountC)
 
 					if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
-						number, tryCount, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId)
+						number, tryCount, numExtraData := GetNumberToDial(company, tenant, campaignId, camScheduleId)
 						if number == "" {
 							numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 							if numberCount == 0 {
@@ -424,7 +424,7 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 									go DialNumberFIFO(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
 									break
 								case "PREVIEW":
-									go AddPreviewDialRequest(company, tenant, callServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, tryCount, extention)
+									go AddPreviewDialRequest(company, tenant, callServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
 									break
 								}
 

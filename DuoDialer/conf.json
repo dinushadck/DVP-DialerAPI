@@ -18,5 +18,7 @@
 	"CallbackServerHost":"192.168.0.15",
 	"CallbackServerPort":"2227",
 	"ArdsServiceHost":"192.168.0.15",
-	"ArdsServicePort":"2225"
+	"ArdsServicePort":"2225",
+	"NotificationServiceHost":"192.168.0.77",
+	"NotificationServicePort":"8086"
 }
