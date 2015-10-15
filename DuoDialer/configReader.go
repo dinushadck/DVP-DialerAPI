@@ -136,7 +136,7 @@ func LoadConfiguration() {
 		defConfig := GetDefaultConfig()
 
 		redisIp = os.Getenv(envconfiguration.RedisIp)
-		redisPort = os.Getenv(envconfiguration.RedisIp)
+		redisPort = os.Getenv(envconfiguration.RedisPort)
 		redisDb, converr = strconv.Atoi(os.Getenv(envconfiguration.RedisDb))
 		dialerId = os.Getenv(envconfiguration.DialerId)
 		campaignLimit, converr = strconv.Atoi(os.Getenv(envconfiguration.CampaignLimit))
