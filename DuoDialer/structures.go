@@ -16,7 +16,8 @@ type Configuration struct {
 	RedisDb                  int
 	DialerId                 string
 	CampaignLimit            int
-	HostIpAddress            string
+	LbIpAddress              string
+	LbPort                   string
 	Port                     string
 	CampaignRequestFrequency time.Duration
 	CampaignServiceHost      string
@@ -41,7 +42,8 @@ type EnvConfiguration struct {
 	RedisDb                  string
 	DialerId                 string
 	CampaignLimit            string
-	HostIpAddress            string
+	LbIpAddress              string
+	LbPort                   string
 	Port                     string
 	CampaignRequestFrequency string
 	CampaignServiceHost      string

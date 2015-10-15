@@ -12,7 +12,7 @@ import (
 func GetAppoinmentsForSchedule(authToken, schedulrId string) []Appoinment {
 	fmt.Println("Start Get Schedule Schedule service")
 	client := &http.Client{}
-	request := fmt.Sprintf("http://%s:%s/DVP/API/6.0/LimitAPI/Schedule/%s/Appointments", scheduleServiceHost, scheduleServicePort, schedulrId)
+	request := fmt.Sprintf("http://%s/DVP/API/6.0/LimitAPI/Schedule/%s/Appointments", CreateHost(scheduleServiceHost, scheduleServicePort), schedulrId)
 	fmt.Println("request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)

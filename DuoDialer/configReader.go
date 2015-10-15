@@ -16,7 +16,8 @@ var redisPort string
 var redisDb int
 var dialerId string
 var campaignLimit int
-var hostIpAddress string
+var lbIpAddress string
+var lbPort string
 var port string
 var campaignRequestFrequency time.Duration
 var campaignServiceHost string
@@ -61,7 +62,8 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.RedisDb = 5
 		defconfiguration.DialerId = "Dialer2"
 		defconfiguration.CampaignLimit = 30
-		defconfiguration.HostIpAddress = "192.168.0.15"
+		defconfiguration.LbIpAddress = "192.168.0.15"
+		defconfiguration.LbPort = "2226"
 		defconfiguration.Port = "2226"
 		defconfiguration.CampaignRequestFrequency = 300
 		defconfiguration.CampaignServiceHost = "192.168.0.143"
@@ -92,7 +94,8 @@ func LoadDefaultConfig() {
 	redisDb = defconfiguration.RedisDb
 	dialerId = defconfiguration.DialerId
 	campaignLimit = defconfiguration.CampaignLimit
-	hostIpAddress = defconfiguration.HostIpAddress
+	lbIpAddress = defconfiguration.LbIpAddress
+	lbPort = defconfiguration.LbPort
 	port = defconfiguration.Port
 	campaignRequestFrequency = defconfiguration.CampaignRequestFrequency
 	campaignServiceHost = defconfiguration.CampaignServiceHost
@@ -137,7 +140,8 @@ func LoadConfiguration() {
 		redisDb, converr = strconv.Atoi(os.Getenv(envconfiguration.RedisDb))
 		dialerId = os.Getenv(envconfiguration.DialerId)
 		campaignLimit, converr = strconv.Atoi(os.Getenv(envconfiguration.CampaignLimit))
-		hostIpAddress = os.Getenv(envconfiguration.HostIpAddress)
+		lbIpAddress = os.Getenv(envconfiguration.LbIpAddress)
+		lbPort = os.Getenv(envconfiguration.LbPort)
 		port = os.Getenv(envconfiguration.Port)
 		campaignRequestFrequencytemp := os.Getenv(envconfiguration.CampaignRequestFrequency)
 		campaignServiceHost = os.Getenv(envconfiguration.CampaignServiceHost)
@@ -170,8 +174,11 @@ func LoadConfiguration() {
 		if campaignLimit == 0 || converr != nil {
 			campaignLimit = defConfig.CampaignLimit
 		}
-		if hostIpAddress == "" {
-			hostIpAddress = defConfig.HostIpAddress
+		if lbIpAddress == "" {
+			lbIpAddress = defConfig.LbIpAddress
+		}
+		if lbPort == "" {
+			lbPort = defConfig.LbPort
 		}
 		if port == "" {
 			port = defConfig.Port

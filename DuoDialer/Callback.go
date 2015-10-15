@@ -18,7 +18,7 @@ func RequestCampaignCallbackConfig(tenant, company, configureId int) ([]Campaign
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s:%s/DVP/API/6.0/CampaignManager/Campaign/Configuration/%d/all", campaignServiceHost, campaignServicePort, configureId)
+	request := fmt.Sprintf("http://%s/DVP/API/6.0/CampaignManager/Campaign/Configuration/%d/all", CreateHost(campaignServiceHost, campaignServicePort), configureId)
 	fmt.Println("Start RequestCampaignCallbackConfig request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)
@@ -65,7 +65,7 @@ func UploadCallbackInfo(company, tenant int, callbackTime time.Time, cbClass, cb
 
 	jsonData, _ := json.Marshal(callback)
 
-	serviceurl := fmt.Sprintf("http://%s:%s/CallbackServerSelfHost/Callback/AddCallback", callbackServerHost, callbackServerPort)
+	serviceurl := fmt.Sprintf("http://%s/CallbackServerSelfHost/Callback/AddCallback", CreateHost(callbackServerHost, callbackServerPort))
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
@@ -194,7 +194,7 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber
 							callbackObj.ContactId = phoneNumber
 							callbackObj.DialoutTime = callbackTime
 
-							dialerAPIUrl := fmt.Sprintf("http://%s:%s", hostIpAddress, port)
+							dialerAPIUrl := fmt.Sprintf("http://%s", CreateHost(lbIpAddress, lbPort))
 							path := fmt.Sprintf("DVP/DialerAPI/ResumeCallback")
 
 							u, _ := url.Parse(dialerAPIUrl)

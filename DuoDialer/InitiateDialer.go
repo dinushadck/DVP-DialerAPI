@@ -15,10 +15,10 @@ func InitiateDuoDialer() {
 func AddDialerInfoToRedis() {
 	dialerInfo := DialerInfo{}
 	dialerInfo.DialerId = dialerId
-	dialerInfo.HostIpAddress = hostIpAddress
+	dialerInfo.HostIpAddress = lbIpAddress
 	dialerInfo.CampaignLimit = campaignLimit
 
-	dialerKey := fmt.Sprintf("DialerInfo:%s:%s", hostIpAddress, dialerId)
+	dialerKey := fmt.Sprintf("DialerInfo:%s:%s", lbIpAddress, dialerId)
 	dialerInfoJson, _ := json.Marshal(dialerInfo)
 	result := RedisAdd(dialerKey, string(dialerInfoJson))
 	fmt.Println("Add DialerInfo to Redis: ", result)

@@ -15,7 +15,7 @@ func AddRequestServer() {
 			fmt.Println("Recovered in AddRequestServer", r)
 		}
 	}()
-	dialerAPIUrl := fmt.Sprintf("http://%s:%s", hostIpAddress, port)
+	dialerAPIUrl := fmt.Sprintf("http://%s", CreateHost(lbIpAddress, lbPort))
 	path := fmt.Sprintf("DVP/DialerAPI/ArdsCallback")
 
 	u, _ := url.Parse(dialerAPIUrl)
@@ -33,7 +33,7 @@ func AddRequestServer() {
 
 	jsonData, _ := json.Marshal(reqServer)
 
-	serviceurl := fmt.Sprintf("http://%s:%s/DVP/API/1.0.0.0/ARDS/requestserver", ardsServiceHost, ardsServicePort)
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/requestserver", CreateHost(ardsServiceHost, ardsServicePort))
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
 	fmt.Println("request:", serviceurl)
@@ -78,7 +78,7 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 	jsonData, _ := json.Marshal(ardsReq)
 
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
-	serviceurl := fmt.Sprintf("http://%s:%s/DVP/API/1.0.0.0/ARDS/request", ardsServiceHost, ardsServicePort)
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request", CreateHost(ardsServiceHost, ardsServicePort))
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", authToken)
@@ -106,7 +106,7 @@ func RemoveRequest(company, tenant int, sessionId string) {
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s:%s/DVP/API/1.0.0.0/ARDS/request/%s", ardsServiceHost, ardsServicePort, sessionId)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request/%s", CreateHost(ardsServiceHost, ardsServicePort), sessionId)
 	fmt.Println("Start RemoveRequest: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)

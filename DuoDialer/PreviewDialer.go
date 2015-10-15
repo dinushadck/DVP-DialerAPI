@@ -63,13 +63,13 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	pushD.To = resourceInfo.ResourceInfo.ResourceId
 	pushD.Direction = "BY"
 	pushD.message = reqOData.PreviewData
-	pushD.clbk = fmt.Sprintf("http://%s:%s/DialerAPI/PreviewCallBack", hostIpAddress, port)
+	pushD.clbk = fmt.Sprintf("http://%s/DialerAPI/PreviewCallBack", CreateHost(lbIpAddress, lbPort))
 	pushD.Ref = refDataStr
 
 	jsonData, _ := json.Marshal(pushD)
 
 	authToken := fmt.Sprintf("%d#%d", resourceInfo.Tenant, resourceInfo.Company)
-	serviceurl := fmt.Sprintf("http://%s:%s/DVP/API/6.0/NotificationService/Notification/initiate", notificationServiceHost, notificationServicePort)
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/6.0/NotificationService/Notification/initiate", CreateHost(notificationServiceHost, notificationServicePort))
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("authorization", authToken)

@@ -15,7 +15,7 @@ func RegisterCallServer(serverId string) CallServerInfo {
 	cs := CallServerInfo{}
 	cs.CallServerId = "2"
 	cs.MaxChannelCount = 60
-	cs.Url = fmt.Sprintf("%s:%s", callServerHost, callServerPort)
+	cs.Url = fmt.Sprintf("%s", CreateHost(callServerHost, callServerPort))
 
 	callServerKey := fmt.Sprintf("CallServer:%s", cs.CallServerId)
 	callServerjson, _ := json.Marshal(cs)
