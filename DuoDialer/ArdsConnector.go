@@ -97,13 +97,13 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 	return resp, err
 }
 
-func RemoveRequest(company, tenant int, sessionId string) {
+func RemoveRequest(company, tenant, sessionId string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in AddRequest", r)
 		}
 	}()
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
+	authToken := fmt.Sprintf("%s#%s", tenant, company)
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request/%s", CreateHost(ardsServiceHost, ardsServicePort), sessionId)

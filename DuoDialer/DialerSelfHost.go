@@ -124,7 +124,7 @@ func (dvp DVP) Dial(AniNumber, DnisNumber, Extention, CallserverId string) bool 
 func (dvp DVP) ArdsCallback(ardsCallbackInfo ArdsCallbackInfo) {
 	log := fmt.Sprintf("Start ArdsCallback :%s ", ardsCallbackInfo)
 	fmt.Println(log)
-
+	go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
 	SendPreviewDataToAgent(ardsCallbackInfo)
 	return
 }
