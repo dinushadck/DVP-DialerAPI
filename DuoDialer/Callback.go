@@ -18,7 +18,7 @@ func RequestCampaignCallbackConfig(tenant, company, configureId int) ([]Campaign
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s/DVP/API/6.0/CampaignManager/Campaign/Configuration/%d/all", CreateHost(campaignServiceHost, campaignServicePort), configureId)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/Configuration/%d/all", CreateHost(campaignServiceHost, campaignServicePort), configureId)
 	fmt.Println("Start RequestCampaignCallbackConfig request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)

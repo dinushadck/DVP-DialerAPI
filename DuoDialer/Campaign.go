@@ -174,7 +174,7 @@ func RequestCampaign(requestCount int) []Campaign {
 
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s/DVP/API/6.0/CampaignManager/Campaigns/State/Pending/%d", CreateHost(campaignServiceHost, campaignServicePort), requestCount)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaigns/State/Pending/%d", CreateHost(campaignServiceHost, campaignServicePort), requestCount)
 	fmt.Println("Start RequestCampaign request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", "")
@@ -204,7 +204,7 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 	client := &http.Client{}
 
 	currentState := GetCampaignStatus(campaignId, company, tenant)
-	request := fmt.Sprintf("http://%s/DVP/API/6.0/CampaignManager/Campaign/%s/Operations/State/%s/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId, currentState)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/State/%s/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId, currentState)
 	fmt.Println("Start UpdateCampaignStatus request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Add("Authorization", authToken)
@@ -257,7 +257,7 @@ func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 
 	jsonData, _ := json.Marshal(state)
 
-	serviceurl := fmt.Sprintf("http://%s/DVP/API/6.0/CampaignManager/Campaign/Operations", CreateHost(campaignServiceHost, campaignServicePort))
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/Operations", CreateHost(campaignServiceHost, campaignServicePort))
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")

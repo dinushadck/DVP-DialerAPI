@@ -33,7 +33,7 @@ func GetTrunkCode(authToken, ani, dnis string) (trunkCode, rAni, rDnis string) {
 	fmt.Println("Start GetTrunkCode: ", authToken, ": ", ani, ": ", dnis)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s/DVP/API/6.0/CallRuleApi/CallRule/Outbound/ANI/%s/DNIS/%s", CreateHost(callRuleServiceHost, callRuleServicePort), ani, dnis)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CallRuleApi/CallRule/Outbound/ANI/%s/DNIS/%s", CreateHost(callRuleServiceHost, callRuleServicePort), ani, dnis)
 	//request := fmt.Sprintf("%s?ANI=%s&DNIS=%s", callRuleService, ani, dnis)
 	fmt.Println("Start GetTrunkCode request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)

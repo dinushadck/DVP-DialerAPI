@@ -104,7 +104,7 @@ func UploadSessionInfoToCampaignManager(sessionInfo map[string]string) {
 	text := string(sessionb)
 	fmt.Println(text)
 	//upload to campaign service
-	serviceurl := fmt.Sprintf("http://%s/DVP/API/6.0/CampaignManager/Campaign/Session", CreateHost(campaignServiceHost, campaignServicePort))
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/Session", CreateHost(campaignServiceHost, campaignServicePort))
 	authToken := fmt.Sprintf("%s#%s", sessionInfo["TenantId"], sessionInfo["CompanyId"])
 
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(sessionb))
