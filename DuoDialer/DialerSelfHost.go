@@ -139,7 +139,7 @@ func (dvp DVP) PreviewCallBack(receivedata ReceiveData) {
 	var reqOData PreviewRequestOtherData
 	json.Unmarshal([]byte(refData.OtherInfo), &reqOData)
 
-	if receivedata.reply.message == "ACCEPT" {
+	if receivedata.reply.message == "ACCEPTED" {
 		DialPreviewNumber(refData.ResourceInfo.Extention, refData.Company, refData.Tenant, reqOData.CampaignId, refData.Class, refData.Type, refData.Category, refData.SessionID, refData.ResourceInfo.ResourceId, refData.ResourceInfo.DialHostName)
 	} else {
 		RejectPreviewNumber(reqOData.CampaignId, refData.SessionID, "AgentRejected")

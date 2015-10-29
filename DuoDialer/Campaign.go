@@ -257,7 +257,7 @@ func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 
 	jsonData, _ := json.Marshal(state)
 
-	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/Operations", CreateHost(campaignServiceHost, campaignServicePort))
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId)
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")

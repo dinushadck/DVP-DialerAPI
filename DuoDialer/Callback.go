@@ -46,7 +46,7 @@ func RequestCampaignCallbackConfig(tenant, company, configureId int) ([]Campaign
 }
 
 //----------CallbackServer Self Host-----------------------
-func UploadCallbackInfo(company, tenant int, callbackTime time.Time, cbClass, cbType, cbCategory, cbUrl, cbObj string) {
+func UploadCallbackInfo(company, tenant int, callbackTime time.Time, campaignId, cbClass, cbType, cbCategory, cbUrl, cbObj string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in UploadCallbackInfo", r)
@@ -62,6 +62,7 @@ func UploadCallbackInfo(company, tenant int, callbackTime time.Time, cbClass, cb
 	callback.DialoutTime = callbackTime
 	callback.CallbackUrl = cbUrl
 	callback.CallbackObj = cbObj
+	callback.CampaignId = campaignId
 
 	jsonData, _ := json.Marshal(callback)
 
@@ -204,7 +205,7 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber
 							cbUrl := u.String()
 
 							jsonData, _ := json.Marshal(callbackObj)
-							go UploadCallbackInfo(_company, _tenant, callbackTimeUTC, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+							go UploadCallbackInfo(_company, _tenant, callbackTimeUTC, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
 						}
 					}
 				}

@@ -21,6 +21,9 @@ func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campa
 
 	//get attribute info from redis ** after put data stucture to cam service
 	attributeInfo := make([]string, 0)
+
+	attributeInfo = RequestCampaignAttributeInfo(company, tenant, campaignId)
+
 	reqOtherData := PreviewRequestOtherData{}
 	reqOtherData.CampaignId = campaignId
 	reqOtherData.PreviewData = numExtraData
@@ -69,7 +72,7 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	jsonData, _ := json.Marshal(pushD)
 
 	authToken := fmt.Sprintf("%d#%d", resourceInfo.Tenant, resourceInfo.Company)
-	serviceurl := fmt.Sprintf("http://%s/DVP/API/6.0/NotificationService/Notification/initiate", CreateHost(notificationServiceHost, notificationServicePort))
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/NotificationService/Notification/initiate", CreateHost(notificationServiceHost, notificationServicePort))
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("authorization", authToken)
@@ -124,4 +127,41 @@ func RejectPreviewNumber(campaignId, sessionId, rejectReason string) {
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")
 		go UploadSessionInfo(campaignId, sessionId)
 	}
+}
+
+//-----------------------------------CampaignManager Service-------------------------------------------------
+
+func RequestCampaignAttributeInfo(company, tenant int, campaignId string) []string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RequestCampaignAttributeInfo", r)
+		}
+	}()
+	//Request campaign from Campaign Manager service
+	attributeDetails := make([]string, 0)
+	authToken := fmt.Sprintf("%d#%d", tenant, company)
+
+	client := &http.Client{}
+
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/AdditinalData/PREVIEW/ARDS/ATTRIBUTE", CreateHost(campaignServiceHost, campaignServicePort), campaignId)
+	fmt.Println("Start RequestCampaign request: ", request)
+	req, _ := http.NewRequest("GET", request, nil)
+	req.Header.Add("Authorization", authToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+		return attributeDetails
+	}
+	defer resp.Body.Close()
+
+	response, _ := ioutil.ReadAll(resp.Body)
+
+	var campaignAdditionalDataResult CampaignAdditionalDataResult
+	json.Unmarshal(response, &campaignAdditionalDataResult)
+	if campaignAdditionalDataResult.IsSuccess == true {
+		for _, camAddiRes := range campaignAdditionalDataResult.Result.AdditionalData {
+			attributeDetails = append(attributeDetails, camAddiRes)
+		}
+	}
+	return attributeDetails
 }

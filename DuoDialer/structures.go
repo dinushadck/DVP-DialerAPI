@@ -118,6 +118,7 @@ type CampaignCallback struct {
 	DialoutTime time.Time
 	CallbackUrl string
 	CallbackObj string
+	CampaignId  string
 }
 
 type CampaignCallbackObj struct {
@@ -183,6 +184,19 @@ type CampaignStatusResult struct {
 	CustomMessage string
 	IsSuccess     bool
 	Result        CampaignState
+}
+
+type CampaignAdditionalData struct {
+	Class          string
+	Type           string
+	Category       string
+	AdditionalData []string
+}
+
+type CampaignAdditionalDataResult struct {
+	CustomMessage string
+	IsSuccess     bool
+	Result        CampaignAdditionalData
 }
 
 //--------------------Dialer--------------------
