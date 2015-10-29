@@ -26,7 +26,7 @@ func AddRequestServer() {
 
 	var reqServer = RequestServer{}
 	reqServer.ServerID = dialerId
-	reqServer.Class = "CALLSERVER"
+	reqServer.Class = "DIALER"
 	reqServer.Type = "ARDS"
 	reqServer.Category = "CALL"
 	reqServer.CallbackUrl = cbUrl
@@ -67,7 +67,7 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 
 	var ardsReq = Request{}
 	ardsReq.SessionId = uuid
-	ardsReq.Class = "CALLSERVER"
+	ardsReq.Class = "DIALER"
 	ardsReq.Type = "ARDS"
 	ardsReq.Category = "CALL"
 	ardsReq.Priority = "L"

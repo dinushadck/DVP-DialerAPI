@@ -19,6 +19,7 @@ func main() {
 	InitiateDuoDialer()
 
 	go InitiateService()
+	go AddRequestServer()
 
 	//AddPhoneNumberToCallback("1", "1", "1", "1", "0112546969", "USER_BUSY")
 	for {
