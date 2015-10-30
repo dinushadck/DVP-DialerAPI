@@ -339,10 +339,10 @@ type PushData struct {
 
 type ReplyData struct {
 	Tkey    string
-	message string
+	Message string
 }
 
 type ReceiveData struct {
-	reply ReplyData
-	ref   string
+	Reply ReplyData
+	Ref   string
 }

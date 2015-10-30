@@ -14,13 +14,13 @@ type DVP struct {
 	incrMaxChannelLimit    gorest.EndPoint `method:"POST" path:"/DialerAPI/IncrMaxChannelLimit/" postdata:"string"`
 	decrMaxChannelLimit    gorest.EndPoint `method:"POST" path:"/DialerAPI/DecrMaxChannelLimit/" postdata:"string"`
 	setMaxChannelLimit     gorest.EndPoint `method:"POST" path:"/DialerAPI/SetMaxChannelLimit/" postdata:"string"`
+	previewCallBack        gorest.EndPoint `method:"POST" path:"/DialerAPI/PreviewCallBack/" postdata:"ReceiveData"`
+	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CampaignCallbackObj"`
 	getTotalDialCount      gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalDialCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
-	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CampaignCallbackObj"`
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
 	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ContactNumber:string}" output:"bool"`
 	ardsCallback           gorest.EndPoint `method:"GET" path:"/DialerAPI/ArdsCallback/" output:"string"`
-	previewCallBack        gorest.EndPoint `method:"POST" path:"/DialerAPI/PreviewCallBack/" postdata:"ReceiveData"`
 }
 
 func (dvp DVP) IncrMaxChannelLimit(campaignId string) {
@@ -136,21 +136,21 @@ func (dvp DVP) ArdsCallback() string {
 	return ""
 }
 
-func (dvp DVP) PreviewCallBack(receivedata ReceiveData) {
-	log := fmt.Sprintf("Start PreviewCallBack Ref:%s ", receivedata.ref)
-	log1 := fmt.Sprintf("Start PreviewCallBack TKey:%s ", receivedata.reply.Tkey)
-	log2 := fmt.Sprintf("Start PreviewCallBack Message:%s ", receivedata.reply.message)
+func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
+	log := fmt.Sprintf("Start PreviewCallBack Ref:%s ", rdata.Ref)
+	log1 := fmt.Sprintf("Start PreviewCallBack TKey:%s ", rdata.Reply.Tkey)
+	log2 := fmt.Sprintf("Start PreviewCallBack Message:%s ", rdata.Reply.Message)
 	fmt.Println(log)
 	fmt.Println(log1)
 	fmt.Println(log2)
 
 	var refData ArdsCallbackInfo
-	json.Unmarshal([]byte(receivedata.ref), &refData)
+	json.Unmarshal([]byte(rdata.Ref), &refData)
 
 	var reqOData PreviewRequestOtherData
 	json.Unmarshal([]byte(refData.OtherInfo), &reqOData)
 
-	if receivedata.reply.message == "ACCEPTED" {
+	if rdata.Reply.Message == "ACCEPTED" {
 		DialPreviewNumber(refData.ResourceInfo.Extention, refData.Company, refData.Tenant, reqOData.CampaignId, refData.Class, refData.Type, refData.Category, refData.SessionID, refData.ResourceInfo.ResourceId, refData.ResourceInfo.DialHostName)
 	} else {
 		RejectPreviewNumber(reqOData.CampaignId, refData.SessionID, "AgentRejected")
