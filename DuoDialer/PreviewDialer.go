@@ -159,9 +159,9 @@ func RequestCampaignAttributeInfo(company, tenant int, campaignId string) []stri
 	var campaignAdditionalDataResult CampaignAdditionalDataResult
 	json.Unmarshal(response, &campaignAdditionalDataResult)
 	if campaignAdditionalDataResult.IsSuccess == true {
-		for _, camAddiRes := range campaignAdditionalDataResult.Result.AdditionalData {
-			attributeDetails = append(attributeDetails, camAddiRes)
-		}
+		var attInfo []string
+		json.Unmarshal([]byte(campaignAdditionalDataResult.Result.AdditionalData), &attInfo)
+		attributeDetails = attInfo
 	}
 	return attributeDetails
 }

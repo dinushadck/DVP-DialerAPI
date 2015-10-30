@@ -83,7 +83,7 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", authToken)
 	fmt.Println("request:", serviceurl)
-	fmt.Println(jsonData)
+	fmt.Println(string(jsonData))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

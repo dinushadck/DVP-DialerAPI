@@ -190,7 +190,7 @@ type CampaignAdditionalData struct {
 	Class          string
 	Type           string
 	Category       string
-	AdditionalData []string
+	AdditionalData string
 }
 
 type CampaignAdditionalDataResult struct {
