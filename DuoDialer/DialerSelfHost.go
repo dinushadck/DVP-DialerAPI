@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/gorest"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -18,7 +19,7 @@ type DVP struct {
 	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CampaignCallbackObj"`
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
 	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ContactNumber:string}" output:"bool"`
-	ardsCallback           gorest.EndPoint `method:"POST" path:"/DialerAPI/ArdsCallback/" postdata:"ArdsCallbackInfo"`
+	ardsCallback           gorest.EndPoint `method:"GET" path:"/DialerAPI/ArdsCallback/" output:"string"`
 	previewCallBack        gorest.EndPoint `method:"POST" path:"/DialerAPI/PreviewCallBack/" postdata:"ReceiveData"`
 }
 
@@ -121,12 +122,18 @@ func (dvp DVP) Dial(AniNumber, DnisNumber, Extention, CallserverId string) bool 
 	return false
 }
 
-func (dvp DVP) ArdsCallback(ardsCallbackInfo ArdsCallbackInfo) {
-	log := fmt.Sprintf("Start ArdsCallback :%s ", ardsCallbackInfo)
+func (dvp DVP) ArdsCallback() string {
+	fmt.Println("---------------Start ArdsCallback---------")
+	jResult, _ := url.QueryUnescape(dvp.Context.Request().URL.RawQuery)
+	log := fmt.Sprintf("Start ArdsCallback :%s ", jResult)
 	fmt.Println(log)
+
+	var ardsCallbackInfo ArdsCallbackInfo
+	json.Unmarshal([]byte(jResult), &ardsCallbackInfo)
+
 	go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
 	SendPreviewDataToAgent(ardsCallbackInfo)
-	return
+	return ""
 }
 
 func (dvp DVP) PreviewCallBack(receivedata ReceiveData) {

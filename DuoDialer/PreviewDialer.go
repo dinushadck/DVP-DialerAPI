@@ -77,7 +77,7 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("authorization", authToken)
 	fmt.Println("request:", serviceurl)
-	fmt.Println(jsonData)
+	fmt.Println(string(jsonData))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
