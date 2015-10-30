@@ -137,8 +137,12 @@ func (dvp DVP) ArdsCallback() string {
 }
 
 func (dvp DVP) PreviewCallBack(receivedata ReceiveData) {
-	log := fmt.Sprintf("Start PreviewCallBack :%s ", receivedata)
+	log := fmt.Sprintf("Start PreviewCallBack Ref:%s ", receivedata.ref)
+	log1 := fmt.Sprintf("Start PreviewCallBack TKey:%s ", receivedata.reply.Tkey)
+	log2 := fmt.Sprintf("Start PreviewCallBack Message:%s ", receivedata.reply.message)
 	fmt.Println(log)
+	fmt.Println(log1)
+	fmt.Println(log2)
 
 	var refData ArdsCallbackInfo
 	json.Unmarshal([]byte(receivedata.ref), &refData)
