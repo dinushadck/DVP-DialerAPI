@@ -13,7 +13,7 @@ func RegisterCallServer(serverId string) CallServerInfo {
 	}
 	//Get CallServer info
 	cs := CallServerInfo{}
-	cs.CallServerId = "2"
+	cs.CallServerId = "3"
 	cs.MaxChannelCount = 60
 	cs.Url = fmt.Sprintf("%s", CreateHost(callServerHost, callServerPort))
 
