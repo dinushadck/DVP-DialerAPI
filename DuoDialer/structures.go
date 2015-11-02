@@ -329,6 +329,12 @@ type ArdsCallbackInfo struct {
 	ResourceInfo ResourceDetails
 }
 
+type ArdsResSlot struct {
+	ReqCategory string
+	State       string
+	OtherInfo   string
+}
+
 //--------------------Notification--------------------
 type PushData struct {
 	From      string

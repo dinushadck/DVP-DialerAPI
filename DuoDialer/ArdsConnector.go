@@ -125,3 +125,39 @@ func RemoveRequest(company, tenant, sessionId string) {
 
 	fmt.Println(string(response))
 }
+
+func ClearResourceSlotWhenReject(company, tenant, reqCategory, resId, sessionId string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in ClearResourceSlotWhenReject", r)
+		}
+	}()
+
+	var ardsResSlot = ArdsResSlot{}
+	ardsResSlot.ReqCategory = reqCategory
+	ardsResSlot.State = "Available"
+	ardsResSlot.OtherInfo = "Reject"
+
+	jsonData, _ := json.Marshal(ardsResSlot)
+
+	authToken := fmt.Sprintf("%s#%s", tenant, company)
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/resource/%s/concurrencyslot/session/%s", CreateHost(ardsServiceHost, ardsServicePort), resId, sessionId)
+	req, err := http.NewRequest("PUT", serviceurl, bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Authorization", authToken)
+	fmt.Println("request:", serviceurl)
+	fmt.Println(string(jsonData))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	response, _ := ioutil.ReadAll(resp.Body)
+	result := string(response)
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	fmt.Println("response Body:", result)
+	defer resp.Body.Close()
+}

@@ -57,9 +57,10 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 
 	refData, _ := json.Marshal(resourceInfo)
 	refDataStr := string(refData)
+	campaignId := reqOData.CampaignId
 
 	pushD := PushData{}
-	pushD.From = "Campaign"
+	pushD.From = campaignId
 	pushD.To = resourceInfo.ResourceInfo.ResourceId
 	pushD.Direction = "BY"
 	pushD.Message = reqOData.PreviewData
@@ -87,6 +88,8 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	fmt.Println("response Headers:", resp.Header)
 
 	//if done update Session ExpireTime
+	SetSessionInfo(campaignId, resourceInfo.SessionID, "Resource", resourceInfo.ResourceInfo.ResourceId)
+	SetSessionInfo(campaignId, resourceInfo.SessionID, "ArdsCategory", resourceInfo.Category)
 }
 
 func DialPreviewNumber(contactName, domain, contactType, resourceId, company, tenant, campaignId, ardsClass, ardsType, ardsCategory, sessionId string) {
@@ -128,12 +131,12 @@ func DialPreviewNumber(contactName, domain, contactType, resourceId, company, te
 			HandleDialResponse(resp, err, callServer, campaignId, sessionId)
 		} else {
 			SetSessionInfo(campaignId, sessionId, "Reason", "Invalied ContactType")
-			RejectPreviewNumber(campaignId, sessionId, "Invalied ContactType")
+			RejectPreviewNumber(company, tenant, campaignId, sessionId, ardsCategory, resourceId, "Invalied ContactType")
 		}
 	}
 }
 
-func RejectPreviewNumber(campaignId, sessionId, rejectReason string) {
+func RejectPreviewNumber(company, tenant, campaignId, sessionId, ardsCategory, resourceId, rejectReason string) {
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	if RedisCheckKeyExist(sessionInfoKey) {
 		callServerId := RedisHashGetField(sessionInfoKey, "ServerId")
@@ -142,6 +145,7 @@ func RejectPreviewNumber(campaignId, sessionId, rejectReason string) {
 		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
 		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")
+		ClearResourceSlotWhenReject(company, tenant, ardsCategory, resourceId, sessionId)
 		go UploadSessionInfo(campaignId, sessionId)
 	}
 }

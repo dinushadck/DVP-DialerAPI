@@ -157,7 +157,7 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 		DialPreviewNumber(refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.Class, refData.Type, refData.Category, refData.SessionID)
 	} else {
 		fmt.Println("Start Reject Priview Number")
-		RejectPreviewNumber(reqOData.CampaignId, refData.SessionID, "AgentRejected")
+		RejectPreviewNumber(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.Category, refData.ResourceInfo.ResourceId, "AgentRejected")
 	}
 	return
 }

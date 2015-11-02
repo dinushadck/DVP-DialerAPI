@@ -60,20 +60,31 @@ func ClearTimeoutChannels(campaignId string) {
 	tn := time.Now()
 	for _, session := range ongoingSessions {
 		sessionInfo := RedisHashGetAll(session)
+		company := sessionInfo["CompanyId"]
+		tenant := sessionInfo["TenantId"]
 		dtime := sessionInfo["Dialtime"]
 		ctime := sessionInfo["ChannelCreatetime"]
 		atime := sessionInfo["ChannelAnswertime"]
 		sid := sessionInfo["ServerId"]
 		cid := sessionInfo["CampaignId"]
 		sessionid := sessionInfo["SessionId"]
+		category := sessionInfo["Category"]
+		resourceId := sessionInfo["Resource"]
+		ardsCategory := sessionInfo["ArdsCategory"]
 
 		dtt, _ := time.Parse(layout4, dtime)
 		ctt, _ := time.Parse(layout4, ctime)
 		if ctime == "" && tn.Sub(dtt).Seconds() > 240 {
+			if category == "PreviewDial" && resourceId != "" && ardsCategory != "" {
+				go ClearResourceSlotWhenReject(company, tenant, ardsCategory, resourceId, sessionid)
+			}
 			DecrConcurrentChannelCount(sid, cid)
 			SetSessionInfo(cid, sessionid, "reason", "ChannelCreate timeout")
 			go UploadSessionInfo(cid, sessionid)
 		} else if atime == "" && ctime != "" && tn.Sub(ctt).Seconds() > 240 {
+			if category == "PreviewDial" && resourceId != "" && ardsCategory != "" {
+				go ClearResourceSlotWhenReject(company, tenant, ardsCategory, resourceId, sessionid)
+			}
 			DecrConcurrentChannelCount(sid, cid)
 			SetSessionInfo(cid, sessionid, "reason", "ChannelAnswer timeout")
 			go UploadSessionInfo(cid, sessionid)
@@ -96,6 +107,11 @@ func GetPhoneNumberAndTryCount(campaignId, sessionId string) (string, int) {
 
 //----------------Campaign Manager Service------------------------
 func UploadSessionInfoToCampaignManager(sessionInfo map[string]string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in UploadSessionInfoToCampaignManager", r)
+		}
+	}()
 	sessionb, err := json.Marshal(sessionInfo)
 	if err != nil {
 		fmt.Println(err)
