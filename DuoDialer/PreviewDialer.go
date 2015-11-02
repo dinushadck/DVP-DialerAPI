@@ -103,7 +103,7 @@ func DialPreviewNumber(contactName, domain, contactType, resourceId, company, te
 		fmt.Println("Start DialPreviewNumber: ", sessionId, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 		customCompanyStr := fmt.Sprintf("%s_%s", company, tenant)
 		param := fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, fromNumber)
-		furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
+		furl := fmt.Sprintf("sofia/gateway/%s/%s ", trunkCode, phoneNumber)
 		var data string
 		var dial bool
 		if contactType == "PRIVATE" {
