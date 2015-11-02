@@ -9,6 +9,11 @@ import (
 )
 
 func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camScheduleId string) []string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in GetNumbersFromNumberBase", r)
+		}
+	}()
 	numbers := make([]string, 0)
 	pageKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	pageNumberToRequest := RedisIncr(pageKey)

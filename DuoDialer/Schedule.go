@@ -10,6 +10,11 @@ import (
 )
 
 func GetAppoinmentsForSchedule(authToken, schedulrId string) []Appoinment {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in GetAppoinmentsForSchedule", r)
+		}
+	}()
 	fmt.Println("Start Get Schedule Schedule service")
 	client := &http.Client{}
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/LimitAPI/Schedule/%s/Appointments", CreateHost(scheduleServiceHost, scheduleServicePort), schedulrId)

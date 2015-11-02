@@ -198,6 +198,11 @@ func RequestCampaign(requestCount int) []Campaign {
 }
 
 func UpdateCampaignStatus(company, tenant int, campaignId string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in UpdateCampaignStatus", r)
+		}
+	}()
 	//Send CampaignStatus to Campaign Manager
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	fmt.Println("Start UpdateCampaignStatus Auth: ", authToken, " CampaignId: ", campaignId, " DialerId: ", dialerId)
@@ -249,6 +254,11 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 }
 
 func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in UpdateCampaignStartStatus", r)
+		}
+	}()
 	//Send CampaignStatus to Campaign Manager
 	state := CampaignStart{}
 	camIdInt, _ := strconv.Atoi(campaignId)

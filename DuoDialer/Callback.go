@@ -13,6 +13,11 @@ import (
 
 //----------Campaign Manager Service-----------------------
 func RequestCampaignCallbackConfig(tenant, company, configureId int) ([]CampaignCallbackInfo, bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RequestCampaignCallbackConfig", r)
+		}
+	}()
 	//Request campaign from Campaign Manager service
 	campaignCallbackInfo := make([]CampaignCallbackInfo, 0)
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
