@@ -312,9 +312,10 @@ type ArdsResult struct {
 }
 
 type ResourceDetails struct {
-	Extention    int
-	DialHostName string
-	ResourceId   string
+	ContactName string
+	Domain      string
+	ContactType string
+	ResourceId  string
 }
 
 type ArdsCallbackInfo struct {

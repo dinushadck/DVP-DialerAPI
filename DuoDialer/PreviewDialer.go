@@ -38,13 +38,9 @@ func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campa
 		fmt.Println(err.Error())
 	}
 
-	if resp != nil {
-		response, _ := ioutil.ReadAll(resp.Body)
-		result := string(response)
-		fmt.Println("response Body:", result)
-
+	if resp != "" {
 		var ardsRes = ArdsResult{}
-		json.Unmarshal(response, &ardsRes)
+		json.Unmarshal([]byte(resp), &ardsRes)
 		if ardsRes.IsSuccess == false {
 			DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
 			SetSessionInfo(campaignId, uuid, "Reason", ardsRes.CustomMessage)
@@ -92,7 +88,7 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	//if done update Session ExpireTime
 }
 
-func DialPreviewNumber(agentExtension int, company, tenant, campaignId, ardsClass, ardsType, ardsCategory, sessionId, resourceId, domain string) {
+func DialPreviewNumber(contactName, domain, contactType, resourceId, company, tenant, campaignId, ardsClass, ardsType, ardsCategory, sessionId string) {
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	if RedisCheckKeyExist(sessionInfoKey) {
 		sessionInfo := RedisHashGetAll(sessionInfoKey)
@@ -108,11 +104,31 @@ func DialPreviewNumber(agentExtension int, company, tenant, campaignId, ardsClas
 		customCompanyStr := fmt.Sprintf("%s_%s", company, tenant)
 		param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, fromNumber)
 		furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
-		data := fmt.Sprintf(" &bridge({ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}user/%d@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, agentExtension, domain)
-		SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
+		var data string
+		var dial bool
+		if contactType == "PRIVATE" {
+			dial = true
+			data = fmt.Sprintf(" &bridge({ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}user/%s@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, contactName, domain)
+		} else if contactType == "PUBLIC" {
+			dial = true
+			data = fmt.Sprintf(" &bridge({ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}sofia/external/%s@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, contactName, domain)
+		} else if contactType == "TRUNK" {
+			dial = true
+			data = fmt.Sprintf(" &bridge({ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}sofia/gateway/%s/%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, domain, contactName)
+		} else {
+			dial = false
+			fmt.Println("Invalied ContactType")
+		}
 
-		resp, err := Dial(callServer.Url, param, furl, data)
-		HandleDialResponse(resp, err, callServer, campaignId, sessionId)
+		if dial == true {
+			SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
+
+			resp, err := Dial(callServer.Url, param, furl, data)
+			HandleDialResponse(resp, err, callServer, campaignId, sessionId)
+		} else {
+			SetSessionInfo(campaignId, sessionId, "Reason", "Invalied ContactType")
+			RejectPreviewNumber(campaignId, sessionId, "Invalied ContactType")
+		}
 	}
 }
 

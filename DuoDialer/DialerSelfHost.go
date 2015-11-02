@@ -151,8 +151,12 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 	json.Unmarshal([]byte(refData.OtherInfo), &reqOData)
 
 	if rdata.Reply.Message == "ACCEPTED" {
-		DialPreviewNumber(refData.ResourceInfo.Extention, refData.Company, refData.Tenant, reqOData.CampaignId, refData.Class, refData.Type, refData.Category, refData.SessionID, refData.ResourceInfo.ResourceId, refData.ResourceInfo.DialHostName)
+		fmt.Println("Start Dial Priview Number")
+		log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: Class: %s :: Type: %s :: Category: %s :: SessionId: %s", refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.Class, refData.Type, refData.Category, refData.SessionID)
+		fmt.Println(log3)
+		DialPreviewNumber(refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.Class, refData.Type, refData.Category, refData.SessionID)
 	} else {
+		fmt.Println("Start Reject Priview Number")
 		RejectPreviewNumber(reqOData.CampaignId, refData.SessionID, "AgentRejected")
 	}
 	return

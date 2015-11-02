@@ -58,7 +58,7 @@ func AddRequestServer() {
 
 }
 
-func AddRequest(company, tenant int, uuid, otherData string, attributes []string) (*http.Response, error) {
+func AddRequest(company, tenant int, uuid, otherData string, attributes []string) (string, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in AddRequest", r)
@@ -90,11 +90,16 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+	response, _ := ioutil.ReadAll(resp.Body)
+	result := string(response)
+	fmt.Println("response Body:", result)
+
 	defer resp.Body.Close()
 
 	fmt.Println("response Status:", resp.Status)
 	fmt.Println("response Headers:", resp.Header)
-	return resp, err
+	return result, err
 }
 
 func RemoveRequest(company, tenant, sessionId string) {
