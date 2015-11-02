@@ -102,19 +102,19 @@ func DialPreviewNumber(contactName, domain, contactType, resourceId, company, te
 
 		fmt.Println("Start DialPreviewNumber: ", sessionId, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 		customCompanyStr := fmt.Sprintf("%s_%s", company, tenant)
-		param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, fromNumber)
+		param := fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, fromNumber)
 		furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
 		var data string
 		var dial bool
 		if contactType == "PRIVATE" {
 			dial = true
-			data = fmt.Sprintf(" &bridge({ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}user/%s@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, contactName, domain)
+			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}user/%s@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, contactName, domain)
 		} else if contactType == "PUBLIC" {
 			dial = true
-			data = fmt.Sprintf(" &bridge({ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}sofia/external/%s@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, contactName, domain)
+			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PUBLIC_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}sofia/external/%s@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, contactName, domain)
 		} else if contactType == "TRUNK" {
 			dial = true
-			data = fmt.Sprintf(" &bridge({ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}sofia/gateway/%s/%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, domain, contactName)
+			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}sofia/gateway/%s/%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, domain, contactName)
 		} else {
 			dial = false
 			fmt.Println("Invalied ContactType")
