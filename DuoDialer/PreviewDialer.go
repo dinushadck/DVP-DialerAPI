@@ -59,6 +59,7 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	refDataStr := string(refData)
 
 	pushD := PushData{}
+	pushD.From = "Campaign"
 	pushD.To = resourceInfo.ResourceInfo.ResourceId
 	pushD.Direction = "BY"
 	pushD.Message = reqOData.PreviewData

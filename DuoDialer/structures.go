@@ -331,6 +331,7 @@ type ArdsCallbackInfo struct {
 
 //--------------------Notification--------------------
 type PushData struct {
+	From      string
 	To        string
 	Direction string
 	Message   string
