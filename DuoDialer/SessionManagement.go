@@ -26,8 +26,8 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["DialerId"] = dialerId
 	data["CampaignId"] = campaignId
 	data["Dialtime"] = dialTime
-	data["ChannelCreatetime"] = dialTime
-	data["ChannelAnswertime"] = dialTime
+	data["ChannelCreatetime"] = ""
+	data["ChannelAnswertime"] = ""
 	data["ServerId"] = serverId
 	data["Reason"] = reason
 	data["DialerStatus"] = dialerStatus
