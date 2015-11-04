@@ -37,7 +37,7 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, callSer
 	if trunkCode != "" && uuid != "" {
 		fmt.Println("Start AddDirectDialRequest: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
 		campaignId := "DirectDial"
-		callServer := GetCallServerInfo(callServerId)
+		callServer := GetCallServerInfo(company, tenant, callServerId)
 
 		IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
 		IncrCampaignDialCount(company, tenant, campaignId)

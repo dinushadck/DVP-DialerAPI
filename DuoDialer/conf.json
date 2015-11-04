@@ -21,5 +21,7 @@
 	"ArdsServiceHost":"192.168.0.15",
 	"ArdsServicePort":"2225",
 	"NotificationServiceHost":"notificationservice.104.131.67.21.xip.io",
-	"NotificationServicePort":"8086"
+	"NotificationServicePort":"8086",
+	"ClusterConfigServiceHost":"clusterconfig.104.131.67.21.xip.i",
+	"ClusterConfigServicePort":"3434"
 }

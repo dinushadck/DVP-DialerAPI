@@ -380,7 +380,7 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 	defCallServerInfo := CallServerInfo{}
 	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	appment := CheckAppoinmentForCampaign(authToken, scheduleId)
-	callServerInfos := GetCallServerInfo(callServerId)
+	callServerInfos := GetCallServerInfo(company, tenant, callServerId)
 
 	if appment != emtAppoinment && callServerInfos != defCallServerInfo {
 		campStatus := GetCampaignStatus(campaignId, company, tenant)

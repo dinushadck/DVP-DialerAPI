@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -102,7 +103,9 @@ func DialPreviewNumber(contactName, domain, contactType, resourceId, company, te
 		extention := sessionInfo["Extention"]
 		callServerId := sessionInfo["ServerId"]
 
-		callServer := GetCallServerInfo(callServerId)
+		companyInt, _ := strconv.Atoi(company)
+		tenantInt, _ := strconv.Atoi(tenant)
+		callServer := GetCallServerInfo(companyInt, tenantInt, callServerId)
 
 		fmt.Println("Start DialPreviewNumber: ", sessionId, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 		customCompanyStr := fmt.Sprintf("%s_%s", company, tenant)
@@ -140,8 +143,9 @@ func RejectPreviewNumber(company, tenant, campaignId, sessionId, ardsCategory, r
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	if RedisCheckKeyExist(sessionInfoKey) {
 		callServerId := RedisHashGetField(sessionInfoKey, "ServerId")
-
-		callServer := GetCallServerInfo(callServerId)
+		companyInt, _ := strconv.Atoi(company)
+		tenantInt, _ := strconv.Atoi(tenant)
+		callServer := GetCallServerInfo(companyInt, tenantInt, callServerId)
 		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
 		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")

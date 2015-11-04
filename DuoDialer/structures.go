@@ -34,6 +34,8 @@ type Configuration struct {
 	ArdsServicePort          string
 	NotificationServiceHost  string
 	NotificationServicePort  string
+	ClusterConfigServiceHost string
+	ClusterConfigServicePort string
 }
 
 type EnvConfiguration struct {
@@ -60,6 +62,8 @@ type EnvConfiguration struct {
 	ArdsServicePort          string
 	NotificationServiceHost  string
 	NotificationServicePort  string
+	ClusterConfigServiceHost string
+	ClusterConfigServicePort string
 }
 
 //--------------------Campaign--------------------
@@ -211,6 +215,20 @@ type CallServerInfo struct {
 	CallServerId    string
 	Url             string
 	MaxChannelCount int
+}
+
+//--------------------ClusterConfig API--------------------
+type CallServerResult struct {
+	id             int
+	Activate       bool
+	Class          string
+	Type           string
+	Category       string
+	InternalMainIP string
+}
+type ClusterConfigApiResult struct {
+	IsSuccess bool
+	Result    []CallServerResult
 }
 
 //--------------------Rule API--------------------

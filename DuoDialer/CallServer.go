@@ -3,36 +3,85 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
+	"net/http"
 	"strconv"
 )
 
-func RegisterCallServer(serverId string) CallServerInfo {
+//---------------------ClusterConfigService------------------------
+func GetCallserverInfo(company, tenant int) CallServerResult {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in GetCallserverInfo", r)
+		}
+	}()
+	//Request campaign from Campaign Manager service
+	activeCallServers := make([]CallServerResult, 0)
+	authToken := fmt.Sprintf("%d#%d", tenant, company)
+
+	client := &http.Client{}
+
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CloudConfiguration/CallserversByCompany", CreateHost(clusterConfigServiceHost, clusterConfigServicePort))
+	fmt.Println("Start CallserversByCompany request: ", request)
+	req, _ := http.NewRequest("GET", request, nil)
+	req.Header.Add("Authorization", authToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+		return CallServerResult{}
+	}
+	defer resp.Body.Close()
+
+	response, _ := ioutil.ReadAll(resp.Body)
+
+	var clusterConfigApiResult ClusterConfigApiResult
+	json.Unmarshal(response, &clusterConfigApiResult)
+	if clusterConfigApiResult.IsSuccess == true {
+		for _, callSvr := range clusterConfigApiResult.Result {
+			activeCallServers = append(activeCallServers, callSvr)
+			if len(activeCallServers) == 1 {
+				return activeCallServers[0]
+			} else if len(activeCallServers) > 1 {
+				return activeCallServers[rand.Intn(len(activeCallServers))]
+			} else {
+				return CallServerResult{}
+			}
+		}
+	}
+	return CallServerResult{}
+}
+
+func RegisterCallServer(company, tenant int) CallServerInfo {
 	defCallServerInfo := CallServerInfo{}
-	if serverId == "*" {
-		//pick callserver
-	}
+
 	//Get CallServer info
-	cs := CallServerInfo{}
-	cs.CallServerId = "3"
-	cs.MaxChannelCount = 60
-	cs.Url = fmt.Sprintf("%s", CreateHost(callServerHost, callServerPort))
+	pickedCallServer := GetCallserverInfo(company, tenant)
+	if pickedCallServer.InternalMainIP != "" {
+		callServerIdStr := strconv.Itoa(pickedCallServer.id)
+		cs := CallServerInfo{}
+		cs.CallServerId = callServerIdStr
+		cs.MaxChannelCount = 50
+		cs.Url = fmt.Sprintf("%s", CreateHost(pickedCallServer.InternalMainIP, callServerPort))
 
-	callServerKey := fmt.Sprintf("CallServer:%s", cs.CallServerId)
-	callServerjson, _ := json.Marshal(cs)
-	addResult := RedisSet(callServerKey, string(callServerjson))
+		callServerKey := fmt.Sprintf("CallServer:%s", cs.CallServerId)
+		callServerjson, _ := json.Marshal(cs)
+		addResult := RedisSet(callServerKey, string(callServerjson))
 
-	if addResult == "OK" {
-		csck := fmt.Sprintf("CallServerConcurrentCalls:%s", cs.CallServerId)
-		csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", cs.CallServerId)
-		countStr := strconv.Itoa(cs.MaxChannelCount)
-		RedisSet(csck, "0")
-		RedisSet(csmcl, countStr)
-		return cs
+		if addResult == "OK" {
+			csck := fmt.Sprintf("CallServerConcurrentCalls:%s", cs.CallServerId)
+			csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", cs.CallServerId)
+			countStr := strconv.Itoa(cs.MaxChannelCount)
+			RedisSet(csck, "0")
+			RedisSet(csmcl, countStr)
+			return cs
+		}
 	}
+
 	return defCallServerInfo
 }
 
-func GetCallServerInfo(serverId string) CallServerInfo {
+func GetCallServerInfo(company, tenant int, serverId string) CallServerInfo {
 	callServerKey := fmt.Sprintf("CallServer:%s", serverId)
 	csString := RedisGet(callServerKey)
 	if csString != "" {
@@ -40,7 +89,7 @@ func GetCallServerInfo(serverId string) CallServerInfo {
 		json.Unmarshal([]byte(csString), &callServerInfo)
 		return callServerInfo
 	} else {
-		return RegisterCallServer(serverId)
+		return RegisterCallServer(company, tenant)
 	}
 }
 
@@ -88,11 +137,11 @@ func DecrConcurrentChannelCount(serverId, campaignId string) {
 	}
 }
 
-func IncrMaxLimit(serverId string) {
+func IncrMaxLimit(company, tenant int, serverId string) {
 	callServerKey := fmt.Sprintf("CallServer:%s", serverId)
 	csString := RedisGet(callServerKey)
 	if csString == "" {
-		RegisterCallServer(serverId)
+		RegisterCallServer(company, tenant)
 	}
 
 	csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", serverId)
