@@ -225,6 +225,7 @@ type CallServerResult struct {
 	Type           string
 	Category       string
 	InternalMainIP string
+	CompanyId      int
 }
 type ClusterConfigApiResult struct {
 	IsSuccess bool

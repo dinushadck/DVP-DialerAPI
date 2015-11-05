@@ -40,7 +40,9 @@ func GetCallserverInfo(company, tenant int) CallServerResult {
 	json.Unmarshal(response, &clusterConfigApiResult)
 	if clusterConfigApiResult.IsSuccess == true {
 		for _, callSvr := range clusterConfigApiResult.Result {
-			activeCallServers = append(activeCallServers, callSvr)
+			if callSvr.Activate == true {
+				activeCallServers = append(activeCallServers, callSvr)
+			}
 		}
 		if len(activeCallServers) == 1 {
 			return activeCallServers[0]
@@ -58,7 +60,7 @@ func RegisterCallServer(company, tenant int) CallServerInfo {
 
 	//Get CallServer info
 	pickedCallServer := GetCallserverInfo(company, tenant)
-	log := fmt.Sprintf("Callserver id: %d :: ip: %s", pickedCallServer.id, pickedCallServer.InternalMainIP)
+	log := fmt.Sprintf("Callserver id: %d :: ip: %s :: CompanyId: %d", pickedCallServer.id, pickedCallServer.InternalMainIP, pickedCallServer.CompanyId)
 	fmt.Println(log)
 	if pickedCallServer.InternalMainIP != "" {
 		callServerIdStr := strconv.Itoa(pickedCallServer.id)
