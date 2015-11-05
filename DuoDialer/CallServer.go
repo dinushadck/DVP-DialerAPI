@@ -60,10 +60,10 @@ func RegisterCallServer(company, tenant int) CallServerInfo {
 
 	//Get CallServer info
 	pickedCallServer := GetCallserverInfo(company, tenant)
-	log := fmt.Sprintf("Callserver id: %d :: ip: %s :: CompanyId: %d", pickedCallServer.id, pickedCallServer.InternalMainIP, pickedCallServer.CompanyId)
+	log := fmt.Sprintf("Callserver id: %d :: ip: %s :: CompanyId: %d", pickedCallServer.Id, pickedCallServer.InternalMainIP, pickedCallServer.CompanyId)
 	fmt.Println(log)
 	if pickedCallServer.InternalMainIP != "" {
-		callServerIdStr := strconv.Itoa(pickedCallServer.id)
+		callServerIdStr := strconv.Itoa(pickedCallServer.Id)
 		cs := CallServerInfo{}
 		cs.CallServerId = callServerIdStr
 		cs.MaxChannelCount = 50

@@ -219,7 +219,7 @@ type CallServerInfo struct {
 
 //--------------------ClusterConfig API--------------------
 type CallServerResult struct {
-	id             int
+	Id             int
 	Activate       bool
 	Class          string
 	Type           string
