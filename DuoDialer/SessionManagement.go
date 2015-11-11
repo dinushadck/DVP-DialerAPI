@@ -92,10 +92,10 @@ func ClearTimeoutChannels(campaignId string) {
 	}
 }
 
-func GetSpecificSessionFiled(campaignId, sessionId, field string) string {
-	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
-	return RedisHashGetField(hashKey, field)
-}
+//func GetSpecificSessionFiled(campaignId, sessionId, field string) string {
+//	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+//	return RedisHashGetField(hashKey, field)
+//}
 
 func GetPhoneNumberAndTryCount(campaignId, sessionId string) (string, int) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
