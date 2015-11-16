@@ -142,24 +142,24 @@ func DecrConcurrentChannelCount(serverId, campaignId string) {
 	}
 }
 
-func IncrMaxLimit(company, tenant int, serverId string) {
-	callServerKey := fmt.Sprintf("CallServer:%s", serverId)
-	csString := RedisGet(callServerKey)
-	if csString == "" {
-		RegisterCallServer(company, tenant)
-	}
+//func IncrMaxLimit(company, tenant int, serverId string) {
+//	callServerKey := fmt.Sprintf("CallServer:%s", serverId)
+//	csString := RedisGet(callServerKey)
+//	if csString == "" {
+//		RegisterCallServer(company, tenant)
+//	}
 
-	csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", serverId)
-	RedisIncr(csmcl)
-}
+//	csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", serverId)
+//	RedisIncr(csmcl)
+//}
 
-func DecrMaxLimit(serverId string) {
-	csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", serverId)
-	decValue := RedisIncrBy(csmcl, -1)
-	if decValue < 0 {
-		RedisSet(csmcl, "0")
-	}
-}
+//func DecrMaxLimit(serverId string) {
+//	csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", serverId)
+//	decValue := RedisIncrBy(csmcl, -1)
+//	if decValue < 0 {
+//		RedisSet(csmcl, "0")
+//	}
+//}
 
 func GetMaxChannelLimit(serverId string) int {
 	csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", serverId)

@@ -97,13 +97,13 @@ func ClearTimeoutChannels(campaignId string) {
 //	return RedisHashGetField(hashKey, field)
 //}
 
-func GetPhoneNumberAndTryCount(campaignId, sessionId string) (string, int) {
-	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
-	sessionInfo := RedisHashGetAll(hashKey)
-	number := sessionInfo["Number"]
-	tryCount, _ := strconv.Atoi(sessionInfo["TryCount"])
-	return number, tryCount
-}
+//func GetPhoneNumberAndTryCount(campaignId, sessionId string) (string, int) {
+//	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+//	sessionInfo := RedisHashGetAll(hashKey)
+//	number := sessionInfo["Number"]
+//	tryCount, _ := strconv.Atoi(sessionInfo["TryCount"])
+//	return number, tryCount
+//}
 
 //----------------Campaign Manager Service------------------------
 func UploadSessionInfoToCampaignManager(sessionInfo map[string]string) {

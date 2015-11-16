@@ -258,23 +258,23 @@ func RedisHashSetField(hkey, field, value string) bool {
 	return result
 }
 
-func RedisHashSetNxField(hkey, field, value string) bool {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Recovered in RedisHashSetField", r)
-		}
-	}()
-	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
-	errHndlr(err)
-	defer client.Close()
+//func RedisHashSetNxField(hkey, field, value string) bool {
+//	defer func() {
+//		if r := recover(); r != nil {
+//			fmt.Println("Recovered in RedisHashSetField", r)
+//		}
+//	}()
+//	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+//	errHndlr(err)
+//	defer client.Close()
 
-	// select database
-	r := client.Cmd("select", redisDb)
-	errHndlr(r.Err)
+//	// select database
+//	r := client.Cmd("select", redisDb)
+//	errHndlr(r.Err)
 
-	result, _ := client.Cmd("hsetnx", hkey, field, value).Bool()
-	return result
-}
+//	result, _ := client.Cmd("hsetnx", hkey, field, value).Bool()
+//	return result
+//}
 
 func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
 	defer func() {
@@ -297,23 +297,23 @@ func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
 	return true
 }
 
-func RedisRemoveHashField(hkey, field string) bool {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Recovered in RedisRemoveHashField", r)
-		}
-	}()
-	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
-	errHndlr(err)
-	defer client.Close()
+//func RedisRemoveHashField(hkey, field string) bool {
+//	defer func() {
+//		if r := recover(); r != nil {
+//			fmt.Println("Recovered in RedisRemoveHashField", r)
+//		}
+//	}()
+//	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
+//	errHndlr(err)
+//	defer client.Close()
 
-	// select database
-	r := client.Cmd("select", redisDb)
-	errHndlr(r.Err)
+//	// select database
+//	r := client.Cmd("select", redisDb)
+//	errHndlr(r.Err)
 
-	result, _ := client.Cmd("hdel", hkey, field).Bool()
-	return result
-}
+//	result, _ := client.Cmd("hdel", hkey, field).Bool()
+//	return result
+//}
 
 // Redis List Methods
 

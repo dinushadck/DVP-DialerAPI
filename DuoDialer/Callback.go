@@ -111,19 +111,19 @@ func AddCampaignCallbackConfigInfo(company, tenant, campaignId, configureId int)
 	}
 }
 
-func GetMaxCallbackCount(company, tenant int, campaignId, reason string) int {
-	hashKey := fmt.Sprintf("CampaignCallbackConfig:%d:%d:%s:%s", company, tenant, campaignId, reason)
-	callbackCountStr := RedisHashGetField(hashKey, "MaxCallbackCount")
-	maxCallbackCount, _ := strconv.Atoi(callbackCountStr)
-	return maxCallbackCount
-}
+//func GetMaxCallbackCount(company, tenant int, campaignId, reason string) int {
+//	hashKey := fmt.Sprintf("CampaignCallbackConfig:%d:%d:%s:%s", company, tenant, campaignId, reason)
+//	callbackCountStr := RedisHashGetField(hashKey, "MaxCallbackCount")
+//	maxCallbackCount, _ := strconv.Atoi(callbackCountStr)
+//	return maxCallbackCount
+//}
 
-func GetCallbackInterval(company, tenant int, campaignId, reason string) int {
-	hashKey := fmt.Sprintf("CampaignCallbackConfig:%d:%d:%s:%s", company, tenant, campaignId, reason)
-	callbackIntervalStr := RedisHashGetField(hashKey, "CallbackInterval")
-	callbackInterval, _ := strconv.Atoi(callbackIntervalStr)
-	return callbackInterval
-}
+//func GetCallbackInterval(company, tenant int, campaignId, reason string) int {
+//	hashKey := fmt.Sprintf("CampaignCallbackConfig:%d:%d:%s:%s", company, tenant, campaignId, reason)
+//	callbackIntervalStr := RedisHashGetField(hashKey, "CallbackInterval")
+//	callbackInterval, _ := strconv.Atoi(callbackIntervalStr)
+//	return callbackInterval
+//}
 
 func GetCallbackDetails(company, tenant int, campaignId, reason string) (maxCallbackCount, callbackInterval int, isReasonExists bool) {
 	hashKey := fmt.Sprintf("CampaignCallbackConfig:%d:%d:%s:%s", company, tenant, campaignId, reason)
