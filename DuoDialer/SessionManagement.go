@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 )
-
+//test
 func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
