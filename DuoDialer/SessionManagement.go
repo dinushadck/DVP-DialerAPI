@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+//Initiate dial session for a number
 func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
@@ -54,6 +55,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	UploadSessionInfoToCampaignManager(sessionInfo)
 }
 
+//Clear timed out sessions from campaign
 func ClearTimeoutChannels(campaignId string) {
 	sHashKey := fmt.Sprintf("sessionInfo:%s:*", campaignId)
 	ongoingSessions := RedisSearchKeys(sHashKey)

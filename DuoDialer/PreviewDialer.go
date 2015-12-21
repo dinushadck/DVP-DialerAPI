@@ -70,7 +70,7 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 
 	jsonData, _ := json.Marshal(pushD)
 
-	authToken := fmt.Sprintf("%d#%d", resourceInfo.Tenant, resourceInfo.Company)
+	authToken := fmt.Sprintf("%s#%s", resourceInfo.Tenant, resourceInfo.Company)
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/NotificationService/Notification/initiate", CreateHost(notificationServiceHost, notificationServicePort))
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
