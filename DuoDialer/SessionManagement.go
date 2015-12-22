@@ -55,7 +55,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	UploadSessionInfoToCampaignManager(sessionInfo)
 }
 
-//Clear timed out sessions from campaign
+//Clear timed out sessions from campaign..
 func ClearTimeoutChannels(campaignId string) {
 	sHashKey := fmt.Sprintf("sessionInfo:%s:*", campaignId)
 	ongoingSessions := RedisSearchKeys(sHashKey)

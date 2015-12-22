@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+//Add preview dial request to dialer
 func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campaignId, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
 	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 
@@ -51,6 +52,7 @@ func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campa
 	}
 }
 
+//Send data to agent for preview
 func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	//send call detail to given agent
 	var reqOData PreviewRequestOtherData
@@ -93,6 +95,7 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	SetSessionInfo(campaignId, resourceInfo.SessionID, "ArdsCategory", resourceInfo.Category)
 }
 
+//Once agent accept, send dial data to server
 func DialPreviewNumber(contactName, domain, contactType, resourceId, company, tenant, campaignId, ardsClass, ardsType, ardsCategory, sessionId string) {
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	if RedisCheckKeyExist(sessionInfoKey) {
