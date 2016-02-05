@@ -1,9 +1,9 @@
 package main
 
 import (
-	"code.google.com/p/gorest"
 	"encoding/json"
 	"fmt"
+	"github.com/DuoSoftware/gorest"
 	"net/url"
 	"strconv"
 	"strings"

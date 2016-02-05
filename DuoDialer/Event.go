@@ -1,9 +1,9 @@
 package main
 
 import (
-	"code.google.com/p/log4go"
 	"encoding/json"
 	"fmt"
+	"github.com/DuoSoftware/log4go"
 	"strconv"
 	"strings"
 	"time"
