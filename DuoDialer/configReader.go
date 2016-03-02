@@ -13,6 +13,8 @@ import (
 var dirPath string
 var redisIp string
 var redisPort string
+var securityIp string
+var securityPort string
 var redisDb int
 var dialerId string
 var campaignLimit int
@@ -36,6 +38,7 @@ var notificationServiceHost string
 var notificationServicePort string
 var clusterConfigServiceHost string
 var clusterConfigServicePort string
+var accessToken string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -59,8 +62,10 @@ func GetDefaultConfig() Configuration {
 
 	if deferr != nil {
 		fmt.Println("error:", deferr)
-		defconfiguration.RedisIp = "192.168.3.200"
+		defconfiguration.RedisIp = "127.0.0.1"
 		defconfiguration.RedisPort = "6379"
+		defconfiguration.SecurityIp = "127.0.0.1"
+		defconfiguration.SecurityPort = "6379"
 		defconfiguration.RedisDb = 5
 		defconfiguration.DialerId = "Dialer2"
 		defconfiguration.CampaignLimit = 30
@@ -84,6 +89,7 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.NotificationServicePort = "8086"
 		defconfiguration.ClusterConfigServiceHost = "127.0.0.1"
 		defconfiguration.ClusterConfigServicePort = "3434"
+		defconfiguration.AccessToken = ""
 	}
 
 	return defconfiguration
@@ -95,6 +101,8 @@ func LoadDefaultConfig() {
 
 	redisIp = defconfiguration.RedisIp
 	redisPort = defconfiguration.RedisPort
+	securityIp = defconfiguration.SecurityIp
+	securityPort = defconfiguration.SecurityPort
 	redisDb = defconfiguration.RedisDb
 	dialerId = defconfiguration.DialerId
 	campaignLimit = defconfiguration.CampaignLimit
@@ -118,6 +126,7 @@ func LoadDefaultConfig() {
 	notificationServicePort = defconfiguration.NotificationServicePort
 	clusterConfigServiceHost = defconfiguration.ClusterConfigServiceHost
 	clusterConfigServicePort = defconfiguration.ClusterConfigServicePort
+	accessToken = defconfiguration.AccessToken
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -143,6 +152,8 @@ func LoadConfiguration() {
 
 		redisIp = os.Getenv(envconfiguration.RedisIp)
 		redisPort = os.Getenv(envconfiguration.RedisPort)
+		securityIp = os.Getenv(envconfiguration.SecurityIp)
+		securityPort = os.Getenv(envconfiguration.SecurityPort)
 		redisDb, converr = strconv.Atoi(os.Getenv(envconfiguration.RedisDb))
 		dialerId = os.Getenv(envconfiguration.DialerId)
 		campaignLimit, converr = strconv.Atoi(os.Getenv(envconfiguration.CampaignLimit))
@@ -166,6 +177,7 @@ func LoadConfiguration() {
 		notificationServicePort = os.Getenv(envconfiguration.NotificationServicePort)
 		clusterConfigServiceHost = os.Getenv(envconfiguration.ClusterConfigServiceHost)
 		clusterConfigServicePort = os.Getenv(envconfiguration.ClusterConfigServicePort)
+		accessToken = os.Getenv(envconfiguration.AccessToken)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -175,6 +187,12 @@ func LoadConfiguration() {
 		}
 		if redisDb == 0 || converr != nil {
 			redisDb = defConfig.RedisDb
+		}
+		if redisIp == "" {
+			securityIp = defConfig.SecurityIp
+		}
+		if securityPort == "" {
+			securityPort = defConfig.SecurityPort
 		}
 		if dialerId == "" {
 			dialerId = defConfig.DialerId
@@ -244,8 +262,12 @@ func LoadConfiguration() {
 		if clusterConfigServicePort == "" {
 			clusterConfigServicePort = defConfig.ClusterConfigServicePort
 		}
+		if accessToken == "" {
+			accessToken = defConfig.AccessToken
+		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
+		securityIp = fmt.Sprintf("%s:%s", securityIp, securityPort)
 	}
 
 	fmt.Println("redisIp:", redisIp)

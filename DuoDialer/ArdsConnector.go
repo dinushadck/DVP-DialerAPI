@@ -15,6 +15,7 @@ func AddRequestServer() {
 			fmt.Println("Recovered in AddRequestServer", r)
 		}
 	}()
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	dialerAPIUrl := fmt.Sprintf("http://%s", CreateHost(lbIpAddress, lbPort))
 	path := fmt.Sprintf("DVP/DialerAPI/ArdsCallback")
 
@@ -26,9 +27,8 @@ func AddRequestServer() {
 
 	var reqServer = RequestServer{}
 	reqServer.ServerID = dialerId
-	reqServer.Class = "DIALER"
-	reqServer.Type = "ARDS"
-	reqServer.Category = "CALL"
+	reqServer.ServerType = "DIALER"
+	reqServer.RequestType = "CALL"
 	reqServer.CallbackUrl = cbUrl
 
 	jsonData, _ := json.Marshal(reqServer)
@@ -36,6 +36,7 @@ func AddRequestServer() {
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/requestserver", CreateHost(ardsServiceHost, ardsServicePort))
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
 	fmt.Println("request:", serviceurl)
 	fmt.Println(jsonData)
 
@@ -67,9 +68,8 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 
 	var ardsReq = Request{}
 	ardsReq.SessionId = uuid
-	ardsReq.Class = "DIALER"
-	ardsReq.Type = "ARDS"
-	ardsReq.Category = "CALL"
+	ardsReq.ServerType = "DIALER"
+	ardsReq.RequestType = "CALL"
 	ardsReq.Priority = "L"
 	ardsReq.RequestServerId = dialerId
 	ardsReq.Attributes = attributes
@@ -77,11 +77,13 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 
 	jsonData, _ := json.Marshal(ardsReq)
 
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request", CreateHost(ardsServiceHost, ardsServicePort))
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Add("Authorization", authToken)
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	fmt.Println("request:", serviceurl)
 	fmt.Println(string(jsonData))
 
@@ -108,13 +110,15 @@ func RemoveRequest(company, tenant, sessionId string) {
 			fmt.Println("Recovered in AddRequest", r)
 		}
 	}()
-	authToken := fmt.Sprintf("%s#%s", tenant, company)
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request/%s", CreateHost(ardsServiceHost, ardsServicePort), sessionId)
 	fmt.Println("Start RemoveRequest: ", request)
 	req, _ := http.NewRequest("DELETE", request, nil)
-	req.Header.Add("Authorization", authToken)
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -140,11 +144,13 @@ func ClearResourceSlotWhenReject(company, tenant, reqCategory, resId, sessionId 
 
 	jsonData, _ := json.Marshal(ardsResSlot)
 
-	authToken := fmt.Sprintf("%s#%s", tenant, company)
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/resource/%s/concurrencyslot/session/%s", CreateHost(ardsServiceHost, ardsServicePort), resId, sessionId)
 	req, err := http.NewRequest("PUT", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Add("Authorization", authToken)
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	fmt.Println("request:", serviceurl)
 	fmt.Println(string(jsonData))
 

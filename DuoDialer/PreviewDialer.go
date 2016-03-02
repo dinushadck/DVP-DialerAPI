@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -26,9 +24,10 @@ func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campa
 
 	attributeInfo = RequestCampaignAttributeInfo(company, tenant, campaignId)
 
-	reqOtherData := PreviewRequestOtherData{}
+	reqOtherData := RequestOtherData{}
 	reqOtherData.CampaignId = campaignId
-	reqOtherData.PreviewData = numExtraData
+	reqOtherData.StrData = numExtraData
+	reqOtherData.DialoutMec = dialoutMec
 	tmpReqOtherData, _ := json.Marshal(reqOtherData)
 
 	resp, err := AddRequest(company, tenant, uuid, string(tmpReqOtherData), attributeInfo)
@@ -53,11 +52,8 @@ func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campa
 }
 
 //Send data to agent for preview
-func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
+func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo, reqOData RequestOtherData) {
 	//send call detail to given agent
-	var reqOData PreviewRequestOtherData
-	json.Unmarshal([]byte(resourceInfo.OtherInfo), &reqOData)
-
 	refData, _ := json.Marshal(resourceInfo)
 	refDataStr := string(refData)
 	campaignId := reqOData.CampaignId
@@ -66,17 +62,19 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 	pushD.From = campaignId
 	pushD.To = resourceInfo.ResourceInfo.ResourceId
 	pushD.Direction = "BY"
-	pushD.Message = reqOData.PreviewData
+	pushD.Message = reqOData.StrData
 	pushD.Callback = fmt.Sprintf("http://%s/DVP/DialerAPI/PreviewCallBack", CreateHost(lbIpAddress, lbPort))
 	pushD.Ref = refDataStr
 
 	jsonData, _ := json.Marshal(pushD)
 
-	authToken := fmt.Sprintf("%s#%s", resourceInfo.Tenant, resourceInfo.Company)
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%s:%s", resourceInfo.Tenant, resourceInfo.Company)
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/NotificationService/Notification/initiate", CreateHost(notificationServiceHost, notificationServicePort))
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Add("authorization", authToken)
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	fmt.Println("request:", serviceurl)
 	fmt.Println(string(jsonData))
 
@@ -92,104 +90,5 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo) {
 
 	//if done update Session ExpireTime
 	SetSessionInfo(campaignId, resourceInfo.SessionID, "Resource", resourceInfo.ResourceInfo.ResourceId)
-	SetSessionInfo(campaignId, resourceInfo.SessionID, "ArdsCategory", resourceInfo.Category)
-}
-
-//Once agent accept, send dial data to server
-func DialPreviewNumber(contactName, domain, contactType, resourceId, company, tenant, campaignId, ardsClass, ardsType, ardsCategory, sessionId string) {
-	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
-	if RedisCheckKeyExist(sessionInfoKey) {
-		sessionInfo := RedisHashGetAll(sessionInfoKey)
-		fromNumber := sessionInfo["FromNumber"]
-		trunkCode := sessionInfo["TrunkCode"]
-		phoneNumber := sessionInfo["Number"]
-		extention := sessionInfo["Extention"]
-		callServerId := sessionInfo["ServerId"]
-
-		companyInt, _ := strconv.Atoi(company)
-		tenantInt, _ := strconv.Atoi(tenant)
-		callServer := GetCallServerInfo(companyInt, tenantInt, callServerId)
-
-		fmt.Println("Start DialPreviewNumber: ", sessionId, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
-		customCompanyStr := fmt.Sprintf("%s_%s", company, tenant)
-		param := fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, fromNumber)
-		furl := fmt.Sprintf("sofia/gateway/%s/%s ", trunkCode, phoneNumber)
-		var data string
-		var dial bool
-		if contactType == "PRIVATE" {
-			dial = true
-			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}user/%s@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, contactName, domain)
-		} else if contactType == "PUBLIC" {
-			dial = true
-			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PUBLIC_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}sofia/external/%s@%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, contactName, domain)
-		} else if contactType == "TRUNK" {
-			dial = true
-			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_class=%s,ards_type=%s,ards_category=%s}sofia/gateway/%s/%s)", sessionId, resourceId, tenant, company, ardsClass, ardsType, ardsCategory, domain, contactName)
-		} else {
-			dial = false
-			fmt.Println("Invalied ContactType")
-		}
-
-		if dial == true {
-			SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
-
-			resp, err := Dial(callServer.Url, param, furl, data)
-			HandleDialResponse(resp, err, callServer, campaignId, sessionId)
-		} else {
-			SetSessionInfo(campaignId, sessionId, "Reason", "Invalied ContactType")
-			RejectPreviewNumber(company, tenant, campaignId, sessionId, ardsCategory, resourceId, "Invalied ContactType")
-		}
-	}
-}
-
-func RejectPreviewNumber(company, tenant, campaignId, sessionId, ardsCategory, resourceId, rejectReason string) {
-	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
-	if RedisCheckKeyExist(sessionInfoKey) {
-		callServerId := RedisHashGetField(sessionInfoKey, "ServerId")
-		companyInt, _ := strconv.Atoi(company)
-		tenantInt, _ := strconv.Atoi(tenant)
-		callServer := GetCallServerInfo(companyInt, tenantInt, callServerId)
-		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
-		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
-		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")
-		ClearResourceSlotWhenReject(company, tenant, ardsCategory, resourceId, sessionId)
-		go UploadSessionInfo(campaignId, sessionId)
-	}
-}
-
-//-----------------------------------CampaignManager Service-------------------------------------------------
-
-func RequestCampaignAttributeInfo(company, tenant int, campaignId string) []string {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Recovered in RequestCampaignAttributeInfo", r)
-		}
-	}()
-	//Request campaign from Campaign Manager service
-	attributeDetails := make([]string, 0)
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
-
-	client := &http.Client{}
-
-	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/AdditinalData/PREVIEW/ARDS/ATTRIBUTE", CreateHost(campaignServiceHost, campaignServicePort), campaignId)
-	fmt.Println("Start RequestCampaign request: ", request)
-	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", authToken)
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err.Error())
-		return attributeDetails
-	}
-	defer resp.Body.Close()
-
-	response, _ := ioutil.ReadAll(resp.Body)
-
-	var campaignAdditionalDataResult CampaignAdditionalDataResult
-	json.Unmarshal(response, &campaignAdditionalDataResult)
-	if campaignAdditionalDataResult.IsSuccess == true {
-		var attInfo []string
-		json.Unmarshal([]byte(campaignAdditionalDataResult.Result.AdditionalData), &attInfo)
-		attributeDetails = attInfo
-	}
-	return attributeDetails
+	SetSessionInfo(campaignId, resourceInfo.SessionID, "ArdsCategory", resourceInfo.RequestType)
 }

@@ -10,6 +10,8 @@ const layout4 = "2006-01-02T15:04:05.999999-07:00"
 
 //--------------------Dialer Configurations--------------------
 type Configuration struct {
+	SecurityIp               string
+	SecurityPort             string
 	RedisIp                  string
 	RedisPort                string
 	RedisDb                  int
@@ -35,9 +37,12 @@ type Configuration struct {
 	NotificationServicePort  string
 	ClusterConfigServiceHost string
 	ClusterConfigServicePort string
+	AccessToken              string
 }
 
 type EnvConfiguration struct {
+	SecurityIp               string
+	SecurityPort             string
 	RedisIp                  string
 	RedisPort                string
 	RedisDb                  string
@@ -63,6 +68,7 @@ type EnvConfiguration struct {
 	NotificationServicePort  string
 	ClusterConfigServiceHost string
 	ClusterConfigServicePort string
+	AccessToken              string
 }
 
 //--------------------Campaign--------------------
@@ -301,22 +307,21 @@ type PubEvents struct {
 
 //--------------------Ards--------------------
 type RequestServer struct {
-	Class       string
-	Type        string
-	Category    string
+	ServerType  string
+	RequestType string
 	CallbackUrl string
 	ServerID    string
 }
 
-type PreviewRequestOtherData struct {
-	CampaignId  string
-	PreviewData string
+type RequestOtherData struct {
+	CampaignId string
+	StrData    string
+	DialoutMec string
 }
 
 type Request struct {
-	Class           string
-	Type            string
-	Category        string
+	ServerType      string
+	RequestType     string
 	SessionId       string
 	Attributes      []string
 	RequestServerId string
@@ -339,15 +344,16 @@ type ResourceDetails struct {
 type ArdsCallbackInfo struct {
 	Company      string
 	Tenant       string
-	Class        string
-	Type         string
-	Category     string
+	ServerType   string
+	RequestType  string
 	SessionID    string
 	OtherInfo    string
 	ResourceInfo ResourceDetails
 }
 
 type ArdsResSlot struct {
+	Company     string
+	Tenant      string
 	ReqCategory string
 	State       string
 	OtherInfo   string
@@ -371,4 +377,12 @@ type ReplyData struct {
 type ReceiveData struct {
 	Reply ReplyData
 	Ref   string
+}
+
+//--------------------Response-------------------------
+type Result struct {
+	Exception     string
+	CustomMessage string
+	IsSuccess     bool
+	Result        string
 }

@@ -9,18 +9,21 @@ import (
 	"time"
 )
 
-func GetAppoinmentsForSchedule(authToken, schedulrId string) []Appoinment {
+func GetAppoinmentsForSchedule(internalAuthToken, schedulrId string) []Appoinment {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in GetAppoinmentsForSchedule", r)
 		}
 	}()
 	fmt.Println("Start Get Schedule Schedule service")
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	client := &http.Client{}
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/LimitAPI/Schedule/%s/Appointments", CreateHost(scheduleServiceHost, scheduleServicePort), schedulrId)
 	fmt.Println("request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", authToken)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	resp, _ := client.Do(req)
 	defer resp.Body.Close()
 
@@ -71,16 +74,16 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time) Appoinment {
 	return Appoinment{}
 }
 
-func CheckAppoinmentForCampaign(authToken, schedulrId string) Appoinment {
-	appionments := GetAppoinmentsForSchedule(authToken, schedulrId)
+func CheckAppoinmentForCampaign(internalAuthToken, schedulrId string) Appoinment {
+	appionments := GetAppoinmentsForSchedule(internalAuthToken, schedulrId)
 	timeNow := time.Now().UTC()
 	return CheckAppoinments(appionments, timeNow)
 }
 
 func CheckAppoinmentForCallback(company, tenant int, schedulrId string, timeToCheck time.Time) bool {
 	defaultAppoinment := Appoinment{}
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
-	appionments := GetAppoinmentsForSchedule(authToken, schedulrId)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	appionments := GetAppoinmentsForSchedule(internalAuthToken, schedulrId)
 	machingAppoinment := CheckAppoinments(appionments, timeToCheck)
 	if machingAppoinment == defaultAppoinment {
 		return false

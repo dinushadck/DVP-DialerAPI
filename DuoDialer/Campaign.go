@@ -174,10 +174,12 @@ func RequestCampaign(requestCount int) []Campaign {
 
 	client := &http.Client{}
 
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaigns/State/Pending/%d", CreateHost(campaignServiceHost, campaignServicePort), requestCount)
 	fmt.Println("Start RequestCampaign request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", "")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("authorization", jwtToken)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -204,15 +206,18 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 		}
 	}()
 	//Send CampaignStatus to Campaign Manager
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
-	fmt.Println("Start UpdateCampaignStatus Auth: ", authToken, " CampaignId: ", campaignId, " DialerId: ", dialerId)
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	fmt.Println("Start UpdateCampaignStatus Auth: ", internalAuthToken, " CampaignId: ", campaignId, " DialerId: ", dialerId)
 	client := &http.Client{}
 
 	currentState := GetCampaignStatus(campaignId, company, tenant)
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/State/%s/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId, currentState)
 	fmt.Println("Start UpdateCampaignStatus request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", authToken)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -267,11 +272,13 @@ func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 
 	jsonData, _ := json.Marshal(state)
 
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId)
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", authToken)
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	fmt.Println("request:", serviceurl)
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -378,8 +385,8 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, scheduleId, camScheduleId, callServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
 	emtAppoinment := Appoinment{}
 	defCallServerInfo := CallServerInfo{}
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
-	appment := CheckAppoinmentForCampaign(authToken, scheduleId)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	appment := CheckAppoinmentForCampaign(internalAuthToken, scheduleId)
 	callServerInfos := GetCallServerInfo(company, tenant, callServerId)
 
 	if appment != emtAppoinment && callServerInfos != defCallServerInfo {
@@ -423,7 +430,7 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 							}
 						} else {
 							//trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
-							trunkCode, ani, dnis := GetTrunkCode(authToken, defaultAni, number)
+							trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, defaultAni, number)
 							uuid := GetUuid()
 							if trunkCode != "" && uuid != "" {
 								switch dialoutMec {
@@ -435,6 +442,9 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 									break
 								case "PREVIEW":
 									go AddPreviewDialRequest(company, tenant, callServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+									break
+								case "AGENT":
+									go AddAgentDialRequest(company, tenant, callServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
 									break
 								}
 

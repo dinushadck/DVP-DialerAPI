@@ -23,5 +23,6 @@
 	"NotificationServiceHost":"SYS_NOTIFICATIONSERVICE_HOST",
 	"NotificationServicePort":"SYS_NOTIFICATIONSERVICE_PORT",
 	"ClusterConfigServiceHost":"SYS_CLUSTERCONFIGURATION_HOST",
-	"ClusterConfigServicePort":"SYS_CLUSTERCONFIGURATION_PORT"
+	"ClusterConfigServicePort":"SYS_CLUSTERCONFIGURATION_PORT",
+	"AccessToken":"SYS_SECURITY_ACCESSTOKEN"
 }

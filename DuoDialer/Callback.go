@@ -20,13 +20,15 @@ func RequestCampaignCallbackConfig(tenant, company, configureId int) ([]Campaign
 	}()
 	//Request campaign from Campaign Manager service
 	campaignCallbackInfo := make([]CampaignCallbackInfo, 0)
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/Configuration/%d/all", CreateHost(campaignServiceHost, campaignServicePort), configureId)
 	fmt.Println("Start RequestCampaignCallbackConfig request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", authToken)
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -72,10 +74,12 @@ func UploadCallbackInfo(company, tenant int, callbackTime time.Time, campaignId,
 	jsonData, _ := json.Marshal(callback)
 
 	serviceurl := fmt.Sprintf("http://%s/CallbackServerSelfHost/Callback/AddCallback", CreateHost(callbackServerHost, callbackServerPort))
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", authToken)
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	fmt.Println("request:", serviceurl)
 	client := &http.Client{}
 	resp, err := client.Do(req)

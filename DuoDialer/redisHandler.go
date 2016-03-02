@@ -96,6 +96,21 @@ func RedisGet(key string) string {
 	return strObj
 }
 
+func SecurityGet(key string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisGet", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", securityIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+
+	strObj, _ := client.Cmd("get", key).Str()
+	fmt.Println(strObj)
+	return strObj
+}
+
 func RedisSearchKeys(pattern string) []string {
 	defer func() {
 		if r := recover(); r != nil {

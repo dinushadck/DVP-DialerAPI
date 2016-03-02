@@ -31,8 +31,8 @@ func DirectDialCampaign(company, tenant, campaignId int, number string) bool {
 
 func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, callServerId string) bool {
 
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
-	trunkCode, ani, dnis := GetTrunkCode(authToken, fromNumber, phoneNumber)
+	internalAccessToken := fmt.Sprintf("%d:%d", tenant, company)
+	trunkCode, ani, dnis := GetTrunkCode(internalAccessToken, fromNumber, phoneNumber)
 	uuid := GetUuid()
 	if trunkCode != "" && uuid != "" {
 		fmt.Println("Start AddDirectDialRequest: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)

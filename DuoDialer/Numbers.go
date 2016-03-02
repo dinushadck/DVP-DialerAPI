@@ -20,14 +20,17 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	fmt.Println("pageNumber: ", pageNumberToRequest)
 
 	// Get phone number from campign service and append
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
-	fmt.Println("Start GetPhoneNumbers Auth: ", authToken, " CampaignId: ", campaignId, " camScheduleId: ", camScheduleId)
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	fmt.Println("Start GetPhoneNumbers Auth: ", internalAuthToken, " CampaignId: ", campaignId, " camScheduleId: ", camScheduleId)
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Numbers/%s/%d/%d", CreateHost(campaignServiceHost, campaignServicePort), campaignId, camScheduleId, numberLimit, pageNumberToRequest)
 	fmt.Println("Start GetPhoneNumbers request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", authToken)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
