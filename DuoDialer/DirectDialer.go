@@ -29,7 +29,7 @@ func DirectDialCampaign(company, tenant, campaignId int, number string) bool {
 	return false
 }
 
-func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, callServerId string) bool {
+func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourceServerId string) bool {
 
 	internalAccessToken := fmt.Sprintf("%d:%d", tenant, company)
 	trunkCode, ani, dnis := GetTrunkCode(internalAccessToken, fromNumber, phoneNumber)
@@ -37,11 +37,11 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, callSer
 	if trunkCode != "" && uuid != "" {
 		fmt.Println("Start AddDirectDialRequest: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
 		campaignId := "DirectDial"
-		callServer := GetCallServerInfo(company, tenant, callServerId)
+		resourceServer := GetResourceServerInfo(company, tenant, resourceServerId, "call")
 
-		IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
+		IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		IncrCampaignDialCount(company, tenant, campaignId)
-		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, uuid, dnis, "direct dial", "start", time.Now().UTC().Format(layout4), callServerId)
+		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, uuid, dnis, "direct dial", "start", time.Now().UTC().Format(layout4), resourceServerId)
 		SetSessionInfo(campaignId, uuid, "FromNumber", ani)
 		SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 		SetSessionInfo(campaignId, uuid, "Extention", extention)
@@ -54,8 +54,8 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, callSer
 
 		SetSessionInfo(campaignId, uuid, "Reason", "Dial Number")
 
-		resp, err := Dial(callServer.Url, param, furl, data)
-		HandleDialResponse(resp, err, callServer, campaignId, uuid)
+		resp, err := Dial(resourceServer.Url, param, furl, data)
+		HandleDialResponse(resp, err, resourceServer, campaignId, uuid)
 		return true
 		//}
 	}

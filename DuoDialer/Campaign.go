@@ -382,14 +382,14 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 }
 
 //----------Run Campaign-----------------------
-func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, scheduleId, camScheduleId, callServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
+func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
 	emtAppoinment := Appoinment{}
-	defCallServerInfo := CallServerInfo{}
+	defResourceServerInfo := ResourceServerInfo{}
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	appment := CheckAppoinmentForCampaign(internalAuthToken, scheduleId)
-	callServerInfos := GetCallServerInfo(company, tenant, callServerId)
+	resourceServerInfos := GetResourceServerInfo(company, tenant, resourceServerId, CampaignChannel)
 
-	if appment != emtAppoinment && callServerInfos != defCallServerInfo {
+	if appment != emtAppoinment && resourceServerInfos != defResourceServerInfo {
 		campStatus := GetCampaignStatus(campaignId, company, tenant)
 		if campStatus == "Start" {
 			LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
@@ -410,13 +410,13 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 				fmt.Println("endTime: ", appmntEndTime.String())
 				fmt.Println("timeNW: ", tm.String())
 				if tm.Before(appmntEndTime) {
-					cchannelCountS, cchannelCountC := GetConcurrentChannelCount(callServerInfos.CallServerId, campaignId)
-					maxChannelLimit := GetMaxChannelLimit(callServerInfos.CallServerId)
+					cchannelCountS, cchannelCountC := GetConcurrentChannelCount(resourceServerInfos.ResourceServerId, campaignId)
+					maxChannelLimit := GetMaxChannelLimit(resourceServerInfos.ResourceServerId)
 					maxCampaignChannelLimit := GetCampMaxChannelLimit(campaignId)
-					fmt.Println("callServerInfos.CallServerId: ", callServerInfos.CallServerId)
+					fmt.Println("resourceServerInfos.CallServerId: ", resourceServerInfos.ResourceServerId)
 					fmt.Println("MaxCallServerChannelLimit: ", maxChannelLimit)
 					fmt.Println("maxCampaignChannelLimit: ", maxCampaignChannelLimit)
-					fmt.Println("ConcurrentCallServerChannel: ", cchannelCountS)
+					fmt.Println("ConcurrentResourceServerChannel: ", cchannelCountS)
 					fmt.Println("ConcurrentCampaignChannel: ", cchannelCountC)
 
 					if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
@@ -429,27 +429,39 @@ func StartCampaign(campaignId, dialoutMec, camClass, camType, camCategory, sched
 								return
 							}
 						} else {
-							//trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
-							trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, defaultAni, number)
-							uuid := GetUuid()
-							if trunkCode != "" && uuid != "" {
-								switch dialoutMec {
-								case "BLAST":
-									go DialNumber(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, tryCount, extention)
-									break
-								case "FIFO":
-									go DialNumberFIFO(company, tenant, callServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
-									break
-								case "PREVIEW":
-									go AddPreviewDialRequest(company, tenant, callServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
-									break
-								case "AGENT":
-									go AddAgentDialRequest(company, tenant, callServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
-									break
+							switch CampaignChannel {
+							case "CALL":
+								//trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
+								trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, defaultAni, number)
+								uuid := GetUuid()
+								if trunkCode != "" && uuid != "" {
+									switch dialoutMec {
+									case "BLAST":
+										go DialNumber(company, tenant, resourceServerInfos, campaignId, uuid, ani, trunkCode, dnis, tryCount, extention)
+										break
+									case "FIFO":
+										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
+										break
+									case "PREVIEW":
+										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+										break
+									case "AGENT":
+										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+										break
+									}
 								}
-
-								time.Sleep(100 * time.Millisecond)
+								break
+							case "SMS":
+								message := "123123"
+								go SendSms(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, defaultAni, message, number)
+								break
+							case "EMAIL":
+								subject := "Test"
+								message := "Hello"
+								go SendEmail(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, defaultAni, subject, message, number)
+								break
 							}
+							time.Sleep(100 * time.Millisecond)
 						}
 					} else {
 						fmt.Println("dialer waiting...")

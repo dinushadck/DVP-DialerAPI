@@ -37,6 +37,8 @@ type Configuration struct {
 	NotificationServicePort  string
 	ClusterConfigServiceHost string
 	ClusterConfigServicePort string
+	CasServerHost            string
+	V5_1SecurityToken        string
 	AccessToken              string
 }
 
@@ -68,6 +70,8 @@ type EnvConfiguration struct {
 	NotificationServicePort  string
 	ClusterConfigServiceHost string
 	ClusterConfigServicePort string
+	CasServerHost            string
+	V5_1SecurityToken        string
 	AccessToken              string
 }
 
@@ -216,10 +220,10 @@ type DialerInfo struct {
 }
 
 //--------------------Call Server--------------------
-type CallServerInfo struct {
-	CallServerId    string
-	Url             string
-	MaxChannelCount int
+type ResourceServerInfo struct {
+	ResourceServerId string
+	Url              string
+	MaxChannelCount  int
 }
 
 //--------------------ClusterConfig API--------------------
@@ -385,4 +389,59 @@ type Result struct {
 	CustomMessage string
 	IsSuccess     bool
 	Result        string
+}
+
+//-------------------CAS SMS---------------------------
+type Sms struct {
+	shortMessageInfo SmsInfo
+	securityToken    string
+}
+
+type SmsInfo struct {
+	Attachments       SmsAttachments
+	Date              string
+	DeliveryRefID     string
+	DeliveryStatus    string
+	FromPhoneNumber   string
+	GUReferenceID     int
+	GUTranID          int
+	GUVersionID       int
+	GatewayName       int
+	ID                int
+	MessageContent    string
+	MessageRefID      string
+	OperationalStatus string
+	PhoneNumbers      []string
+}
+
+type SmsAttachments struct {
+	FileAttachments      []string
+	ReferenceAttachments []string
+}
+
+//-------------------CAS Email---------------------------
+type Email struct {
+	emailInformation EmailInformation
+	SecurityToken    string
+}
+
+type EmailInformation struct {
+	Attachments       EmailAttachments
+	CcEmailAddresses  []string
+	CompanyID         int
+	Content           string
+	Date              string
+	FileAttachments   []string
+	GUTranID          int
+	ID                int
+	MessageRefID      string
+	OperationalStatus string
+	Subject           string
+	ToEmailAddresses  []string
+	URLAttachments    []string
+}
+
+type EmailAttachments struct {
+	FileAttachments      []string
+	ReferenceAttachments []string
 }

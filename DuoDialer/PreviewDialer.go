@@ -9,12 +9,12 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campaignId, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
+func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
 	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 
-	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
+	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "PreviewDial", tryCount, campaignId, uuid, phoneNumber, "ards added", "start", time.Now().UTC().Format(layout4), callServer.CallServerId)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "PreviewDial", tryCount, campaignId, uuid, phoneNumber, "ards added", "start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
 	SetSessionInfo(campaignId, uuid, "FromNumber", fromNumber)
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, uuid, "Extention", extention)
@@ -32,7 +32,7 @@ func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campa
 
 	resp, err := AddRequest(company, tenant, uuid, string(tmpReqOtherData), attributeInfo)
 	if err != nil {
-		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+		DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, uuid, "Reason", "ards_failed")
 		SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
 		go UploadSessionInfo(campaignId, uuid)
@@ -43,7 +43,7 @@ func AddPreviewDialRequest(company, tenant int, callServer CallServerInfo, campa
 		var ardsRes = ArdsResult{}
 		json.Unmarshal([]byte(resp), &ardsRes)
 		if ardsRes.IsSuccess == false {
-			DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+			DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 			SetSessionInfo(campaignId, uuid, "Reason", ardsRes.CustomMessage)
 			SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
 			go UploadSessionInfo(campaignId, uuid)

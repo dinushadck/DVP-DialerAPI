@@ -38,6 +38,8 @@ var notificationServiceHost string
 var notificationServicePort string
 var clusterConfigServiceHost string
 var clusterConfigServicePort string
+var casServerHost string
+var v5_1SecurityToken string
 var accessToken string
 
 func GetDirPath() string {
@@ -89,6 +91,8 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.NotificationServicePort = "8086"
 		defconfiguration.ClusterConfigServiceHost = "127.0.0.1"
 		defconfiguration.ClusterConfigServicePort = "3434"
+		defconfiguration.CasServerHost = "localhost:20946"
+		defconfiguration.V5_1SecurityToken = ""
 		defconfiguration.AccessToken = ""
 	}
 
@@ -126,6 +130,8 @@ func LoadDefaultConfig() {
 	notificationServicePort = defconfiguration.NotificationServicePort
 	clusterConfigServiceHost = defconfiguration.ClusterConfigServiceHost
 	clusterConfigServicePort = defconfiguration.ClusterConfigServicePort
+	casServerHost = defconfiguration.CasServerHost
+	v5_1SecurityToken = defconfiguration.V5_1SecurityToken
 	accessToken = defconfiguration.AccessToken
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
@@ -177,6 +183,8 @@ func LoadConfiguration() {
 		notificationServicePort = os.Getenv(envconfiguration.NotificationServicePort)
 		clusterConfigServiceHost = os.Getenv(envconfiguration.ClusterConfigServiceHost)
 		clusterConfigServicePort = os.Getenv(envconfiguration.ClusterConfigServicePort)
+		casServerHost = os.Getenv(envconfiguration.CasServerHost)
+		v5_1SecurityToken = os.Getenv(envconfiguration.V5_1SecurityToken)
 		accessToken = os.Getenv(envconfiguration.AccessToken)
 
 		if redisIp == "" {
@@ -261,6 +269,12 @@ func LoadConfiguration() {
 		}
 		if clusterConfigServicePort == "" {
 			clusterConfigServicePort = defConfig.ClusterConfigServicePort
+		}
+		if casServerHost == "" {
+			casServerHost = defConfig.CasServerHost
+		}
+		if v5_1SecurityToken == "" {
+			v5_1SecurityToken = defConfig.V5_1SecurityToken
 		}
 		if accessToken == "" {
 			accessToken = defConfig.AccessToken

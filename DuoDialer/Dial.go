@@ -80,9 +80,9 @@ func Dial(server, params, furl, data string) (*http.Response, error) {
 	return resp, err
 }
 
-func HandleDialResponse(resp *http.Response, err error, server CallServerInfo, campaignId, sessionId string) {
+func HandleDialResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) {
 	if err != nil {
-		DecrConcurrentChannelCount(server.CallServerId, campaignId)
+		DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "failed")
 		go UploadSessionInfo(campaignId, sessionId)
@@ -96,7 +96,7 @@ func HandleDialResponse(resp *http.Response, err error, server CallServerInfo, c
 		resultInfo := strings.Split(tmx, " ")
 		if len(resultInfo) > 0 {
 			if resultInfo[0] == "-ERR" {
-				DecrConcurrentChannelCount(server.CallServerId, campaignId)
+				DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
 
 				if len(resultInfo) > 1 {
 					reason := resultInfo[1]

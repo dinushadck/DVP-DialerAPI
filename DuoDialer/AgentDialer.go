@@ -10,12 +10,12 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddAgentDialRequest(company, tenant int, callServer CallServerInfo, campaignId, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
+func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
 	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 
-	IncrConcurrentChannelCount(callServer.CallServerId, campaignId)
+	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "AgentDial", tryCount, campaignId, uuid, phoneNumber, "ards added", "start", time.Now().UTC().Format(layout4), callServer.CallServerId)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "AgentDial", tryCount, campaignId, uuid, phoneNumber, "ards added", "start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
 	SetSessionInfo(campaignId, uuid, "FromNumber", fromNumber)
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, uuid, "Extention", extention)
@@ -33,7 +33,7 @@ func AddAgentDialRequest(company, tenant int, callServer CallServerInfo, campaig
 
 	resp, err := AddRequest(company, tenant, uuid, string(tmpReqOtherData), attributeInfo)
 	if err != nil {
-		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+		DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, uuid, "Reason", "ards_failed")
 		SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
 		go UploadSessionInfo(campaignId, uuid)
@@ -44,7 +44,7 @@ func AddAgentDialRequest(company, tenant int, callServer CallServerInfo, campaig
 		var ardsRes = ArdsResult{}
 		json.Unmarshal([]byte(resp), &ardsRes)
 		if ardsRes.IsSuccess == false {
-			DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+			DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 			SetSessionInfo(campaignId, uuid, "Reason", ardsRes.CustomMessage)
 			SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
 			go UploadSessionInfo(campaignId, uuid)
@@ -65,7 +65,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 
 		companyInt, _ := strconv.Atoi(company)
 		tenantInt, _ := strconv.Atoi(tenant)
-		callServer := GetCallServerInfo(companyInt, tenantInt, callServerId)
+		resourceServer := GetResourceServerInfo(companyInt, tenantInt, callServerId, ardsReqType)
 
 		fmt.Println("Start DialPreviewNumber: ", sessionId, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 		customCompanyStr := fmt.Sprintf("%s_%s", company, tenant)
@@ -90,8 +90,8 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		if dial == true {
 			SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
 
-			resp, err := Dial(callServer.Url, param, furl, data)
-			HandleDialResponse(resp, err, callServer, campaignId, sessionId)
+			resp, err := Dial(resourceServer.Url, param, furl, data)
+			HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
 		} else {
 			SetSessionInfo(campaignId, sessionId, "Reason", "Invalied ContactType")
 			AgentReject(company, tenant, campaignId, sessionId, ardsReqType, resourceId, "Invalied ContactType")
@@ -105,8 +105,8 @@ func AgentReject(company, tenant, campaignId, sessionId, requestType, resourceId
 		callServerId := RedisHashGetField(sessionInfoKey, "ServerId")
 		companyInt, _ := strconv.Atoi(company)
 		tenantInt, _ := strconv.Atoi(tenant)
-		callServer := GetCallServerInfo(companyInt, tenantInt, callServerId)
-		DecrConcurrentChannelCount(callServer.CallServerId, campaignId)
+		resourceServer := GetResourceServerInfo(companyInt, tenantInt, callServerId, requestType)
+		DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")
 		ClearResourceSlotWhenReject(company, tenant, requestType, resourceId, sessionId)

@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 //---------------------ClusterConfigService------------------------
@@ -55,8 +56,40 @@ func GetCallserverInfo(company, tenant int) CallServerResult {
 	return CallServerResult{}
 }
 
-func RegisterCallServer(company, tenant int) CallServerInfo {
-	defCallServerInfo := CallServerInfo{}
+func GetSmsServerInfo(company, tenant int) ResourceServerInfo {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in GetSmsserverInfo", r)
+		}
+	}()
+	authToken := fmt.Sprintf("%d:%d", tenant, company)
+
+	client := &http.Client{}
+
+	request := fmt.Sprintf("http://%s/DuoMessageTemplate/MesssageDispatcherService.svc/Json/getSMSServeDetails/%d/%d", casServerHost, company, tenant)
+	fmt.Println("Start GetSmsserverInfo request: ", request)
+	req, _ := http.NewRequest("GET", request, nil)
+	req.Header.Add("Authorization", authToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+		return ResourceServerInfo{}
+	}
+	defer resp.Body.Close()
+
+	response, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("Result: ", string(response))
+
+	var smsServerApiResult ResourceServerInfo
+	json.Unmarshal(response, &smsServerApiResult)
+	if smsServerApiResult.ResourceServerId != "" {
+		return smsServerApiResult
+	}
+	return ResourceServerInfo{}
+}
+
+func RegisterCallServer(company, tenant int) ResourceServerInfo {
+	defResourceServerInfo := ResourceServerInfo{}
 
 	//Get CallServer info
 	pickedCallServer := GetCallserverInfo(company, tenant)
@@ -64,52 +97,85 @@ func RegisterCallServer(company, tenant int) CallServerInfo {
 	fmt.Println(log)
 	if pickedCallServer.InternalMainIP != "" {
 		callServerIdStr := strconv.Itoa(pickedCallServer.Id)
-		cs := CallServerInfo{}
-		cs.CallServerId = callServerIdStr
-		cs.MaxChannelCount = 50
-		cs.Url = fmt.Sprintf("%s", CreateHost(pickedCallServer.InternalMainIP, callServerPort))
+		rs := ResourceServerInfo{}
+		rs.ResourceServerId = callServerIdStr
+		rs.MaxChannelCount = 50
+		rs.Url = fmt.Sprintf("%s", CreateHost(pickedCallServer.InternalMainIP, callServerPort))
 
-		callServerKey := fmt.Sprintf("CallServer:%s", cs.CallServerId)
-		callServerjson, _ := json.Marshal(cs)
-		addResult := RedisSet(callServerKey, string(callServerjson))
+		resourceServerKey := fmt.Sprintf("ResourceServer:%s", rs.ResourceServerId)
+		resourceServerjson, _ := json.Marshal(rs)
+		addResult := RedisSet(resourceServerKey, string(resourceServerjson))
 
 		if addResult == "OK" {
-			csck := fmt.Sprintf("CallServerConcurrentCalls:%s", cs.CallServerId)
-			csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", cs.CallServerId)
-			countStr := strconv.Itoa(cs.MaxChannelCount)
-			RedisSet(csck, "0")
-			RedisSet(csmcl, countStr)
-			return cs
+			rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", rs.ResourceServerId)
+			rsmcl := fmt.Sprintf("ResourceServerMaxCallLimit:%s", rs.ResourceServerId)
+			countStr := strconv.Itoa(rs.MaxChannelCount)
+			RedisSet(rsck, "0")
+			RedisSet(rsmcl, countStr)
+			return rs
 		}
 	}
 
-	return defCallServerInfo
+	return defResourceServerInfo
 }
 
-func GetCallServerInfo(company, tenant int, serverId string) CallServerInfo {
-	callServerKey := fmt.Sprintf("CallServer:%s", serverId)
-	csString := RedisGet(callServerKey)
-	if csString != "" {
-		var callServerInfo CallServerInfo
-		json.Unmarshal([]byte(csString), &callServerInfo)
-		return callServerInfo
+func RegisterSmsServer(company, tenant int) ResourceServerInfo {
+	defResourceServerInfo := ResourceServerInfo{}
+
+	//Get CallServer info
+	pickedSmsServer := GetSmsServerInfo(company, tenant)
+	log := fmt.Sprintf("SmsSrver id: %d :: URL: %s", pickedSmsServer.ResourceServerId, pickedSmsServer.Url)
+	fmt.Println(log)
+	if pickedSmsServer.ResourceServerId != "" {
+		resourceServerKey := fmt.Sprintf("ResourceServer:%s", pickedSmsServer.ResourceServerId)
+		resourceServerjson, _ := json.Marshal(pickedSmsServer)
+		addResult := RedisSet(resourceServerKey, string(resourceServerjson))
+
+		if addResult == "OK" {
+			rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", pickedSmsServer.ResourceServerId)
+			rsmcl := fmt.Sprintf("ResourceServerMaxCallLimit:%s", pickedSmsServer.ResourceServerId)
+			countStr := strconv.Itoa(pickedSmsServer.MaxChannelCount)
+			RedisSet(rsck, "0")
+			RedisSet(rsmcl, countStr)
+			return pickedSmsServer
+		}
+	}
+
+	return defResourceServerInfo
+}
+
+func GetResourceServerInfo(company, tenant int, serverId, serverType string) ResourceServerInfo {
+	resourceServerKey := fmt.Sprintf("ResourceServer:%s", serverId)
+	rsString := RedisGet(resourceServerKey)
+	if rsString != "" {
+		var resourceServerInfo ResourceServerInfo
+		json.Unmarshal([]byte(rsString), &resourceServerInfo)
+		return resourceServerInfo
 	} else {
-		return RegisterCallServer(company, tenant)
+		//add swith case to pick server for campanign type eg:- CAll, SMS, Email
+		switch strings.ToLower(serverType) {
+		case "call":
+			return RegisterCallServer(company, tenant)
+		case "sms":
+			return RegisterSmsServer(company, tenant)
+		}
+
+		return ResourceServerInfo{}
 	}
 }
 
 func GetConcurrentChannelCount(serverId, campaignId string) (concurrentOnServer, concurrentOnCamp int) {
-	csckC := fmt.Sprintf("CallServerConcurrentCalls:%s:%s", serverId, campaignId)
-	csck := fmt.Sprintf("CallServerConcurrentCalls:%s", serverId)
-	channelCountC := RedisGet(csckC)
+	rsckC := fmt.Sprintf("ResourceServerConcurrentCalls:%s:%s", serverId, campaignId)
+	rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", serverId)
+	channelCountC := RedisGet(rsckC)
 	fmt.Println("RedisGet channelCountC: ", channelCountC)
 
 	if channelCountC == "" {
-		RedisSet(csckC, "0")
+		RedisSet(rsckC, "0")
 		channelCountC = "0"
 	}
 
-	channelCountS := RedisGet(csck)
+	channelCountS := RedisGet(rsck)
 	fmt.Println("RedisGet channelCountS: ", channelCountS)
 	valueC, err := strconv.Atoi(channelCountC)
 	valueS, _ := strconv.Atoi(channelCountS)
@@ -122,23 +188,23 @@ func GetConcurrentChannelCount(serverId, campaignId string) (concurrentOnServer,
 }
 
 func IncrConcurrentChannelCount(serverId, campaignId string) {
-	csckC := fmt.Sprintf("CallServerConcurrentCalls:%s:%s", serverId, campaignId)
-	csck := fmt.Sprintf("CallServerConcurrentCalls:%s", serverId)
-	RedisIncr(csckC)
-	RedisIncr(csck)
+	rsckC := fmt.Sprintf("ResourceServerConcurrentCalls:%s:%s", serverId, campaignId)
+	rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", serverId)
+	RedisIncr(rsckC)
+	RedisIncr(rsck)
 }
 
 func DecrConcurrentChannelCount(serverId, campaignId string) {
-	csckC := fmt.Sprintf("CallServerConcurrentCalls:%s:%s", serverId, campaignId)
-	csck := fmt.Sprintf("CallServerConcurrentCalls:%s", serverId)
-	csckCExists := RedisCheckKeyExist(csckC)
-	csckExists := RedisCheckKeyExist(csck)
+	rsckC := fmt.Sprintf("ResourceServerConcurrentCalls:%s:%s", serverId, campaignId)
+	rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", serverId)
+	rsckCExists := RedisCheckKeyExist(rsckC)
+	rsckExists := RedisCheckKeyExist(rsck)
 
-	if csckCExists == true {
-		RedisIncrBy(csckC, -1)
+	if rsckCExists == true {
+		RedisIncrBy(rsckC, -1)
 	}
-	if csckExists == true {
-		RedisIncrBy(csck, -1)
+	if rsckExists == true {
+		RedisIncrBy(rsck, -1)
 	}
 }
 
@@ -162,8 +228,8 @@ func DecrConcurrentChannelCount(serverId, campaignId string) {
 //}
 
 func GetMaxChannelLimit(serverId string) int {
-	csmcl := fmt.Sprintf("CallServerMaxCallLimit:%s", serverId)
-	maxChannelCount := RedisGet(csmcl)
+	rsmcl := fmt.Sprintf("ResourceServerMaxCallLimit:%s", serverId)
+	maxChannelCount := RedisGet(rsmcl)
 	value, err := strconv.Atoi(maxChannelCount)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -174,8 +240,8 @@ func GetMaxChannelLimit(serverId string) int {
 }
 
 func RemoveCampConcurrentChannelCount(campaignId string) {
-	SKcsckC := fmt.Sprintf("CallServerConcurrentCalls:*:%s", campaignId)
-	sResult := RedisSearchKeys(SKcsckC)
+	SKrsckC := fmt.Sprintf("ResourceServerConcurrentCalls:*:%s", campaignId)
+	sResult := RedisSearchKeys(SKrsckC)
 	if len(sResult) > 0 {
 		RedisRemove(sResult[0])
 	}
