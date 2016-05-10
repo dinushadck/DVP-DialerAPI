@@ -115,7 +115,6 @@ func AgentReject(company, tenant, campaignId, sessionId, requestType, resourceId
 }
 
 //-----------------------------------CampaignManager Service-------------------------------------------------
-
 func RequestCampaignAttributeInfo(company, tenant int, campaignId string) []string {
 	defer func() {
 		if r := recover(); r != nil {
@@ -124,12 +123,29 @@ func RequestCampaignAttributeInfo(company, tenant int, campaignId string) []stri
 	}()
 	//Request campaign from Campaign Manager service
 	attributeDetails := make([]string, 0)
+
+	response := RequestCampaignAddtionalData(company, tenant, campaignId, "PREVIEW", "ARDS", "ATTRIBUTE")
+	if response != "" {
+		var attInfo []string
+		json.Unmarshal([]byte(response), &attInfo)
+		attributeDetails = attInfo
+	}
+	return attributeDetails
+}
+
+func RequestCampaignAddtionalData(company, tenant int, campaignId, class, ctype, category string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RequestCampaignAddtionalData", r)
+		}
+	}()
+	//Request campaign from Campaign Manager service
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/AdditinalData/PREVIEW/ARDS/ATTRIBUTE", CreateHost(campaignServiceHost, campaignServicePort), campaignId)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/AdditinalData/%s/%s/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, class, ctype, category)
 	fmt.Println("Start RequestCampaign request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
@@ -138,18 +154,21 @@ func RequestCampaignAttributeInfo(company, tenant int, campaignId string) []stri
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
-		return attributeDetails
+		return ""
 	}
 	defer resp.Body.Close()
 
 	response, _ := ioutil.ReadAll(resp.Body)
 
-	var campaignAdditionalDataResult CampaignAdditionalDataResult
-	json.Unmarshal(response, &campaignAdditionalDataResult)
-	if campaignAdditionalDataResult.IsSuccess == true {
-		var attInfo []string
-		json.Unmarshal([]byte(campaignAdditionalDataResult.Result.AdditionalData), &attInfo)
-		attributeDetails = attInfo
+	if response != nil {
+		var campaignAdditionalDataResult CampaignAdditionalDataResult
+		json.Unmarshal(response, &campaignAdditionalDataResult)
+		if campaignAdditionalDataResult.IsSuccess == true {
+			return campaignAdditionalDataResult.Result.AdditionalData
+		} else {
+			return ""
+		}
+	} else {
+		return ""
 	}
-	return attributeDetails
 }

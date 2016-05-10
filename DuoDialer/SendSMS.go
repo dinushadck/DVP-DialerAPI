@@ -50,21 +50,21 @@ func SaveShortMessageInformation(sms Sms) {
 }
 
 func GenerateSMS(fromNumber, message, phoneNumber string) Sms {
-	numbers := make([]string, 0)
-	smsInfoData := SmsInfo{}
-	smsData := Sms{}
+	numbers1 := make([]string, 0)
+	smsInfoData1 := SmsInfo{}
+	smsData1 := Sms{}
 
-	numbers = append(numbers, phoneNumber)
-	smsInfoData.Date = time.Now().String()
-	smsInfoData.FromPhoneNumber = fromNumber
-	smsInfoData.GatewayName = 1
-	smsInfoData.MessageContent = message
-	smsInfoData.PhoneNumbers = numbers
+	numbers1 = append(numbers1, phoneNumber)
+	smsInfoData1.Date = fmt.Sprintf("/Date(%d)/", time.Now().UnixNano())
+	smsInfoData1.FromPhoneNumber = fromNumber
+	smsInfoData1.GatewayName = 1
+	smsInfoData1.MessageContent = message
+	smsInfoData1.PhoneNumbers = numbers1
 
-	smsData.shortMessageInfo = smsInfoData
-	smsData.securityToken = v5_1SecurityToken
+	smsData1.ShortMessageInfo = smsInfoData1
+	smsData1.SecurityToken = v5_1SecurityToken
 
-	return smsData
+	return smsData1
 }
 
 func SendSms(company, tenant int, resourceServer ResourceServerInfo, campaignId, camClass, camType, camCategory, fromNumber, message, phoneNumber string) {

@@ -452,13 +452,17 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 								}
 								break
 							case "SMS":
-								message := "123123"
-								go SendSms(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, defaultAni, message, number)
+								message := RequestCampaignAddtionalData(company, tenant, campaignId, "SMS", "mode1", "BLAST")
+								if message != "" {
+									go SendSms(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, defaultAni, message, number)
+								}
 								break
 							case "EMAIL":
-								subject := "Test"
-								message := "Hello"
-								go SendEmail(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, defaultAni, subject, message, number)
+								defEmailInfo := EmailAdditionalData{}
+								emailInfo := RequestEmailInfo(company, tenant, campaignId)
+								if emailInfo != defEmailInfo {
+									go SendEmail(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, emailInfo.FromAddresss, emailInfo.Subject, emailInfo.Body, number)
+								}
 								break
 							}
 							time.Sleep(100 * time.Millisecond)

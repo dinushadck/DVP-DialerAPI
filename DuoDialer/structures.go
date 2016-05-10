@@ -14,6 +14,7 @@ type Configuration struct {
 	SecurityPort             string
 	RedisIp                  string
 	RedisPort                string
+	RedisPassword            string
 	RedisDb                  int
 	DialerId                 string
 	CampaignLimit            int
@@ -47,6 +48,7 @@ type EnvConfiguration struct {
 	SecurityPort             string
 	RedisIp                  string
 	RedisPort                string
+	RedisPassword            string
 	RedisDb                  string
 	DialerId                 string
 	CampaignLimit            string
@@ -197,6 +199,13 @@ type CampaignStatusResult struct {
 	CustomMessage string
 	IsSuccess     bool
 	Result        CampaignState
+}
+
+type EmailAdditionalData struct {
+	FromAddresss string
+	Cc           string
+	Body         string
+	Subject      string
 }
 
 type CampaignAdditionalData struct {
@@ -393,8 +402,8 @@ type Result struct {
 
 //-------------------CAS SMS---------------------------
 type Sms struct {
-	shortMessageInfo SmsInfo
-	securityToken    string
+	ShortMessageInfo SmsInfo
+	SecurityToken    string
 }
 
 type SmsInfo struct {
@@ -421,7 +430,7 @@ type SmsAttachments struct {
 
 //-------------------CAS Email---------------------------
 type Email struct {
-	emailInformation EmailInformation
+	EmailInformation EmailInformation
 	SecurityToken    string
 }
 

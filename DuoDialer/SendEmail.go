@@ -55,12 +55,12 @@ func GenerateEmail(fromEmail, subject, message, toEmail string) Email {
 	_email := Email{}
 
 	toEmailAddresses = append(toEmailAddresses, toEmail)
-	_emailInfo.Date = time.Now().String()
+	_emailInfo.Date = fmt.Sprintf("/Date(%d)/", time.Now().UnixNano())
 	_emailInfo.ToEmailAddresses = toEmailAddresses
 	_emailInfo.Subject = subject
 	_emailInfo.Content = message
 
-	_email.emailInformation = _emailInfo
+	_email.EmailInformation = _emailInfo
 	_email.SecurityToken = v5_1SecurityToken
 
 	return _email
@@ -78,4 +78,22 @@ func SendEmail(company, tenant int, resourceServer ResourceServerInfo, campaignI
 	SetSessionInfo(campaignId, toEmail, "Reason", "dial_success")
 	SetSessionInfo(campaignId, toEmail, "DialerStatus", "connected")
 	go UploadSessionInfo(campaignId, toEmail)
+}
+
+func RequestEmailInfo(company, tenant int, campaignId string) EmailAdditionalData {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RequestEmailInfo", r)
+		}
+	}()
+	//Request campaign from Campaign Manager service
+	additionalInfo := EmailAdditionalData{}
+
+	response := RequestCampaignAddtionalData(company, tenant, campaignId, "EMAIL", "mode1", "BLAST")
+	if response != "" {
+		var tempAdditionalInfo EmailAdditionalData
+		json.Unmarshal([]byte(response), &tempAdditionalInfo)
+		additionalInfo = tempAdditionalInfo
+	}
+	return additionalInfo
 }

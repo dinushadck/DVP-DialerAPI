@@ -13,6 +13,7 @@ import (
 var dirPath string
 var redisIp string
 var redisPort string
+var redisPassword string
 var securityIp string
 var securityPort string
 var redisDb int
@@ -67,7 +68,8 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.RedisIp = "127.0.0.1"
 		defconfiguration.RedisPort = "6379"
 		defconfiguration.SecurityIp = "127.0.0.1"
-		defconfiguration.SecurityPort = "6379"
+		defconfiguration.SecurityPort = "6389"
+		defconfiguration.RedisPassword = "DuoS123"
 		defconfiguration.RedisDb = 5
 		defconfiguration.DialerId = "Dialer2"
 		defconfiguration.CampaignLimit = 30
@@ -105,6 +107,7 @@ func LoadDefaultConfig() {
 
 	redisIp = defconfiguration.RedisIp
 	redisPort = defconfiguration.RedisPort
+	redisPassword = defconfiguration.RedisPassword
 	securityIp = defconfiguration.SecurityIp
 	securityPort = defconfiguration.SecurityPort
 	redisDb = defconfiguration.RedisDb
@@ -158,6 +161,7 @@ func LoadConfiguration() {
 
 		redisIp = os.Getenv(envconfiguration.RedisIp)
 		redisPort = os.Getenv(envconfiguration.RedisPort)
+		redisPassword = os.Getenv(envconfiguration.RedisPassword)
 		securityIp = os.Getenv(envconfiguration.SecurityIp)
 		securityPort = os.Getenv(envconfiguration.SecurityPort)
 		redisDb, converr = strconv.Atoi(os.Getenv(envconfiguration.RedisDb))
@@ -192,6 +196,9 @@ func LoadConfiguration() {
 		}
 		if redisPort == "" {
 			redisPort = defConfig.RedisPort
+		}
+		if redisPassword == "" {
+			redisPassword = defConfig.RedisPassword
 		}
 		if redisDb == 0 || converr != nil {
 			redisDb = defConfig.RedisDb
