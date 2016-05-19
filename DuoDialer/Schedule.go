@@ -45,18 +45,21 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time) Appoinment {
 			tempstartDate, _ := time.Parse(layout2, appmnt.StartDate)
 			tempendDate, _ := time.Parse(layout2, appmnt.EndDate)
 
-			startDate := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), tempstartDate.Hour(), tempstartDate.Minute(), tempstartDate.Second(), 0, time.UTC)
-			endDate := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), tempendDate.Hour(), tempendDate.Minute(), tempendDate.Second(), 0, time.UTC)
+			startDate := tempstartDate.Local()
+			endDate := tempendDate.Local()
 
 			fmt.Println("appoinment startDate: ", startDate.String())
 			fmt.Println("appoinment endDate: ", endDate.String())
 
 			if startDate.Before(timeNow) && endDate.After(timeNow) {
-				startTime, _ := time.Parse(layout1, appmnt.StartTime)
-				endTime, _ := time.Parse(layout1, appmnt.EndTime)
+				tmpstartTime, _ := time.Parse(layout1, appmnt.StartTime)
+				tmpendTime, _ := time.Parse(layout1, appmnt.EndTime)
 
-				localStartTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), startTime.Hour(), startTime.Minute(), startTime.Second(), 0, time.UTC)
-				localEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.UTC)
+				startTime := tmpstartTime.Local()
+				endTime := tmpendTime.Local()
+
+				localStartTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), startTime.Hour(), startTime.Minute(), startTime.Second(), 0, time.Local)
+				localEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.Local)
 
 				fmt.Println("serverTimeUTC: ", timeNow.String())
 				fmt.Println("appoinment startTime: ", localStartTime.String())
@@ -76,7 +79,7 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time) Appoinment {
 
 func CheckAppoinmentForCampaign(internalAuthToken, schedulrId string) Appoinment {
 	appionments := GetAppoinmentsForSchedule(internalAuthToken, schedulrId)
-	timeNow := time.Now().UTC()
+	timeNow := time.Now()
 	return CheckAppoinments(appionments, timeNow)
 }
 

@@ -400,13 +400,13 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
 
 		endTime, _ := time.Parse(layout1, appment.EndTime)
-		timeNow := time.Now().UTC()
-		appmntEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.UTC)
+		timeNow := time.Now()
+		appmntEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.Local)
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
 			if campStatus == "Running" {
-				tm := time.Now().UTC()
+				tm := time.Now()
 				fmt.Println("endTime: ", appmntEndTime.String())
 				fmt.Println("timeNW: ", tm.String())
 				if tm.Before(appmntEndTime) {

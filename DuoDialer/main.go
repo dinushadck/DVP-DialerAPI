@@ -33,7 +33,7 @@ func main() {
 
 		if onGoingCampaignCount > 0 {
 
-			tm := time.Now().UTC()
+			tm := time.Now()
 			runningCampaigns := GetAllRunningCampaign()
 			for _, campaign := range runningCampaigns {
 				campIdStr := strconv.Itoa(campaign.CampaignId)
@@ -52,8 +52,8 @@ func main() {
 						UpdateCampaignStartStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 					}
 
-					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), tempCampaignStartDate.Hour(), tempCampaignStartDate.Minute(), tempCampaignStartDate.Second(), 0, time.UTC)
-					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, time.UTC)
+					campaignStartDate := tempCampaignStartDate.Local()
+					campaignEndDate := tempCampaignEndDate.Local()
 					fmt.Println("Check Campaign: ", campIdStr)
 					fmt.Println("campaignStartDate: ", campaignStartDate.String())
 					fmt.Println("campaignEndDate: ", campaignEndDate.String())
