@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/fzzy/radix/redis"
 	"github.com/gorilla/context"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func loadJwtMiddleware() *jwtmiddleware.JWTMiddleware {
@@ -16,6 +18,7 @@ func loadJwtMiddleware() *jwtmiddleware.JWTMiddleware {
 			fmt.Println(token.Claims["iss"])
 			fmt.Println(token.Claims["jti"])
 			secretKey := fmt.Sprintf("token:iss:%s:%s", token.Claims["iss"], token.Claims["jti"])
+			fmt.Println("secretKey: ", secretKey)
 			secret := SecurityGet(secretKey)
 			if secret == "" {
 				return nil, fmt.Errorf("Invalied 'iss' or 'jti' in JWT")
@@ -68,4 +71,22 @@ func ResponseGenerator(isSuccess bool, customMessage, result, exception string) 
 	res.Result = result
 	resb, _ := json.Marshal(res)
 	return resb
+}
+
+func SecurityGet(key string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisGet", r)
+		}
+	}()
+	client, err := redis.DialTimeout("tcp", securityIp, time.Duration(10)*time.Second)
+	errHndlr(err)
+	defer client.Close()
+	//authServer
+	authE := client.Cmd("auth", redisPassword)
+	errHndlr(authE.Err)
+
+	strObj, _ := client.Cmd("get", key).Str()
+	fmt.Println(strObj)
+	return strObj
 }

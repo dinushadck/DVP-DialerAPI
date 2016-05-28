@@ -452,10 +452,10 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 								}
 								break
 							case "SMS":
-								message := RequestCampaignAddtionalData(company, tenant, campaignId, "SMS", "mode1", "BLAST")
-								if message != "" {
-									go SendSms(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, defaultAni, message, number)
-								}
+								//message := RequestCampaignAddtionalData(company, tenant, campaignId, "SMS", "mode1", "BLAST")
+								//if message != "" {
+								//	go SendSms(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, defaultAni, message, number)
+								//}
 								break
 							case "EMAIL":
 								defEmailInfo := EmailAdditionalData{}

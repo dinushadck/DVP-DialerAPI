@@ -203,7 +203,7 @@ func LoadConfiguration() {
 		if redisDb == 0 || converr != nil {
 			redisDb = defConfig.RedisDb
 		}
-		if redisIp == "" {
+		if securityIp == "" {
 			securityIp = defConfig.SecurityIp
 		}
 		if securityPort == "" {
@@ -293,6 +293,7 @@ func LoadConfiguration() {
 
 	fmt.Println("redisIp:", redisIp)
 	fmt.Println("redisDb:", redisDb)
+	fmt.Println("securityIp:", securityIp)
 	fmt.Println("dialerId:", dialerId)
 	fmt.Println("campaignLimit:", campaignLimit)
 }

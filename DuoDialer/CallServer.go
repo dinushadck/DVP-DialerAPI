@@ -62,39 +62,13 @@ func GetSmsServerInfo(company, tenant int) ResourceServerInfo {
 			fmt.Println("Recovered in GetSmsserverInfo", r)
 		}
 	}()
-	authToken := fmt.Sprintf("%d:%d", tenant, company)
-
-	client := &http.Client{}
-
-	request := fmt.Sprintf("http://%s/DuoMessageTemplate/MesssageDispatcherService.svc/Json/getSMSServeDetails/%d/%d", casServerHost, company, tenant)
-	fmt.Println("Start GetSmsserverInfo request: ", request)
-	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", authToken)
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err.Error())
-		return ResourceServerInfo{}
-	}
-	defer resp.Body.Close()
-
-	response, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("Result: ", string(response))
 
 	var smsServerApiResult ResourceServerInfo
-	var resData string
-	conErr1 := json.Unmarshal(response, &resData)
-	if conErr1 != nil {
-		fmt.Println(conErr1.Error())
-	}
-	fmt.Println("tempData: ", resData)
-	conErr := json.Unmarshal([]byte(resData), &smsServerApiResult)
-	if conErr != nil {
-		fmt.Println(conErr.Error())
-	}
-	if smsServerApiResult.ResourceServerId != "" {
-		return smsServerApiResult
-	}
-	return ResourceServerInfo{}
+	smsServerApiResult.ResourceServerId = "SMS1"
+	smsServerApiResult.Url = "159.203.109.43:1401"
+	smsServerApiResult.MaxChannelCount = 5
+
+	return smsServerApiResult
 }
 
 func GetEmailServerInfo(company, tenant int) ResourceServerInfo {

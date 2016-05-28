@@ -21,6 +21,7 @@ type DVP struct {
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
 	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ContactNumber:string}" output:"bool"`
 	ardsCallback           gorest.EndPoint `method:"GET" path:"/DialerAPI/ArdsCallback/" output:"string"`
+	sendSms                gorest.EndPoint `method:"GET" path:"/DialerAPI/SendSms/{DnisNumber:string}/{Message:string}" output:"bool"`
 }
 
 func (dvp DVP) IncrMaxChannelLimit(campaignId string) {
@@ -221,4 +222,17 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 		}
 	}
 	return
+}
+
+func (dvp DVP) SendSms(DnisNumber, Message string) bool {
+	company, tenant := validateCompanyTenant(dvp)
+	if company != 0 && tenant != 0 {
+		log := fmt.Sprintf("Start Send SMS DNIS:%s # Message:%s ", DnisNumber, Message)
+		fmt.Println(log)
+
+		SendSmsDirect(company, tenant, Message, DnisNumber)
+		return true
+	} else {
+		return false
+	}
 }

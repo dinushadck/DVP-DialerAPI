@@ -1,82 +1,87 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
-func SaveShortMessageInformation(sms Sms) {
+func GenerateSMS(smsServerUrl, fromNumber, message, phoneNumber string) string {
+	resportUrl := "http://45.55.171.228:9998/reply"
+
+	ru := url.QueryEscape(resportUrl)
+	fmt.Println(ru)
+
+	param := fmt.Sprintf("username=foo&password=bar&from=%s&to=%s&content=%s&dlr-url=%s&dlr-level=2", fromNumber, phoneNumber, message, ru)
+
+	request := fmt.Sprintf("http://%s/send?%s", smsServerUrl, param)
+	//path := fmt.Sprintf("send?")
+	//param := fmt.Sprintf(" %s%s %s", params, furl, data)
+
+	//u, _ := url.Parse(request)
+	//u.Path += path
+	//u.Path += param
+
+	fmt.Println("request: ", request)
+	return request
+}
+
+func SendSmsDirect(company, tenant int, message, phoneNumber string) {
+	campaignId := "SMS_Direct"
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	serverInfo := GetResourceServerInfo(company, tenant, "SMS1", "sms")
+	_, ani, dnis := GetTrunkCode(internalAuthToken, "", phoneNumber)
+
+	IncrConcurrentChannelCount(serverInfo.ResourceServerId, campaignId)
+	IncrCampaignDialCount(company, tenant, campaignId)
+	InitiateSessionInfo(company, tenant, 240, "SMS", "DIRECT", "DIALOUT", "1", campaignId, dnis, dnis, "start", "start", time.Now().UTC().Format(layout4), serverInfo.ResourceServerId)
+
+	smsRequest := GenerateSMS(serverInfo.Url, ani, message, dnis)
+	resp, err := SendSms(smsRequest)
+	HandleSmsResponse(resp, err, serverInfo, campaignId, dnis)
+}
+
+func SendSms(smsUrl string) (*http.Response, error) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered in SaveShortMessageInformation", r)
+			fmt.Println("Recovered in SendSms", r)
 		}
 	}()
-	smsByte, err := json.Marshal(sms)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	text := string(smsByte)
-	fmt.Println(text)
-	//upload to campaign service
-	serviceurl := fmt.Sprintf("http://%s/DuoMessageTemplate/MesssageDispatcherService.svc/Json/saveShortMessageInformation", casServerHost)
-	//jwtToken := fmt.Sprintf("Bearer %s", accessToken)
-	//internalAuthToken := fmt.Sprintf("%s:%s", sessionInfo["TenantId"], sessionInfo["CompanyId"])
 
-	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(smsByte))
-	req.Header.Set("Content-Type", "application/json")
-	//req.Header.Set("authorization", jwtToken)
-	//req.Header.Set("companyinfo", internalAuthToken)
-	fmt.Println("request:", serviceurl)
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	resp, err := http.Get(smsUrl)
 	defer resp.Body.Close()
+	return resp, err
+}
 
-	body, errb := ioutil.ReadAll(resp.Body)
-	//if success remove hashInfo
-	if errb != nil {
+func HandleSmsResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) {
+	if err != nil {
+		DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
+		SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
+		SetSessionInfo(campaignId, sessionId, "DialerStatus", "failed")
+		go UploadSessionInfo(campaignId, sessionId)
 		fmt.Println(err.Error())
-	} else {
-		result := string(body)
-		fmt.Println("response Body:", result)
 	}
-}
 
-func GenerateSMS(fromNumber, message, phoneNumber string) Sms {
-	numbers1 := make([]string, 0)
-	smsInfoData1 := SmsInfo{}
-	smsData1 := Sms{}
+	if resp != nil {
+		response, _ := ioutil.ReadAll(resp.Body)
+		tmx := string(response[:])
+		fmt.Println(tmx)
+		resultInfo := strings.Split(tmx, " ")
+		if len(resultInfo) > 0 {
+			if resultInfo[0] == "Success" {
+				DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
 
-	numbers1 = append(numbers1, phoneNumber)
-	smsInfoData1.Date = fmt.Sprintf("/Date(%d)/", time.Now().UnixNano())
-	smsInfoData1.FromPhoneNumber = fromNumber
-	smsInfoData1.GatewayName = 1
-	smsInfoData1.MessageContent = message
-	smsInfoData1.PhoneNumbers = numbers1
+				SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
+				SetSessionInfo(campaignId, sessionId, "DialerStatus", "connected")
+			} else {
+				SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
+				SetSessionInfo(campaignId, sessionId, "DialerStatus", "not-connected")
+			}
 
-	smsData1.ShortMessageInfo = smsInfoData1
-	smsData1.SecurityToken = v5_1SecurityToken
-
-	return smsData1
-}
-
-func SendSms(company, tenant int, resourceServer ResourceServerInfo, campaignId, camClass, camType, camCategory, fromNumber, message, phoneNumber string) {
-	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
-	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, camClass, camType, camCategory, "1", campaignId, phoneNumber, phoneNumber, "start", "start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
-	smsRequest := GenerateSMS(fromNumber, message, phoneNumber)
-	SaveShortMessageInformation(smsRequest)
-
-	DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
-
-	SetSessionInfo(campaignId, phoneNumber, "Reason", "dial_success")
-	SetSessionInfo(campaignId, phoneNumber, "DialerStatus", "connected")
-	go UploadSessionInfo(campaignId, phoneNumber)
+			go UploadSessionInfo(campaignId, sessionId)
+		}
+	}
 }

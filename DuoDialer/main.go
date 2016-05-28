@@ -25,10 +25,10 @@ func main() {
 	for {
 		onGoingCampaignCount := GetOnGoingCampaignCount()
 		if onGoingCampaignCount < campaignLimit {
-			campaigns := RequestCampaign(campaignLimit - onGoingCampaignCount)
-			for _, campaign := range campaigns {
-				AddCampaignToDialer(campaign)
-			}
+			//campaigns := RequestCampaign(campaignLimit - onGoingCampaignCount)
+			//for _, campaign := range campaigns {
+			//	AddCampaignToDialer(campaign)
+			//}
 		}
 
 		if onGoingCampaignCount > 0 {
@@ -91,9 +91,11 @@ func main() {
 }
 
 func InitiateService() {
+	jwtMiddleware := loadJwtMiddleware()
 	gorest.RegisterService(new(DVP))
-	http.Handle("/", gorest.Handle())
+	//http.Handle("/", gorest.Handle())
+	app := jwtMiddleware.Handler(gorest.Handle())
 	addr := fmt.Sprintf(":%s", port)
 	fmt.Println(addr)
-	http.ListenAndServe(addr, nil)
+	http.ListenAndServe(addr, app)
 }
