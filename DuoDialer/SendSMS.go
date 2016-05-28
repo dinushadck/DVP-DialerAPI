@@ -68,7 +68,7 @@ func HandleSmsResponse(resp *http.Response, err error, server ResourceServerInfo
 	if resp != nil {
 		response, _ := ioutil.ReadAll(resp.Body)
 		tmx := string(response[:])
-		fmt.Println(tmx)
+		fmt.Println("response: ", tmx)
 		resultInfo := strings.Split(tmx, " ")
 		if len(resultInfo) > 0 {
 			if resultInfo[0] == "Success" {
