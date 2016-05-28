@@ -11,6 +11,7 @@ import (
 
 func GetUuid() string {
 	uuidService := fmt.Sprintf("http://%s/api/create_uuid", CreateHost(callServerHost, callServerPort))
+	fmt.Println("uuidService: ", uuidService)
 	resp, err := http.Get(uuidService)
 	if err != nil {
 		fmt.Println(err.Error())

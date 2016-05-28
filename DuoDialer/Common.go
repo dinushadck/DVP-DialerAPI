@@ -19,6 +19,8 @@ func CreateHost(_ip, _port string) string {
 	if testIp.To4() == nil {
 		return _ip
 	} else {
+		newurl := fmt.Sprintf("%s:%s", _ip, _port)
+		fmt.Println(newurl)
 		return fmt.Sprintf("%s:%s", _ip, _port)
 	}
 }

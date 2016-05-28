@@ -399,7 +399,8 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 		maxChannelLimitStr := strconv.Itoa(campaignMaxChannelCount)
 		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
 
-		endTime, _ := time.Parse(layout1, appment.EndTime)
+		tempendTime, _ := time.Parse(layout1, appment.EndTime)
+		endTime := tempendTime.Local()
 		timeNow := time.Now()
 		appmntEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.Local)
 
