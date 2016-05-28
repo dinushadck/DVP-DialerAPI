@@ -52,7 +52,6 @@ func SendSms(smsUrl string) (*http.Response, error) {
 	}()
 
 	resp, err := http.Get(smsUrl)
-	defer resp.Body.Close()
 	return resp, err
 }
 
@@ -67,6 +66,7 @@ func HandleSmsResponse(resp *http.Response, err error, server ResourceServerInfo
 
 	if resp != nil {
 		response, _ := ioutil.ReadAll(resp.Body)
+		defer resp.Body.Close()
 		tmx := string(response[:])
 		fmt.Println("response: ", tmx)
 		resultInfo := strings.Split(tmx, " ")
