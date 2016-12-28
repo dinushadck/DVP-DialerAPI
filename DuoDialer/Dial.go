@@ -76,7 +76,7 @@ func Dial(server, params, furl, data string) (*http.Response, error) {
 
 	fmt.Println(u.String())
 	resp, err := http.Get(u.String())
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
 	return resp, err
 }
 
@@ -91,6 +91,7 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 
 	if resp != nil {
 		response, _ := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
 		tmx := string(response[:])
 		fmt.Println(tmx)
 		resultInfo := strings.Split(tmx, " ")

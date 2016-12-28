@@ -1,7 +1,7 @@
 {
     "RedisIp": "SYS_REDIS_HOST",
 	"RedisPort": "SYS_REDIS_PORT",
-	"RedisDb": "SYS_REDIS_DB",
+	"RedisDb": "SYS_REDIS_DB_ARDS",
 	"DialerId": "SYS_DIALER_ID",
 	"CampaignLimit": "SYS_DIALER_CAMP_LIMIT",
 	"LbIpAddress": "LB_FRONTEND",
