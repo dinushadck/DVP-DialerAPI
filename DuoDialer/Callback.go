@@ -181,19 +181,19 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber
 
 				campaignInfo, isCamExists := GetCampaign(_company, _tenant, camIdInt)
 				if isCamExists {
-					tmNow := time.Now()
-					tmNowUTC := tmNow.UTC()
+
+					location, _ := time.LoadLocation(campaignInfo.TimeZone)
+
+					tmNow := time.Now().In(location)
 					secCount := tmNow.Second() + callbackInterval
-					secCountUTC := tmNowUTC.Second() + callbackInterval
-					callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), secCount, 0, time.Local)
-					callbackTimeUTC := time.Date(tmNowUTC.Year(), tmNowUTC.Month(), tmNowUTC.Day(), tmNowUTC.Hour(), tmNowUTC.Minute(), secCountUTC, 0, time.UTC)
+					callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), secCount, 0, location)
 
 					tempCampaignEndDate, _ := time.Parse(layout1, campaignInfo.CampConfigurations.EndDate)
-					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, time.UTC)
+					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
 
-					if campaignEndDate.After(callbackTimeUTC) {
+					if campaignEndDate.After(callbackTime) {
 						scheduleIdStr := strconv.Itoa(campaignInfo.CampScheduleInfo[0].ScheduleId)
-						validateAppoinment := CheckAppoinmentForCallback(_company, _tenant, scheduleIdStr, callbackTimeUTC)
+						validateAppoinment := CheckAppoinmentForCallback(_company, _tenant, scheduleIdStr, callbackTime, campaignInfo.TimeZone)
 						if validateAppoinment {
 							callbackObj := CampaignCallbackObj{}
 							callbackObj.CampaignId = camIdInt
@@ -214,7 +214,7 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber
 							cbUrl := u.String()
 
 							jsonData, _ := json.Marshal(callbackObj)
-							go UploadCallbackInfo(_company, _tenant, callbackTimeUTC, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+							go UploadCallbackInfo(_company, _tenant, callbackTime, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
 						}
 					}
 				}

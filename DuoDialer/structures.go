@@ -93,6 +93,7 @@ type Campaign struct {
 	OperationalStatus  string
 	CampScheduleInfo   []CampaignShedule
 	CampConfigurations CampaignConfigInfo
+	TimeZone           string
 }
 
 type CampaignResult struct {
@@ -267,27 +268,34 @@ type CallRule struct {
 type ScheduleDetails struct {
 	CustomMessage string
 	IsSuccess     bool
-	Result        []Appoinment
+	Result        []Schedule
+}
+
+type Schedule struct {
+	ScheduleName string
+	TimeZone     string
+	Appointment  []Appoinment
 }
 
 type Appoinment struct {
-	id              int
-	AppointmentName string
-	Action          string
-	ExtraData       string
-	StartDate       string
-	EndDate         string
-	StartTime       string
-	EndTime         string
-	DaysOfWeek      string
-	ObjClass        string
-	ObjType         string
-	ObjCategory     string
-	CompanyId       int
-	TenantId        int
-	createdAt       string
-	updatedAt       string
-	ScheduleId      int
+	id                int
+	AppointmentName   string
+	Action            string
+	ExtraData         string
+	StartDate         string
+	EndDate           string
+	StartTime         string
+	EndTime           string
+	RecurrencePattern string
+	DaysOfWeek        string
+	ObjClass          string
+	ObjType           string
+	ObjCategory       string
+	CompanyId         int
+	TenantId          int
+	createdAt         string
+	updatedAt         string
+	ScheduleId        int
 }
 
 //--------------------Events--------------------

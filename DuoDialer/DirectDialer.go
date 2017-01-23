@@ -11,15 +11,17 @@ func DirectDialCampaign(company, tenant, campaignId int, number string) bool {
 	campaignIdStr := strconv.Itoa(campaignId)
 	campaignInfo, isCamExists := GetCampaign(company, tenant, campaignId)
 	if isCamExists {
-		tmNowUTC := time.Now().UTC()
+
+		location, _ := time.LoadLocation(campaignInfo.TimeZone)
+		tmNow := time.Now().In(location)
 
 		tempCampaignEndDate, _ := time.Parse(layout1, campaignInfo.CampConfigurations.EndDate)
-		campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, time.UTC)
+		campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
 
-		if campaignEndDate.After(tmNowUTC) {
+		if campaignEndDate.After(tmNow) {
 			scheduleIdStr := strconv.Itoa(campaignInfo.CampScheduleInfo[0].ScheduleId)
 			camScheduleStr := strconv.Itoa(campaignInfo.CampScheduleInfo[0].CamScheduleId)
-			validateAppoinment := CheckAppoinmentForCallback(company, tenant, scheduleIdStr, tmNowUTC)
+			validateAppoinment := CheckAppoinmentForCallback(company, tenant, scheduleIdStr, tmNow, campaignInfo.TimeZone)
 			if validateAppoinment {
 				numberWithTryCount := fmt.Sprintf("%s:%d", number, 1)
 				return AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)

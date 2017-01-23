@@ -25,34 +25,37 @@ type DVP struct {
 }
 
 func (dvp DVP) IncrMaxChannelLimit(campaignId string) {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		fmt.Println("Start IncrMaxChannelLimit ServerId: ", campaignId)
 		go IncrCampChannelMaxLimit(campaignId)
+	} else {
+		dvp.RB().SetResponseCode(403)
 	}
-	return
 }
 
 func (dvp DVP) DecrMaxChannelLimit(campaignId string) {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		fmt.Println("Start IncrMaxChannelLimit ServerId: ", campaignId)
 		go DecrCampChannelMaxLimit(campaignId)
+	} else {
+		dvp.RB().SetResponseCode(403)
 	}
-	return
 }
 
 func (dvp DVP) SetMaxChannelLimit(campaignId string) {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		fmt.Println("Start IncrMaxChannelLimit ServerId: ", campaignId)
 		go SetCampChannelMaxLimit(campaignId)
+	} else {
+		dvp.RB().SetResponseCode(403)
 	}
-	return
 }
 
 func (dvp DVP) GetTotalDialCount(companyId, tenantId int, campaignId string) int {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "read")
 	if company != 0 && tenant != 0 {
 		fmt.Println("Start GetTotalDialCount CampaignId: ", campaignId)
 		count := 0
@@ -67,12 +70,13 @@ func (dvp DVP) GetTotalDialCount(companyId, tenantId int, campaignId string) int
 		}
 		return count
 	} else {
+		dvp.RB().SetResponseCode(403)
 		return 0
 	}
 }
 
 func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string) int {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "read")
 	if company != 0 && tenant != 0 {
 		fmt.Println("Start GetTotalConnectedCount CampaignId: ", campaignId)
 		count := 0
@@ -87,12 +91,13 @@ func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string
 		}
 		return count
 	} else {
+		dvp.RB().SetResponseCode(403)
 		return 0
 	}
 }
 
 func (dvp DVP) ResumeCallback(callbackInfo CampaignCallbackObj) {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		log := fmt.Sprintf("Start ResumeCallback CampaignId:%d # ContactId:%s ", callbackInfo.CampaignId, callbackInfo.ContactId)
 		fmt.Println(log)
@@ -107,12 +112,13 @@ func (dvp DVP) ResumeCallback(callbackInfo CampaignCallbackObj) {
 			fmt.Println("Tenant: ", tenant)
 			ResumeCampaignCallback(company, tenant, callbackInfo.CallBackCount, callbackInfo.CampaignId, callbackInfo.ContactId)
 		}
+	} else {
+		dvp.RB().SetResponseCode(403)
 	}
-	return
 }
 
 func (dvp DVP) DialCampaign(campaignId int, contactNumber string) bool {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		log := fmt.Sprintf("Start Direct DialCampaign CampaignId:%d # DNIS:%s ", campaignId, contactNumber)
 		fmt.Println(log)
@@ -129,12 +135,13 @@ func (dvp DVP) DialCampaign(campaignId int, contactNumber string) bool {
 		}
 		return false
 	} else {
+		dvp.RB().SetResponseCode(403)
 		return false
 	}
 }
 
 func (dvp DVP) Dial(AniNumber, DnisNumber, Extention, CallserverId string) bool {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		log := fmt.Sprintf("Start Direct Dial ANI:%s # DNIS:%s ", AniNumber, DnisNumber)
 		fmt.Println(log)
@@ -151,6 +158,7 @@ func (dvp DVP) Dial(AniNumber, DnisNumber, Extention, CallserverId string) bool 
 		}
 		return false
 	} else {
+		dvp.RB().SetResponseCode(403)
 		return false
 	}
 }
@@ -161,7 +169,7 @@ func (dvp DVP) ArdsCallback() string {
 			fmt.Println("Recovered in ArdsCallback", r)
 		}
 	}()
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		fmt.Println("---------------Start ArdsCallback---------")
 		jResult, _ := url.QueryUnescape(dvp.Context.Request().URL.RawQuery)
@@ -185,9 +193,12 @@ func (dvp DVP) ArdsCallback() string {
 			DialAgent(ardsCallbackInfo.ResourceInfo.ContactName, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
 			break
 		}
-	}
-	return ""
 
+	} else {
+		dvp.RB().SetResponseCode(403)
+	}
+
+	return ""
 }
 
 func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
@@ -196,7 +207,7 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			fmt.Println("Recovered in PreviewCallBack", r)
 		}
 	}()
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		log := fmt.Sprintf("Start PreviewCallBack Ref:%s ", rdata.Ref)
 		log1 := fmt.Sprintf("Start PreviewCallBack TKey:%s ", rdata.Reply.Tkey)
@@ -220,12 +231,14 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			fmt.Println("Start Reject Priview Number")
 			AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
 		}
+	} else {
+		dvp.RB().SetResponseCode(403)
+		return
 	}
-	return
 }
 
 func (dvp DVP) SendSms(DnisNumber, Message string) bool {
-	company, tenant := validateCompanyTenant(dvp)
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		log := fmt.Sprintf("Start Send SMS DNIS:%s # Message:%s ", DnisNumber, Message)
 		fmt.Println(log)
@@ -233,6 +246,7 @@ func (dvp DVP) SendSms(DnisNumber, Message string) bool {
 		SendSmsDirect(company, tenant, Message, DnisNumber)
 		return true
 	} else {
+		dvp.RB().SetResponseCode(403)
 		return false
 	}
 }

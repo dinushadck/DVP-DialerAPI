@@ -19,14 +19,18 @@ func GetCallserverInfo(company, tenant int) CallServerResult {
 	}()
 	//Request campaign from Campaign Manager service
 	activeCallServers := make([]CallServerResult, 0)
-	authToken := fmt.Sprintf("%d#%d", tenant, company)
+
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	authToken := fmt.Sprintf("%d:%d", tenant, company)
 
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CloudConfiguration/CallserversByCompany", CreateHost(clusterConfigServiceHost, clusterConfigServicePort))
 	fmt.Println("Start CallserversByCompany request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", authToken)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", authToken)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())

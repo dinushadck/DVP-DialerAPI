@@ -25,17 +25,20 @@ func main() {
 	for {
 		onGoingCampaignCount := GetOnGoingCampaignCount()
 		if onGoingCampaignCount < campaignLimit {
-			//campaigns := RequestCampaign(campaignLimit - onGoingCampaignCount)
-			//for _, campaign := range campaigns {
-			//	AddCampaignToDialer(campaign)
-			//}
+			campaigns := RequestCampaign(campaignLimit - onGoingCampaignCount)
+			for _, campaign := range campaigns {
+				AddCampaignToDialer(campaign)
+			}
 		}
 
 		if onGoingCampaignCount > 0 {
 
-			tm := time.Now().UTC()
 			runningCampaigns := GetAllRunningCampaign()
 			for _, campaign := range runningCampaigns {
+
+				location, _ := time.LoadLocation(campaign.TimeZone)
+				tm := time.Now().In(location)
+
 				campIdStr := strconv.Itoa(campaign.CampaignId)
 
 				go ClearTimeoutChannels(campIdStr)
@@ -52,8 +55,8 @@ func main() {
 						UpdateCampaignStartStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 					}
 
-					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), tempCampaignStartDate.Hour(), tempCampaignStartDate.Minute(), tempCampaignStartDate.Second(), 0, time.UTC)
-					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, time.UTC)
+					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), tempCampaignStartDate.Hour(), tempCampaignStartDate.Minute(), tempCampaignStartDate.Second(), 0, location)
+					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
 					fmt.Println("Check Campaign: ", campIdStr)
 					fmt.Println("campaignStartDate: ", campaignStartDate.String())
 					fmt.Println("campaignEndDate: ", campaignEndDate.String())

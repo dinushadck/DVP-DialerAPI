@@ -79,6 +79,13 @@ func AddCampaignToDialer(campaignD Campaign) {
 	searchCamp := fmt.Sprintf("Campaign:*:%d:%d:%d", campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
 	existingKeys := RedisSearchKeys(searchCamp)
 
+	companyToken := fmt.Sprintf("%d:%d", campaignD.TenantId, campaignD.CompanyId)
+	scheduleId := strconv.Itoa(campaignD.CampScheduleInfo[0].ScheduleId)
+	timeZone := GetTimeZoneFroSchedule(companyToken, scheduleId)
+
+	fmt.Println("Add Time Zone::", timeZone)
+	campaignD.TimeZone = timeZone
+
 	if len(existingKeys) == 0 {
 		campaignJson, _ := json.Marshal(campaignD)
 		result := RedisAdd(campaignKey, string(campaignJson))
@@ -86,6 +93,7 @@ func AddCampaignToDialer(campaignD Campaign) {
 		if result == "OK" {
 			campIdStr := strconv.Itoa(campaignD.CampaignId)
 			channelCountStr := strconv.Itoa(campaignD.CampConfigurations.ChannelConcurrency)
+			//SetCampaignTimeZone(campIdStr, campaignD.CompanyId, campaignD.TenantId, timeZone)
 			IncrementOnGoingCampaignCount()
 			SetCampChannelMaxLimitDirect(campIdStr, channelCountStr)
 			AddCampaignCallbackConfigInfo(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId)
@@ -102,6 +110,7 @@ func AddCampaignToDialer(campaignD Campaign) {
 		result := RedisAdd(campaignKey, string(campaignJson))
 		fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
 		if result == "OK" {
+			//SetCampaignTimeZone(campIdStr, campaignD.CompanyId, campaignD.TenantId, timeZone)
 			IncrementOnGoingCampaignCount()
 			SetCampaignStatus(campIdStr, "Resume", campaignD.CompanyId, campaignD.TenantId)
 			UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
@@ -159,6 +168,24 @@ func RemoveCampaignFromOtherDialer(oDialerId, campaignId string, company, tenant
 	if result == true {
 		DecrementOnGoingCampaignCountOther(oDialerId)
 		RemoveCampaignStatusOther(oDialerId, campaignId, company, tenant)
+	}
+}
+
+func SetCampaignTimeZone(campaignId string, company, tenant int, timeZone string) {
+	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
+
+	campJson := RedisGet(campaignKey)
+	var campObj Campaign
+	json.Unmarshal([]byte(campJson), &campObj)
+
+	campObj.TimeZone = timeZone
+
+	campaignJson, _ := json.Marshal(campObj)
+
+	result := RedisAdd(campaignKey, string(campaignJson))
+	fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+	if result == "OK" {
+		fmt.Println("Update Campaign TimeZone success")
 	}
 }
 
@@ -386,7 +413,9 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 	emtAppoinment := Appoinment{}
 	defResourceServerInfo := ResourceServerInfo{}
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
-	appment := CheckAppoinmentForCampaign(internalAuthToken, scheduleId)
+
+	appment, _, appmntEndTime := CheckAppoinmentForCampaign(internalAuthToken, scheduleId)
+
 	resourceServerInfos := GetResourceServerInfo(company, tenant, resourceServerId, CampaignChannel)
 
 	if appment != emtAppoinment && resourceServerInfos != defResourceServerInfo {
@@ -399,9 +428,9 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 		maxChannelLimitStr := strconv.Itoa(campaignMaxChannelCount)
 		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
 
-		endTime, _ := time.Parse(layout1, appment.EndTime)
-		timeNow := time.Now().UTC()
-		appmntEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.UTC)
+		//endTime, _ := time.Parse(layout1, appment.EndTime)
+		//timeNow := time.Now().UTC()
+		//appmntEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.UTC)
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
