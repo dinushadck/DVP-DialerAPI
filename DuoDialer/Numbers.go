@@ -54,6 +54,8 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId string) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	numbers := GetNumbersFromNumberBase(company, tenant, numberLimit, campaignId, camScheduleId)
+
+	fmt.Println("Number count = ", len(numbers))
 	if len(numbers) == 0 {
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 		RedisSet(numLoadingStatusKey, "done")
@@ -61,6 +63,7 @@ func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId str
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 		RedisSet(numLoadingStatusKey, "waiting")
 		for _, number := range numbers {
+			fmt.Println("Adding number to campaign: ", number)
 			RedisListRpush(listId, number)
 		}
 	}

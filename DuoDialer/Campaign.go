@@ -414,19 +414,22 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 	defResourceServerInfo := ResourceServerInfo{}
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
-	appment, _, appmntEndTime := CheckAppoinmentForCampaign(internalAuthToken, scheduleId)
+	appment, timeZone, appmntEndTime := CheckAppoinmentForCampaign(internalAuthToken, scheduleId)
+
+	location, _ := time.LoadLocation(timeZone)
 
 	resourceServerInfos := GetResourceServerInfo(company, tenant, resourceServerId, CampaignChannel)
 
 	if appment != emtAppoinment && resourceServerInfos != defResourceServerInfo {
 		campStatus := GetCampaignStatus(campaignId, company, tenant)
-		if campStatus == "Start" {
-			LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
-		}
 
 		SetCampaignStatus(campaignId, "Running", company, tenant)
 		maxChannelLimitStr := strconv.Itoa(campaignMaxChannelCount)
 		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
+
+		if campStatus == "Start" {
+			LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
+		}
 
 		//endTime, _ := time.Parse(layout1, appment.EndTime)
 		//timeNow := time.Now().UTC()
@@ -435,7 +438,7 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
 			if campStatus == "Running" {
-				tm := time.Now().UTC()
+				tm := time.Now().In(location)
 				fmt.Println("endTime: ", appmntEndTime.String())
 				fmt.Println("timeNW: ", tm.String())
 				if tm.Before(appmntEndTime) {
