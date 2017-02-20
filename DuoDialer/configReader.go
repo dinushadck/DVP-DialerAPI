@@ -321,6 +321,8 @@ func LoadCallbackConfiguration() {
 
 	response, _ := ioutil.ReadAll(resp.Body)
 
+	fmt.Println(string(response))
+
 	callbackConf := CallbackConfiguration{}
 	err = json.Unmarshal(response, &callbackConf)
 	if err != nil {
@@ -329,6 +331,7 @@ func LoadCallbackConfiguration() {
 		for _, conf := range callbackConf.Result {
 			for _, hangCause := range conf.HangupCause {
 				confKey := fmt.Sprintf("CallbackReason:%s", hangCause)
+				fmt.Println(confKey, "::", conf.Reason)
 				RedisSetNx(confKey, conf.Reason)
 			}
 		}
