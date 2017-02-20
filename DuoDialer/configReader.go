@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -299,23 +300,35 @@ func LoadConfiguration() {
 }
 
 func LoadCallbackConfiguration() {
-	dirPath = GetDirPath()
-	confPath := filepath.Join(dirPath, "callbackConf.json")
-	fmt.Println("InitiateCallback config path: ", confPath)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in LoadCallbackConfiguration", r)
+		}
+	}()
+	//Request campaign callback reaseons from Campaign Manager service
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	client := &http.Client{}
 
-	content, operr := ioutil.ReadFile(confPath)
-	if operr != nil {
-		fmt.Println(operr)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/Configuration/callback/Reasons", CreateHost(campaignServiceHost, campaignServicePort))
+	fmt.Println("Start RequestCampaignCallbackReason request: ", request)
+	req, _ := http.NewRequest("GET", request, nil)
+	req.Header.Set("authorization", jwtToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("LoadCallbackConfiguration Failed::", err.Error())
 	}
+	defer resp.Body.Close()
+
+	response, _ := ioutil.ReadAll(resp.Body)
 
 	callbackConf := CallbackConfiguration{}
-	err := json.Unmarshal(content, &callbackConf)
+	err = json.Unmarshal(response, &callbackConf)
 	if err != nil {
-		fmt.Println("error:", err)
+		fmt.Println("error in LoadCallbackConfiguration::", err)
 	} else {
-		for _, conf := range callbackConf.DisconnectReasons {
-			for _, reason := range conf.Values {
-				confKey := fmt.Sprintf("CallbackReason:%s", reason)
+		for _, conf := range callbackConf.Result {
+			for _, hangCause := range conf.HangupCause {
+				confKey := fmt.Sprintf("CallbackReason:%s", hangCause)
 				RedisSetNx(confKey, conf.Reason)
 			}
 		}

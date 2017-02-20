@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"github.com/DuoSoftware/gorest"
+	"github.com/rs/cors"
 	"net/http"
 	"strconv"
 	"time"
@@ -94,11 +95,27 @@ func main() {
 }
 
 func InitiateService() {
-	jwtMiddleware := loadJwtMiddleware()
+	//jwtMiddleware := loadJwtMiddleware()
 	gorest.RegisterService(new(DVP))
 	//http.Handle("/", gorest.Handle())
-	app := jwtMiddleware.Handler(gorest.Handle())
+	//app := jwtMiddleware.Handler(gorest.Handle())
+	//addr := fmt.Sprintf(":%s", port)
+	//fmt.Println(addr)
+	//http.ListenAndServe(addr, app)
+
+	c := cors.New(cors.Options{
+		AllowedHeaders: []string{"accept", "authorization"},
+	})
+	handler := c.Handler(gorest.Handle())
 	addr := fmt.Sprintf(":%s", port)
-	fmt.Println(addr)
-	http.ListenAndServe(addr, app)
+	s := &http.Server{
+		Addr:           addr,
+		Handler:        handler,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	s.SetKeepAlivesEnabled(false)
+	s.ListenAndServe()
 }

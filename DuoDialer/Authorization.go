@@ -29,12 +29,18 @@ func loadJwtMiddleware() *jwtmiddleware.JWTMiddleware {
 }
 
 func FindScope(vs []interface{}, scope, action string) (bool, bool) {
+
 	for _, v := range vs {
 		scopeInfo := v.(map[string]interface{})
-		if scopeInfo["resource"] == scope {
-			return true, FindAction(scopeInfo["actions"].([]interface{}), action)
+		if scopeInfo["resource"] == "all" {
+			return true, true
+		} else {
+			if scopeInfo["resource"] == scope {
+				return true, FindAction(scopeInfo["actions"].([]interface{}), action)
+			}
 		}
 	}
+
 	return false, false
 }
 

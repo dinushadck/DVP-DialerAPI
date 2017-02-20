@@ -55,19 +55,14 @@ func (dvp DVP) SetMaxChannelLimit(campaignId string) {
 }
 
 func (dvp DVP) GetTotalDialCount(companyId, tenantId int, campaignId string) int {
-	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "read")
+	fmt.Println("Start GetTotalDialCount")
+	company, tenant, _, msg := decodeJwtDialer(dvp, "dialer", "read")
+	fmt.Println(company, tenant, msg)
 	if company != 0 && tenant != 0 {
 		fmt.Println("Start GetTotalDialCount CampaignId: ", campaignId)
 		count := 0
-		authHeaderStr := dvp.Context.Request().Header.Get("Authorization")
-		fmt.Println(authHeaderStr)
 
-		authHeaderInfo := strings.Split(authHeaderStr, "#")
-		if len(authHeaderInfo) == 2 {
-			tenant, _ := strconv.Atoi(authHeaderInfo[0])
-			company, _ := strconv.Atoi(authHeaderInfo[1])
-			count = GetCampaignDialCount(company, tenant, campaignId)
-		}
+		count = GetCampaignDialCount(company, tenant, campaignId)
 		return count
 	} else {
 		dvp.RB().SetResponseCode(403)
@@ -80,15 +75,8 @@ func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string
 	if company != 0 && tenant != 0 {
 		fmt.Println("Start GetTotalConnectedCount CampaignId: ", campaignId)
 		count := 0
-		authHeaderStr := dvp.Context.Request().Header.Get("Authorization")
-		fmt.Println(authHeaderStr)
 
-		authHeaderInfo := strings.Split(authHeaderStr, "#")
-		if len(authHeaderInfo) == 2 {
-			tenant, _ := strconv.Atoi(authHeaderInfo[0])
-			company, _ := strconv.Atoi(authHeaderInfo[1])
-			count = GetCampaignConnectedCount(company, tenant, campaignId)
-		}
+		count = GetCampaignConnectedCount(company, tenant, campaignId)
 		return count
 	} else {
 		dvp.RB().SetResponseCode(403)

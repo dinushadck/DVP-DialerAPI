@@ -113,10 +113,10 @@ type CampaignCallbackReason struct {
 }
 
 type CampaignCallbackInfo struct {
-	CallBackConfId      int
+	ConfigureId         int
 	MaxCallBackCount    int
 	CallBackInterval    int
-	ReasonId            string
+	ReasonId            int
 	CampCallBackReasons CampaignCallbackReason
 }
 
@@ -177,12 +177,15 @@ type PhoneNumberResult struct {
 }
 
 type CallbackConfiguration struct {
-	DisconnectReasons []DisconnectReason
+	IsSuccess bool
+	Result    []DisconnectReason
 }
 
 type DisconnectReason struct {
-	Reason string
-	Values []string
+	Reason      string
+	HangupCause []string
+	Status      bool
+	ReasonId    int
 }
 
 type CampaignStart struct {
