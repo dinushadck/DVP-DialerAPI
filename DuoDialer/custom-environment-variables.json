@@ -1,6 +1,9 @@
 {
+	"SecurityIp":"SYS_REDIS_HOST",
+	"SecurityPort":"SYS_REDIS_PORT",
     "RedisIp": "SYS_REDIS_HOST",
 	"RedisPort": "SYS_REDIS_PORT",
+	"RedisPassword":"SYS_REDIS_PASSWORD",
 	"RedisDb": "SYS_REDIS_DB_ARDS",
 	"DialerId": "SYS_DIALER_ID",
 	"CampaignLimit": "SYS_DIALER_CAMP_LIMIT",
