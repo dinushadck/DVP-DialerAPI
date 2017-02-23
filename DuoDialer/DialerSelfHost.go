@@ -89,17 +89,10 @@ func (dvp DVP) ResumeCallback(callbackInfo CampaignCallbackObj) {
 	if company != 0 && tenant != 0 {
 		log := fmt.Sprintf("Start ResumeCallback CampaignId:%d # ContactId:%s ", callbackInfo.CampaignId, callbackInfo.ContactId)
 		fmt.Println(log)
-		authHeaderStr := dvp.Context.Request().Header.Get("Authorization")
-		fmt.Println(authHeaderStr)
 
-		authHeaderInfo := strings.Split(authHeaderStr, "#")
-		if len(authHeaderInfo) == 2 {
-			tenant, _ := strconv.Atoi(authHeaderInfo[0])
-			company, _ := strconv.Atoi(authHeaderInfo[1])
-			fmt.Println("Company: ", company)
-			fmt.Println("Tenant: ", tenant)
-			ResumeCampaignCallback(company, tenant, callbackInfo.CallBackCount, callbackInfo.CampaignId, callbackInfo.ContactId)
-		}
+		fmt.Println("Company: ", company)
+		fmt.Println("Tenant: ", tenant)
+		ResumeCampaignCallback(company, tenant, callbackInfo.CallBackCount, callbackInfo.CampaignId, callbackInfo.ContactId)
 	} else {
 		dvp.RB().SetResponseCode(403)
 	}

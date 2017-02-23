@@ -19,7 +19,7 @@
 	"CallRuleServicePort":"2220",
 	"ScheduleServiceHost":"limithandler.app.veery.cloud",
 	"ScheduleServicePort":"8084",
-	"CallbackServerHost":"callbackservice.app.veery.cloud",
+	"CallbackServerHost":"127.0.0.1",
 	"CallbackServerPort":"2227",
 	"ArdsServiceHost":"ardsliteservice.app.veery.cloud",
 	"ArdsServicePort":"2225",

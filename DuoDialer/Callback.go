@@ -59,6 +59,8 @@ func UploadCallbackInfo(company, tenant int, callbackTime time.Time, campaignId,
 			fmt.Println("Recovered in UploadCallbackInfo", r)
 		}
 	}()
+
+	fmt.Println("Start UploadCallbackInfo")
 	callback := CampaignCallback{}
 
 	callback.Company = company
@@ -77,6 +79,9 @@ func UploadCallbackInfo(company, tenant int, callbackTime time.Time, campaignId,
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
+
+	fmt.Println("Add callback data:: ", serviceurl, "::", string(jsonData))
+
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	req.Header.Set("companyinfo", internalAuthToken)
@@ -143,7 +148,9 @@ func GetCallbackDetails(company, tenant int, campaignId, reason string) (maxCall
 
 func GetAllowCallback(company, tenant int, campaignId string) bool {
 	hashKey := fmt.Sprintf("CampaignAllowCallback:%d:%d:%s", company, tenant, campaignId)
+	fmt.Println("Key:GetAllowCallback:: ", hashKey)
 	callbackIntervalStr := RedisGet(hashKey)
+	fmt.Println("Result:GetAllowCallback:: ", callbackIntervalStr)
 	allowCallback, _ := strconv.ParseBool(callbackIntervalStr)
 	return allowCallback
 }
@@ -158,9 +165,16 @@ func RemoveCampaignCallbackConfigInfo(company, tenant int, campaignId string) {
 	}
 }
 
-func ValidateDisconnectReason(disconnectReason string) bool {
+func ValidateDisconnectReason(disconnectReason string) (keyExist bool, value string) {
 	confKey := fmt.Sprintf("CallbackReason:%s", disconnectReason)
-	return RedisCheckKeyExist(confKey)
+	value = RedisGet(confKey)
+
+	if value == "" {
+		keyExist = false
+	} else {
+		keyExist = true
+	}
+	return
 }
 
 func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber, disConnectkReason string) {
@@ -169,12 +183,15 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber
 	_tenant, _ := strconv.Atoi(tenant)
 	_tryCount, _ := strconv.Atoi(tryCount)
 	isAllowCallback := GetAllowCallback(_company, _tenant, campaignId)
-	//isAllowCallback = true
-	isdisconnectReasonAllowed := ValidateDisconnectReason(disConnectkReason)
-	//isdisconnectReasonAllowed = true
+	fmt.Println("isAllowCallback:: ", isAllowCallback)
+	isdisconnectReasonAllowed, hangupGruop := ValidateDisconnectReason(disConnectkReason)
+	fmt.Println("isdisconnectReasonAllowed:: ", isdisconnectReasonAllowed)
+	fmt.Println("hangupGruop:: ", hangupGruop)
 	if isAllowCallback && isdisconnectReasonAllowed {
-		maxCallbackCount, callbackInterval, isReasonExists := GetCallbackDetails(_company, _tenant, campaignId, disConnectkReason)
-		//maxCallbackCount, callbackInterval, isReasonExists = 3, 50, true
+		maxCallbackCount, callbackInterval, isReasonExists := GetCallbackDetails(_company, _tenant, campaignId, hangupGruop)
+		fmt.Println("maxCallbackCount:: ", maxCallbackCount)
+		fmt.Println("callbackInterval:: ", callbackInterval)
+		fmt.Println("isReasonExists:: ", isReasonExists)
 		if isReasonExists {
 			if maxCallbackCount > 0 && phoneNumber != "" && _tryCount > 0 && _tryCount < maxCallbackCount {
 				camIdInt, _ := strconv.Atoi(campaignId)
