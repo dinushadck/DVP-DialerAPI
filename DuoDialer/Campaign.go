@@ -81,10 +81,12 @@ func AddCampaignToDialer(campaignD Campaign) {
 
 	companyToken := fmt.Sprintf("%d:%d", campaignD.TenantId, campaignD.CompanyId)
 	scheduleId := strconv.Itoa(campaignD.CampScheduleInfo[0].ScheduleId)
-	timeZone := GetTimeZoneFroSchedule(companyToken, scheduleId)
+	startDate, endDate, timeZone := GetTimeZoneFroSchedule(companyToken, scheduleId)
 
 	fmt.Println("Add Time Zone::", timeZone)
 	campaignD.TimeZone = timeZone
+	campaignD.CampConfigurations.StartDate = startDate
+	campaignD.CampConfigurations.EndDate = endDate
 
 	if len(existingKeys) == 0 {
 		campaignJson, _ := json.Marshal(campaignD)
@@ -456,8 +458,10 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 						if number == "" {
 							numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 							if numberCount == 0 {
-								SetCampaignStatus(campaignId, "End", company, tenant)
-								RemoveCampaignFromDialer(campaignId, company, tenant)
+								//SetCampaignStatus(campaignId, "End", company, tenant)
+								//RemoveCampaignFromDialer(campaignId, company, tenant)
+								SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+								SetCampChannelMaxLimitDirect(campaignId, "0")
 								return
 							}
 						} else {

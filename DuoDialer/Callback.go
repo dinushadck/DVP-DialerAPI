@@ -193,10 +193,11 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber
 		fmt.Println("callbackInterval:: ", callbackInterval)
 		fmt.Println("isReasonExists:: ", isReasonExists)
 		if isReasonExists {
-			if maxCallbackCount > 0 && phoneNumber != "" && _tryCount > 0 && _tryCount < maxCallbackCount {
+			if maxCallbackCount > 0 && phoneNumber != "" && _tryCount > 0 && _tryCount <= maxCallbackCount {
 				camIdInt, _ := strconv.Atoi(campaignId)
 
 				campaignInfo, isCamExists := GetCampaign(_company, _tenant, camIdInt)
+				fmt.Println("isCamExists:: ", isCamExists)
 				if isCamExists {
 
 					location, _ := time.LoadLocation(campaignInfo.TimeZone)
@@ -204,13 +205,17 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber
 					tmNow := time.Now().In(location)
 					secCount := tmNow.Second() + callbackInterval
 					callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), secCount, 0, location)
+					fmt.Println("callbackTime:: ", callbackTime)
 
-					tempCampaignEndDate, _ := time.Parse(layout1, campaignInfo.CampConfigurations.EndDate)
+					tempCampaignEndDate, _ := time.Parse(layout2, campaignInfo.CampConfigurations.EndDate)
 					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
 
+					fmt.Println("Callback:CampaignEndDate:: ", campaignEndDate)
 					if campaignEndDate.After(callbackTime) {
+						fmt.Println("Start to build CallbackInfo")
 						scheduleIdStr := strconv.Itoa(campaignInfo.CampScheduleInfo[0].ScheduleId)
 						validateAppoinment := CheckAppoinmentForCallback(_company, _tenant, scheduleIdStr, callbackTime, campaignInfo.TimeZone)
+						fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
 						if validateAppoinment {
 							callbackObj := CampaignCallbackObj{}
 							callbackObj.CampaignId = camIdInt

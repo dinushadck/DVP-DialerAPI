@@ -277,6 +277,8 @@ type ScheduleDetails struct {
 type Schedule struct {
 	ScheduleName string
 	TimeZone     string
+	StartDate    string
+	EndDate      string
 	Appointment  []Appoinment
 }
 

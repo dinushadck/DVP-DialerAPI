@@ -49,15 +49,15 @@ func main() {
 				UpdateCampaignStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 
 				if campStatus == "Resume" || campStatus == "Start" || campStatus == "PauseByDialer" || campStatus == "Waiting for Appoinment" {
-					tempCampaignStartDate, _ := time.Parse(layout1, campaign.CampConfigurations.StartDate)
-					tempCampaignEndDate, _ := time.Parse(layout1, campaign.CampConfigurations.EndDate)
+					tempCampaignStartDate, _ := time.Parse(layout2, campaign.CampConfigurations.StartDate)
+					tempCampaignEndDate, _ := time.Parse(layout2, campaign.CampConfigurations.EndDate)
 
 					if campStatus == "Resume" {
 						UpdateCampaignStartStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 					}
 
-					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), tempCampaignStartDate.Hour(), tempCampaignStartDate.Minute(), tempCampaignStartDate.Second(), 0, location)
-					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
+					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), 0, 0, 0, 0, location)
+					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), 0, 0, 0, 0, location)
 					fmt.Println("Check Campaign: ", campIdStr)
 					fmt.Println("campaignStartDate: ", campaignStartDate.String())
 					fmt.Println("campaignEndDate: ", campaignEndDate.String())

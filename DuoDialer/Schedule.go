@@ -41,7 +41,7 @@ func GetAppoinmentsForSchedule(internalAuthToken, schedulrId string) Schedule {
 	}
 }
 
-func GetTimeZoneFroSchedule(internalAuthToken, schedulrId string) string {
+func GetTimeZoneFroSchedule(internalAuthToken, schedulrId string) (startDate, endDate, timeZone string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in GetTimeZoneFroSchedule", r)
@@ -66,9 +66,12 @@ func GetTimeZoneFroSchedule(internalAuthToken, schedulrId string) string {
 
 	if len(apiResult.Result) > 0 {
 		fmt.Println("Schedulr apiResult.Result: ", apiResult.Result[0])
-		return apiResult.Result[0].TimeZone
+		timeZone = apiResult.Result[0].TimeZone
+		startDate = apiResult.Result[0].StartDate
+		endDate = apiResult.Result[0].EndDate
+		return
 	} else {
-		return ""
+		return
 	}
 }
 
