@@ -431,7 +431,7 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 
-		if campStatus == "Start" || !RedisCheckKeyExist(numLoadingStatusKey) {
+		if campStatus == "Start" || (campStatus == "Waiting for Appoinment" && !RedisCheckKeyExist(numLoadingStatusKey)) {
 			LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
 		}
 
