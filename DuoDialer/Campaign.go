@@ -429,7 +429,9 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 		maxChannelLimitStr := strconv.Itoa(campaignMaxChannelCount)
 		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
 
-		if campStatus == "Start" {
+		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
+
+		if campStatus == "Start" || !RedisCheckKeyExist(numLoadingStatusKey) {
 			LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
 		}
 
