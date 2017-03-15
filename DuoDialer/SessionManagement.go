@@ -11,7 +11,7 @@ import (
 )
 
 //Initiate dial session for a number
-func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
+func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
@@ -26,6 +26,7 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["Number"] = number
 	data["DialerId"] = dialerId
 	data["CampaignId"] = campaignId
+	data["CampaignName"] = campaignName
 	data["Dialtime"] = dialTime
 	data["ChannelCreatetime"] = ""
 	data["ChannelAnswertime"] = ""

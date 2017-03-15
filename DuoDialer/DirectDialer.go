@@ -43,7 +43,7 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourc
 
 		IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		IncrCampaignDialCount(company, tenant, campaignId)
-		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, uuid, dnis, "direct dial", "start", time.Now().UTC().Format(layout4), resourceServerId)
+		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, campaignId, uuid, dnis, "direct dial", "start", time.Now().UTC().Format(layout4), resourceServerId)
 		SetSessionInfo(campaignId, uuid, "FromNumber", ani)
 		SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 		SetSessionInfo(campaignId, uuid, "Extention", extention)

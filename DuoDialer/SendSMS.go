@@ -37,7 +37,7 @@ func SendSmsDirect(company, tenant int, message, phoneNumber string) {
 
 	IncrConcurrentChannelCount(serverInfo.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "SMS", "DIRECT", "DIALOUT", "1", campaignId, dnis, dnis, "start", "start", time.Now().UTC().Format(layout4), serverInfo.ResourceServerId)
+	InitiateSessionInfo(company, tenant, 240, "SMS", "DIRECT", "DIALOUT", "1", campaignId, campaignId, dnis, dnis, "start", "start", time.Now().UTC().Format(layout4), serverInfo.ResourceServerId)
 
 	smsRequest := GenerateSMS(serverInfo.Url, ani, message, dnis)
 	resp, err := SendSms(smsRequest)

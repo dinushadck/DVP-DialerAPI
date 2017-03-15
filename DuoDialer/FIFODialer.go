@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func DialNumberFIFO(company, tenant int, resourceServer ResourceServerInfo, campaignId, uuid, fromNumber, trunkCode, phoneNumber, extention string) {
+func DialNumberFIFO(company, tenant int, resourceServer ResourceServerInfo, campaignId, campaignName, uuid, fromNumber, trunkCode, phoneNumber, extention string) {
 	fmt.Println("Start DialNumber: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 	customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
 
@@ -14,7 +14,7 @@ func DialNumberFIFO(company, tenant int, resourceServer ResourceServerInfo, camp
 	data := " xml dialer"
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "FIFODial", "1", campaignId, uuid, phoneNumber, "start", "start", time.Now().Format(layout4), resourceServer.ResourceServerId)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "FIFODial", "1", campaignId, campaignName, uuid, phoneNumber, "start", "start", time.Now().Format(layout4), resourceServer.ResourceServerId)
 	IncrCampaignDialCount(company, tenant, campaignId)
 
 	resp, err := Dial(resourceServer.Url, param, furl, data)

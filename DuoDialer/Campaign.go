@@ -411,7 +411,7 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 }
 
 //----------Run Campaign-----------------------
-func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
+func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
 	emtAppoinment := Appoinment{}
 	defResourceServerInfo := ResourceServerInfo{}
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
@@ -475,16 +475,16 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 								if trunkCode != "" && uuid != "" {
 									switch dialoutMec {
 									case "BLAST":
-										go DialNumber(company, tenant, resourceServerInfos, campaignId, uuid, ani, trunkCode, dnis, tryCount, extention)
+										go DialNumber(company, tenant, resourceServerInfos, campaignId, campaignName, uuid, ani, trunkCode, dnis, tryCount, extention)
 										break
 									case "FIFO":
-										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, uuid, ani, trunkCode, dnis, extention)
+										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, campaignName, uuid, ani, trunkCode, dnis, extention)
 										break
 									case "PREVIEW":
-										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
 										break
 									case "AGENT":
-										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
 										break
 									}
 								}
@@ -499,7 +499,7 @@ func StartCampaign(campaignId, dialoutMec, CampaignChannel, camClass, camType, c
 								defEmailInfo := EmailAdditionalData{}
 								emailInfo := RequestEmailInfo(company, tenant, campaignId)
 								if emailInfo != defEmailInfo {
-									go SendEmail(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, emailInfo.FromAddresss, emailInfo.Subject, emailInfo.Body, number)
+									go SendEmail(company, tenant, resourceServerInfos, campaignId, campaignName, camClass, camType, camCategory, emailInfo.FromAddresss, emailInfo.Subject, emailInfo.Body, number)
 								}
 								break
 							}
