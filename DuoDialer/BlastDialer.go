@@ -14,7 +14,7 @@ func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaign
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "BlastDial", tryCount, campaignId, campaignName, uuid, phoneNumber, "start", "start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "BlastDial", tryCount, campaignId, campaignName, uuid, phoneNumber, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
 
 	resp, err := Dial(resourceServer.Url, param, furl, data)
 	HandleDialResponse(resp, err, resourceServer, campaignId, uuid)

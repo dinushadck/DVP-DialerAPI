@@ -22,6 +22,7 @@ type DVP struct {
 	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ContactNumber:string}" output:"bool"`
 	ardsCallback           gorest.EndPoint `method:"GET" path:"/DialerAPI/ArdsCallback/" output:"string"`
 	sendSms                gorest.EndPoint `method:"GET" path:"/DialerAPI/SendSms/{DnisNumber:string}/{Message:string}" output:"bool"`
+	clickToCall            gorest.EndPoint `method:"GET" path:"/DialerAPI/ClickToCall/{DnisNumber:string}/{Extention:string}" output:"bool"`
 }
 
 func (dvp DVP) IncrMaxChannelLimit(campaignId string) {
@@ -226,6 +227,21 @@ func (dvp DVP) SendSms(DnisNumber, Message string) bool {
 
 		SendSmsDirect(company, tenant, Message, DnisNumber)
 		return true
+	} else {
+		dvp.RB().SetResponseCode(403)
+		return false
+	}
+}
+
+func (dvp DVP) ClickToCall(DnisNumber, Extention string) bool {
+	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
+	if company != 0 && tenant != 0 {
+		log := fmt.Sprintf("Start ClickToCall Dial DNIS:%s # Extension:%s ", DnisNumber, Extention)
+		fmt.Println(log)
+
+		fmt.Println("Company: ", company)
+		fmt.Println("Tenant: ", tenant)
+		return ClickToCall(company, tenant, DnisNumber, Extention, "1")
 	} else {
 		dvp.RB().SetResponseCode(403)
 		return false

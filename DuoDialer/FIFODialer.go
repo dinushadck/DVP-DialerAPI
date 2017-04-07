@@ -14,7 +14,7 @@ func DialNumberFIFO(company, tenant int, resourceServer ResourceServerInfo, camp
 	data := " xml dialer"
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "FIFODial", "1", campaignId, campaignName, uuid, phoneNumber, "start", "start", time.Now().Format(layout4), resourceServer.ResourceServerId)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "FIFODial", "1", campaignId, campaignName, uuid, phoneNumber, "start", "dial_start", time.Now().Format(layout4), resourceServer.ResourceServerId)
 	IncrCampaignDialCount(company, tenant, campaignId)
 
 	resp, err := Dial(resourceServer.Url, param, furl, data)
