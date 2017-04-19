@@ -113,8 +113,8 @@ func ClickToCall(company, tenant int, phoneNumber, extention, resourceServerId s
 
 		fmt.Println("Start DialDirectNumber: ", uuid, ": ", phoneNumber, ": ", extention)
 		//customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
-		//param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,companyid=%d,tenantid=%d,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,dvp_app_type=HTTAPI,return_ring_ready=true,ignore_early_media=true,origination_caller_id_number=%s,origination_uuid=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, company, tenant, uuid, ani)
-		param := fmt.Sprintf(" {origination_uuid=%s,originate_timeout=30}", phoneNumber)
+		//param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,companyid=%d,tenantid=%d,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,dvp_app_type=HTTAPI,return_ring_ready=true,ignore_early_media=true,origination_caller_id_number=%s,origination_uuid=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, company, tenant, ani, uuid)
+		param := fmt.Sprintf(" {origination_caller_id_number=%s,originate_timeout=30}", phoneNumber)
 		furl := fmt.Sprintf("user/%s", extention)
 
 		data := fmt.Sprintf(" &transfer(%s XML PBXFeatures|%d|%d )", phoneNumber, tenant, company)
