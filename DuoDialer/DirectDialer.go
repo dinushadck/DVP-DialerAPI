@@ -121,7 +121,7 @@ func ClickToCall(company, tenant int, phoneNumber, extention, resourceServerId s
 
 		SetSessionInfo(campaignId, uuid, "Reason", "Dial Number")
 
-		resp, err := Dial(resourceServer.Url, "", furl, data)
+		resp, err := Dial(resourceServer.Url, param, furl, data)
 		HandleDialResponse(resp, err, resourceServer, campaignId, uuid)
 		return true
 		//}
