@@ -66,31 +66,61 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourc
 
 func ClickToCall(company, tenant int, phoneNumber, extention, resourceServerId string) bool {
 
-	internalAccessToken := fmt.Sprintf("%d:%d", tenant, company)
-	trunkCode, ani, dnis := GetTrunkCode(internalAccessToken, "", phoneNumber)
+	//internalAccessToken := fmt.Sprintf("%d:%d", tenant, company)
+	//trunkCode, ani, dnis := GetTrunkCode(internalAccessToken, "", phoneNumber)
+	//uuid := GetUuid()
+	//if trunkCode != "" && uuid != "" {
+	//	fmt.Println("Start Add ClickToCall Request: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
+	//	campaignId := "ClickToCall"
+	//	resourceServer := GetResourceServerInfo(company, tenant, resourceServerId, "call")
+
+	//	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
+	//	IncrCampaignDialCount(company, tenant, campaignId)
+	//	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, campaignId, uuid, dnis, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId)
+	//	SetSessionInfo(campaignId, uuid, "FromNumber", ani)
+	//	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
+	//	SetSessionInfo(campaignId, uuid, "Extention", extention)
+
+	//	fmt.Println("Start DialDirectNumber: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
+	//	customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
+	//	param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,companyid=%d,tenantid=%d,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,dvp_app_type=HTTAPI,return_ring_ready=true,ignore_early_media=true,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, company, tenant, uuid, ani)
+	//	furl := fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, dnis)
+
+	//	data := fmt.Sprintf(" &transfer(%s xml )", extention)
+
+	//	SetSessionInfo(campaignId, uuid, "Reason", "Dial Number")
+
+	//	resp, err := Dial(resourceServer.Url, param, furl, data)
+	//	HandleDialResponse(resp, err, resourceServer, campaignId, uuid)
+	//	return true
+	//	//}
+	//}
+	//return false
+
+	//internalAccessToken := fmt.Sprintf("%d:%d", tenant, company)
+	//trunkCode, ani, dnis := GetTrunkCode(internalAccessToken, "", phoneNumber)
 	uuid := GetUuid()
-	if trunkCode != "" && uuid != "" {
-		fmt.Println("Start Add ClickToCall Request: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
+	if uuid != "" {
+		fmt.Println("Start Add ClickToCall Request: ", uuid, ": ", ": ", phoneNumber, ": ", extention)
 		campaignId := "ClickToCall"
 		resourceServer := GetResourceServerInfo(company, tenant, resourceServerId, "call")
 
 		IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		IncrCampaignDialCount(company, tenant, campaignId)
-		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, campaignId, uuid, dnis, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId)
-		SetSessionInfo(campaignId, uuid, "FromNumber", ani)
-		SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
+		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, campaignId, uuid, phoneNumber, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId)
+
 		SetSessionInfo(campaignId, uuid, "Extention", extention)
 
-		fmt.Println("Start DialDirectNumber: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
-		customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
-		param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,companyid=%d,tenantid=%d,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,dvp_app_type=HTTAPI,return_ring_ready=true,ignore_early_media=true,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, company, tenant, uuid, ani)
-		furl := fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, dnis)
+		fmt.Println("Start DialDirectNumber: ", uuid, ": ", phoneNumber, ": ", extention)
+		//customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
+		//param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,companyid=%d,tenantid=%d,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,dvp_app_type=HTTAPI,return_ring_ready=true,ignore_early_media=true,origination_uuid=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, company, tenant, uuid)
+		furl := fmt.Sprintf("user/%s", extention)
 
-		data := fmt.Sprintf(" &transfer(%s xml )", extention)
+		data := fmt.Sprintf(" &transfer(%s XML PBXFeatures|%d|%d )", phoneNumber, tenant, company)
 
 		SetSessionInfo(campaignId, uuid, "Reason", "Dial Number")
 
-		resp, err := Dial(resourceServer.Url, param, furl, data)
+		resp, err := Dial(resourceServer.Url, "", furl, data)
 		HandleDialResponse(resp, err, resourceServer, campaignId, uuid)
 		return true
 		//}
