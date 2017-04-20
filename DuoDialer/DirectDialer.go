@@ -114,7 +114,7 @@ func ClickToCall(company, tenant int, phoneNumber, extention, resourceServerId s
 		fmt.Println("Start DialDirectNumber: ", uuid, ": ", phoneNumber, ": ", extention)
 		//customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
 		//param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,companyid=%d,tenantid=%d,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,dvp_app_type=HTTAPI,return_ring_ready=true,ignore_early_media=true,origination_caller_id_number=%s,origination_uuid=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, company, tenant, ani, uuid)
-		param := fmt.Sprintf(" {companyid=%d,tenantid=%d,origination_caller_id_number=%s,originate_timeout=30,force_transfer_context=PBXFeatures|%d|%d}", company, tenant, phoneNumber, tenant, company)
+		param := fmt.Sprintf(" {companyid=%d,tenantid=%d,origination_caller_id_number=%s,DVP_OPERATION_CAT=C2C,originate_timeout=30,force_transfer_context=PBXFeatures|%d|%d}", company, tenant, phoneNumber, tenant, company)
 		furl := fmt.Sprintf("user/%s", extention)
 
 		data := fmt.Sprintf(" &transfer(%s)", phoneNumber)
