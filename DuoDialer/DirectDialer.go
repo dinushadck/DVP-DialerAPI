@@ -117,7 +117,7 @@ func ClickToCall(company, tenant int, phoneNumber, extention, resourceServerId s
 		param := fmt.Sprintf(" {companyid=%d,tenantid=%d,origination_caller_id_number=%s,originate_timeout=30,force_transfer_context=PBXFeatures|%d|%d}", company, tenant, phoneNumber, tenant, company)
 		furl := fmt.Sprintf("user/%s", extention)
 
-		data := fmt.Sprintf(" &transfer(18705056560)", phoneNumber)
+		data := fmt.Sprintf(" &transfer(%s)", phoneNumber)
 
 		SetSessionInfo(campaignId, uuid, "Reason", "Dial Number")
 
