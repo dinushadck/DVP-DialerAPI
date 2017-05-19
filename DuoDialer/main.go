@@ -37,8 +37,10 @@ func main() {
 			runningCampaigns := GetAllRunningCampaign()
 			for _, campaign := range runningCampaigns {
 
-				location, _ := time.LoadLocation(campaign.TimeZone)
-				tm := time.Now().In(location)
+				StartLocation, _ := time.LoadLocation(campaign.CampConfigurations.StartTimeZone)
+				EndLocation, _ := time.LoadLocation(campaign.CampConfigurations.EndTimeZone)
+				tmStartLocation := time.Now().In(StartLocation)
+				tmEndLocation := time.Now().In(EndLocation)
 
 				campIdStr := strconv.Itoa(campaign.CampaignId)
 
@@ -49,28 +51,35 @@ func main() {
 				UpdateCampaignStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 
 				if campStatus == "Resume" || campStatus == "Start" || campStatus == "PauseByDialer" || campStatus == "Waiting for Appoinment" {
-					tempCampaignStartDate, _ := time.Parse(layout2, campaign.CampConfigurations.StartDate)
-					tempCampaignEndDate, _ := time.Parse(layout2, campaign.CampConfigurations.EndDate)
+					//tempCampaignStartDate, _ := time.Parse(layout2, campaign.CampConfigurations.StartDate)
+					//tempCampaignEndDate, _ := time.Parse(layout2, campaign.CampConfigurations.EndDate)
 
 					if campStatus == "Resume" {
 						UpdateCampaignStartStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 					}
 
-					campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), 0, 0, 0, 0, location)
-					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), 0, 0, 0, 0, location)
-					fmt.Println("Check Campaign: ", campIdStr)
-					fmt.Println("campaignStartDate: ", campaignStartDate.String())
-					fmt.Println("campaignEndDate: ", campaignEndDate.String())
+					//campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), 0, 0, 0, 0, location)
+					//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), 0, 0, 0, 0, location)
 
-					if campaignEndDate.Before(tm) {
-						fmt.Println("campaignEndDate before: ", tm.String())
+					campaignStartDate := campaign.CampConfigurations.StartDate
+					campaignEndDate := campaign.CampConfigurations.EndDate
+
+					fmt.Println("Check Campaign: ", campIdStr)
+					fmt.Println("campaignStartDate: ", campaign.CampConfigurations.StartDate.String())
+					fmt.Println("campaignEndDate: ", campaign.CampConfigurations.EndDate.String())
+
+					if campaignEndDate.Before(tmEndLocation) {
+						fmt.Println("campaignEndDate before: ", tmEndLocation.String())
 						RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
-					} else if campaignStartDate.Before(tm) && campaignEndDate.After(tm) {
+					} else if campaignStartDate.Before(tmStartLocation) && campaignEndDate.After(tmEndLocation) {
 						fmt.Println("Continue campaign: ", campIdStr)
 						if len(campaign.CampScheduleInfo) > 0 {
-							scheduleId := strconv.Itoa(campaign.CampScheduleInfo[0].ScheduleId)
-							camScheduleId := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
-							go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency)
+
+							for _, schedule := range campaign.CampScheduleInfo {
+								scheduleId := strconv.Itoa(schedule.ScheduleId)
+								camScheduleId := strconv.Itoa(schedule.CamScheduleId)
+								go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency)
+							}
 						}
 					}
 				} else {

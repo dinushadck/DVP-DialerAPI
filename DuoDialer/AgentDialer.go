@@ -10,12 +10,12 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
+func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
 	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "AgentDial", tryCount, campaignId, campaignName, uuid, phoneNumber, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "AgentDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
 	SetSessionInfo(campaignId, uuid, "FromNumber", fromNumber)
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, uuid, "Extention", extention)

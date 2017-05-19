@@ -6,26 +6,39 @@ import (
 	"time"
 )
 
-func DirectDialCampaign(company, tenant, campaignId int, number string) bool {
+func DirectDialCampaign(company, tenant, campaignId, ScheduleId int, number string) bool {
 	fmt.Println("start DialNumber")
 	campaignIdStr := strconv.Itoa(campaignId)
 	campaignInfo, isCamExists := GetCampaign(company, tenant, campaignId)
 	if isCamExists {
 
-		location, _ := time.LoadLocation(campaignInfo.TimeZone)
-		tmNow := time.Now().In(location)
-
-		tempCampaignEndDate, _ := time.Parse(layout1, campaignInfo.CampConfigurations.EndDate)
-		campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
-
-		if campaignEndDate.After(tmNow) {
-			scheduleIdStr := strconv.Itoa(campaignInfo.CampScheduleInfo[0].ScheduleId)
-			camScheduleStr := strconv.Itoa(campaignInfo.CampScheduleInfo[0].CamScheduleId)
-			validateAppoinment := CheckAppoinmentForCallback(company, tenant, scheduleIdStr, tmNow, campaignInfo.TimeZone)
-			if validateAppoinment {
-				numberWithTryCount := fmt.Sprintf("%s:%d", number, 1)
-				return AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
+		scheduleInfo := CampaignShedule{}
+		defaultScheduleInfo := CampaignShedule{}
+		for _, schedule := range campaignInfo.CampScheduleInfo {
+			if schedule.ScheduleId == ScheduleId {
+				scheduleInfo = schedule
+				break
 			}
+		}
+
+		if scheduleInfo != defaultScheduleInfo {
+			location, _ := time.LoadLocation(scheduleInfo.TimeZone)
+			tmNow := time.Now().In(location)
+
+			//tempCampaignEndDate, _ := time.Parse(layout1, campaignInfo.CampConfigurations.EndDate)
+			scheduleEndDate := scheduleInfo.EndDate
+
+			if scheduleEndDate.After(tmNow) {
+				scheduleIdStr := strconv.Itoa(scheduleInfo.ScheduleId)
+				camScheduleStr := strconv.Itoa(scheduleInfo.CamScheduleId)
+				validateAppoinment := CheckAppoinmentForCallback(company, tenant, scheduleIdStr, tmNow, scheduleInfo.TimeZone)
+				if validateAppoinment {
+					numberWithTryCount := fmt.Sprintf("%s:%d", number, 1)
+					return AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
+				}
+			}
+		} else {
+			return false
 		}
 	}
 	return false
@@ -43,7 +56,7 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourc
 
 		IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		IncrCampaignDialCount(company, tenant, campaignId)
-		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, campaignId, uuid, dnis, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId)
+		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, "0", campaignId, uuid, dnis, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId)
 		SetSessionInfo(campaignId, uuid, "FromNumber", ani)
 		SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 		SetSessionInfo(campaignId, uuid, "Extention", extention)
@@ -107,7 +120,7 @@ func ClickToCall(company, tenant int, phoneNumber, extention, resourceServerId s
 
 		IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		IncrCampaignDialCount(company, tenant, campaignId)
-		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, campaignId, uuid, phoneNumber, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId)
+		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, "0", campaignId, uuid, phoneNumber, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId)
 
 		SetSessionInfo(campaignId, uuid, "Extention", extention)
 

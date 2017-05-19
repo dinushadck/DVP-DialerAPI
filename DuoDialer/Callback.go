@@ -177,7 +177,7 @@ func ValidateDisconnectReason(disconnectReason string) (keyExist bool, value str
 	return
 }
 
-func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber, disConnectkReason string) {
+func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId, phoneNumber, disConnectkReason string) {
 	fmt.Println("start AddPhoneNumberToCallback")
 	_company, _ := strconv.Atoi(company)
 	_tenant, _ := strconv.Atoi(tenant)
@@ -195,50 +195,71 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, phoneNumber
 		if isReasonExists {
 			if maxCallbackCount > 0 && phoneNumber != "" && _tryCount > 0 && _tryCount <= maxCallbackCount {
 				camIdInt, _ := strconv.Atoi(campaignId)
+				scheduleIdInt, _ := strconv.Atoi(scheduleId)
 
 				campaignInfo, isCamExists := GetCampaign(_company, _tenant, camIdInt)
 				fmt.Println("isCamExists:: ", isCamExists)
+
 				if isCamExists {
 
-					location, _ := time.LoadLocation(campaignInfo.TimeZone)
-
-					tmNow := time.Now().In(location)
-					secCount := tmNow.Second() + callbackInterval
-					callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), secCount, 0, location)
-					fmt.Println("callbackTime:: ", callbackTime)
-
-					tempCampaignEndDate, _ := time.Parse(layout2, campaignInfo.CampConfigurations.EndDate)
-					campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
-
-					fmt.Println("Callback:CampaignEndDate:: ", campaignEndDate)
-					if campaignEndDate.After(callbackTime) {
-						fmt.Println("Start to build CallbackInfo")
-						scheduleIdStr := strconv.Itoa(campaignInfo.CampScheduleInfo[0].ScheduleId)
-						validateAppoinment := CheckAppoinmentForCallback(_company, _tenant, scheduleIdStr, callbackTime, campaignInfo.TimeZone)
-						fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
-						if validateAppoinment {
-							callbackObj := CampaignCallbackObj{}
-							callbackObj.CampaignId = camIdInt
-							callbackObj.CallbackClass = "DIALER"
-							callbackObj.CallbackType = "CALLBACK"
-							callbackObj.CallbackCategory = "INTERNAL"
-							callbackObj.CallBackCount = _tryCount
-							callbackObj.ContactId = phoneNumber
-							callbackObj.DialoutTime = callbackTime
-
-							dialerAPIUrl := fmt.Sprintf("http://%s", CreateHost(lbIpAddress, lbPort))
-							path := fmt.Sprintf("DVP/DialerAPI/ResumeCallback")
-
-							u, _ := url.Parse(dialerAPIUrl)
-							u.Path += path
-
-							fmt.Println(u.String())
-							cbUrl := u.String()
-
-							jsonData, _ := json.Marshal(callbackObj)
-							go UploadCallbackInfo(_company, _tenant, callbackTime, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+					scheduleInfo := CampaignShedule{}
+					defaultScheduleInfo := CampaignShedule{}
+					for _, schedule := range campaignInfo.CampScheduleInfo {
+						if schedule.ScheduleId == scheduleIdInt {
+							scheduleInfo = schedule
+							break
 						}
 					}
+
+					if scheduleInfo != defaultScheduleInfo {
+
+						location, _ := time.LoadLocation(scheduleInfo.TimeZone)
+
+						tmNow := time.Now().In(location)
+						secCount := tmNow.Second() + callbackInterval
+						callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), secCount, 0, location)
+						fmt.Println("callbackTime:: ", callbackTime)
+
+						//tempCampaignEndDate, _ := time.Parse(layout2, campaignInfo.CampConfigurations.EndDate)
+						//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
+
+						scheduleEndDate := scheduleInfo.EndDate
+
+						fmt.Println("Callback:scheduleEndDate:: ", scheduleEndDate)
+						if scheduleEndDate.After(callbackTime) {
+							fmt.Println("Start to build CallbackInfo")
+							//scheduleIdStr := strconv.Itoa(scheduleInfo.ScheduleId)
+							validateAppoinment := CheckAppoinmentForCallback(_company, _tenant, scheduleId, callbackTime, scheduleInfo.TimeZone)
+							fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
+							if validateAppoinment {
+								callbackObj := CampaignCallbackObj{}
+								callbackObj.CampaignId = camIdInt
+								callbackObj.CallbackClass = "DIALER"
+								callbackObj.CallbackType = "CALLBACK"
+								callbackObj.CallbackCategory = "INTERNAL"
+								callbackObj.CallBackCount = _tryCount
+								callbackObj.ContactId = phoneNumber
+								callbackObj.DialoutTime = callbackTime
+
+								dialerAPIUrl := fmt.Sprintf("http://%s", CreateHost(lbIpAddress, lbPort))
+								path := fmt.Sprintf("DVP/DialerAPI/ResumeCallback")
+
+								u, _ := url.Parse(dialerAPIUrl)
+								u.Path += path
+
+								fmt.Println(u.String())
+								cbUrl := u.String()
+
+								jsonData, _ := json.Marshal(callbackObj)
+								go UploadCallbackInfo(_company, _tenant, callbackTime, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+							}
+						}
+					} else {
+						fmt.Println("Add Callback Failed, No Valied Schedule Found")
+					}
+
+				} else {
+					fmt.Println("Add Callback Failed, No Existing Campaign Found")
 				}
 			}
 		}

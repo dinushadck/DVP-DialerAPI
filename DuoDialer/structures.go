@@ -93,7 +93,6 @@ type Campaign struct {
 	OperationalStatus  string
 	CampScheduleInfo   []CampaignShedule
 	CampConfigurations CampaignConfigInfo
-	TimeZone           string
 }
 
 type CampaignResult struct {
@@ -152,13 +151,18 @@ type CampaignConfigInfo struct {
 	ChannelConcurrency int
 	AllowCallBack      bool
 	Caller             string
-	StartDate          string
-	EndDate            string
+	StartDate          time.Time
+	EndDate            time.Time
+	StartTimeZone      string
+	EndTimeZone        string
 }
 
 type CampaignShedule struct {
 	ScheduleId    int
 	CamScheduleId int
+	TimeZone      string
+	StartDate     time.Time
+	EndDate       time.Time
 }
 
 type ContactInfo struct {

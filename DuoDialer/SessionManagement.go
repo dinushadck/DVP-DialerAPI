@@ -11,7 +11,7 @@ import (
 )
 
 //Initiate dial session for a number
-func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
+func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
@@ -26,6 +26,7 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["Number"] = number
 	data["DialerId"] = dialerId
 	data["CampaignId"] = campaignId
+	data["ScheduleId"] = scheduleId
 	data["CampaignName"] = campaignName
 	data["Dialtime"] = dialTime
 	data["ChannelCreatetime"] = ""
@@ -51,7 +52,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	sessionInfo := RedisHashGetAll(hashKey)
 	RedisRemove(hashKey)
-	AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["Number"], sessionInfo["Reason"])
+	AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"])
 	PublishEvent(campaignId, sessionId)
 	UploadSessionInfoToCampaignManager(sessionInfo)
 }

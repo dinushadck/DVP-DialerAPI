@@ -73,6 +73,32 @@ func RemoveCampaignStatusOther(oDialerId, campaignId string, company, tenant int
 	fmt.Println("RemoveCampaignStatusOther CampaignId: ", campaignStatusKey, " Result: ", result)
 }
 
+//----------Campaign and schedule status-----------------
+func SetScheduleStatus(campaignId, scheduleId, status string, company, tenant int) {
+	scheduleStatusKey := fmt.Sprintf("ScheduleStatus:%s:%d:%d:%s:%s", dialerId, company, tenant, campaignId, scheduleId)
+	result := RedisSet(scheduleStatusKey, status)
+	fmt.Println("SetScheduleStatus CampaignId: ", scheduleStatusKey, " Result: ", result)
+}
+
+func GetScheduleStatus(campaignId, scheduleId string, company, tenant int) string {
+	scheduleStatusKey := fmt.Sprintf("ScheduleStatus:%s:%d:%d:%s:%s", dialerId, company, tenant, campaignId, scheduleId)
+	result := RedisGet(scheduleStatusKey)
+	fmt.Println("GetScheduleStatus CampaignId: ", scheduleStatusKey, " Result: ", result)
+	return result
+}
+
+func RemoveScheduleStatus(campaignId, scheduleId string, company, tenant int) {
+	scheduleStatusKey := fmt.Sprintf("ScheduleStatus:%s:%d:%d:%s:%s", dialerId, company, tenant, campaignId, scheduleId)
+	result := RedisRemove(scheduleStatusKey)
+	fmt.Println("GetScheduleStatus CampaignId: ", scheduleStatusKey, " Result: ", result)
+}
+
+func RemoveScheduleStatusOther(oDialerId, campaignId, scheduleId string, company, tenant int) {
+	scheduleStatusKey := fmt.Sprintf("ScheduleStatus:%s:%d:%d:%s:%s", oDialerId, company, tenant, campaignId, scheduleId)
+	result := RedisRemove(scheduleStatusKey)
+	fmt.Println("RemoveScheduleStatusOther CampaignId: ", scheduleStatusKey, " Result: ", result)
+}
+
 //----------Campaign-----------------------
 func AddCampaignToDialer(campaignD Campaign) {
 	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
@@ -80,13 +106,51 @@ func AddCampaignToDialer(campaignD Campaign) {
 	existingKeys := RedisSearchKeys(searchCamp)
 
 	companyToken := fmt.Sprintf("%d:%d", campaignD.TenantId, campaignD.CompanyId)
-	scheduleId := strconv.Itoa(campaignD.CampScheduleInfo[0].ScheduleId)
-	startDate, endDate, timeZone := GetTimeZoneFroSchedule(companyToken, scheduleId)
 
-	fmt.Println("Add Time Zone::", timeZone)
-	campaignD.TimeZone = timeZone
-	campaignD.CampConfigurations.StartDate = startDate
-	campaignD.CampConfigurations.EndDate = endDate
+	defaultScheduleId := strconv.Itoa(campaignD.CampScheduleInfo[0].ScheduleId)
+	defaultStartDate, defaultEndDate, defaultTimeZone := GetTimeZoneFroSchedule(companyToken, defaultScheduleId)
+
+	location, _ := time.LoadLocation(defaultTimeZone)
+	defaultCampaignStartDate, _ := time.Parse(layout2, defaultStartDate)
+	defaultCampaignEndDate, _ := time.Parse(layout2, defaultEndDate)
+
+	tempCampaignStartDate := time.Date(defaultCampaignStartDate.Year(), defaultCampaignStartDate.Month(), defaultCampaignStartDate.Day(), 0, 0, 0, 0, location)
+	tempCampaignEndDate := time.Date(defaultCampaignEndDate.Year(), defaultCampaignEndDate.Month(), defaultCampaignEndDate.Day(), 0, 0, 0, 0, location)
+
+	campaignD.CampConfigurations.StartDate = tempCampaignStartDate
+	campaignD.CampConfigurations.EndDate = tempCampaignEndDate
+	campaignD.CampConfigurations.StartTimeZone = defaultTimeZone
+	campaignD.CampConfigurations.EndTimeZone = defaultTimeZone
+
+	for i, campSchedule := range campaignD.CampScheduleInfo {
+		scheduleId := strconv.Itoa(campSchedule.ScheduleId)
+		startDate, endDate, timeZone := GetTimeZoneFroSchedule(companyToken, scheduleId)
+
+		scheduleLocation, _ := time.LoadLocation(timeZone)
+		scheduleStartDate, _ := time.Parse(layout2, startDate)
+		scheduleEndDate, _ := time.Parse(layout2, endDate)
+
+		tempScheduleStartDate := time.Date(scheduleStartDate.Year(), scheduleStartDate.Month(), scheduleStartDate.Day(), 0, 0, 0, 0, scheduleLocation)
+		tempScheduleEndDate := time.Date(scheduleEndDate.Year(), scheduleEndDate.Month(), scheduleEndDate.Day(), 0, 0, 0, 0, scheduleLocation)
+
+		campaignD.CampScheduleInfo[i].StartDate = tempScheduleStartDate
+		campaignD.CampScheduleInfo[i].EndDate = tempScheduleEndDate
+		campaignD.CampScheduleInfo[i].TimeZone = timeZone
+
+		fmt.Println("Add Schedule Time Zone::", timeZone)
+		fmt.Println("Add Schedule Start Time::", tempScheduleStartDate.String())
+		fmt.Println("Add Schedule End Time::", tempScheduleEndDate.String())
+
+		if tempScheduleStartDate.Before(tempCampaignStartDate) {
+			campaignD.CampConfigurations.StartDate = tempScheduleStartDate
+			campaignD.CampConfigurations.StartTimeZone = timeZone
+		}
+
+		if tempScheduleEndDate.After(tempCampaignEndDate) {
+			campaignD.CampConfigurations.EndDate = tempScheduleEndDate
+			campaignD.CampConfigurations.EndTimeZone = timeZone
+		}
+	}
 
 	if len(existingKeys) == 0 {
 		campaignJson, _ := json.Marshal(campaignD)
@@ -101,6 +165,7 @@ func AddCampaignToDialer(campaignD Campaign) {
 			AddCampaignCallbackConfigInfo(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId)
 			SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
 			UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
+			UpdateCampaignStartAndEndDate(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId, campaignD.CampConfigurations.StartDate.Format("02 Jan 06 15:04 -0700"), campaignD.CampConfigurations.EndDate.Format("02 Jan 06 15:04 -0700"))
 		}
 	} else {
 		splitVals := strings.Split(existingKeys[0], ":")
@@ -173,23 +238,23 @@ func RemoveCampaignFromOtherDialer(oDialerId, campaignId string, company, tenant
 	}
 }
 
-func SetCampaignTimeZone(campaignId string, company, tenant int, timeZone string) {
-	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
+//func SetCampaignTimeZone(campaignId string, company, tenant int, timeZone string) {
+//	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
 
-	campJson := RedisGet(campaignKey)
-	var campObj Campaign
-	json.Unmarshal([]byte(campJson), &campObj)
+//	campJson := RedisGet(campaignKey)
+//	var campObj Campaign
+//	json.Unmarshal([]byte(campJson), &campObj)
 
-	campObj.TimeZone = timeZone
+//	campObj.TimeZone = timeZone
 
-	campaignJson, _ := json.Marshal(campObj)
+//	campaignJson, _ := json.Marshal(campObj)
 
-	result := RedisAdd(campaignKey, string(campaignJson))
-	fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
-	if result == "OK" {
-		fmt.Println("Update Campaign TimeZone success")
-	}
-}
+//	result := RedisAdd(campaignKey, string(campaignJson))
+//	fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+//	if result == "OK" {
+//		fmt.Println("Update Campaign TimeZone success")
+//	}
+//}
 
 //----------Campaign Manager Service-----------------------
 func RequestCampaign(requestCount int) []Campaign {
@@ -218,6 +283,8 @@ func RequestCampaign(requestCount int) []Campaign {
 
 	response, _ := ioutil.ReadAll(resp.Body)
 
+	fmt.Println("Campaign Data:: ", string(response))
+
 	var campaignResult CampaignResult
 	json.Unmarshal(response, &campaignResult)
 	if campaignResult.IsSuccess == true {
@@ -225,6 +292,8 @@ func RequestCampaign(requestCount int) []Campaign {
 			campaignDetails = append(campaignDetails, camRes)
 		}
 	}
+
+	fmt.Println("campaignDetails:: ", campaignDetails)
 	return campaignDetails
 }
 
@@ -305,6 +374,42 @@ func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
+	fmt.Println("request:", serviceurl)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, errb := ioutil.ReadAll(resp.Body)
+	if errb != nil {
+		fmt.Println(err.Error())
+	} else {
+		result := string(body)
+		fmt.Println("response Body:", result)
+	}
+}
+
+func UpdateCampaignStartAndEndDate(company, tenant, campaignId, configId int, startDate, endDate string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in UpdateCampaignStartAndEndDate", r)
+		}
+	}()
+
+	fmt.Println(company, " :: ", tenant, " :: ", campaignId, " :: ", configId, " :: ", startDate, " :: ", endDate)
+
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%d/Configuration/%d/StartDate/%s/EndDate/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, configId, startDate, endDate)
+
+	req, err := http.NewRequest("PUT", serviceurl, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	req.Header.Set("companyinfo", internalAuthToken)
@@ -475,16 +580,16 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								if trunkCode != "" && uuid != "" {
 									switch dialoutMec {
 									case "BLAST":
-										go DialNumber(company, tenant, resourceServerInfos, campaignId, campaignName, uuid, ani, trunkCode, dnis, tryCount, extention)
+										go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, tryCount, extention)
 										break
 									case "FIFO":
-										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, campaignName, uuid, ani, trunkCode, dnis, extention)
+										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, extention)
 										break
 									case "PREVIEW":
-										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
 										break
 									case "AGENT":
-										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
 										break
 									}
 								}
@@ -499,7 +604,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								defEmailInfo := EmailAdditionalData{}
 								emailInfo := RequestEmailInfo(company, tenant, campaignId)
 								if emailInfo != defEmailInfo {
-									go SendEmail(company, tenant, resourceServerInfos, campaignId, campaignName, camClass, camType, camCategory, emailInfo.FromAddresss, emailInfo.Subject, emailInfo.Body, number)
+									go SendEmail(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, camClass, camType, camCategory, emailInfo.FromAddresss, emailInfo.Subject, emailInfo.Body, number)
 								}
 								break
 							}

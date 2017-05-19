@@ -19,7 +19,7 @@ type DVP struct {
 	getTotalDialCount      gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalDialCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
-	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ContactNumber:string}" output:"bool"`
+	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ScheduleId:int}/{ContactNumber:string}" output:"bool"`
 	ardsCallback           gorest.EndPoint `method:"GET" path:"/DialerAPI/ArdsCallback/" output:"string"`
 	sendSms                gorest.EndPoint `method:"GET" path:"/DialerAPI/SendSms/{DnisNumber:string}/{Message:string}" output:"bool"`
 	clickToCall            gorest.EndPoint `method:"GET" path:"/DialerAPI/ClickToCall/{DnisNumber:string}/{Extention:string}" output:"bool"`
@@ -99,7 +99,7 @@ func (dvp DVP) ResumeCallback(callbackInfo CampaignCallbackObj) {
 	}
 }
 
-func (dvp DVP) DialCampaign(campaignId int, contactNumber string) bool {
+func (dvp DVP) DialCampaign(campaignId, ScheduleId int, contactNumber string) bool {
 	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		log := fmt.Sprintf("Start Direct DialCampaign CampaignId:%d # DNIS:%s ", campaignId, contactNumber)
@@ -113,7 +113,7 @@ func (dvp DVP) DialCampaign(campaignId int, contactNumber string) bool {
 			company, _ := strconv.Atoi(authHeaderInfo[1])
 			fmt.Println("Company: ", company)
 			fmt.Println("Tenant: ", tenant)
-			return DirectDialCampaign(company, tenant, campaignId, contactNumber)
+			return DirectDialCampaign(company, tenant, campaignId, ScheduleId, contactNumber)
 		}
 		return false
 	} else {

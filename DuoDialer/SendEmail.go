@@ -66,10 +66,10 @@ func GenerateEmail(fromEmail, subject, message, toEmail string) Email {
 	return _email
 }
 
-func SendEmail(company, tenant int, resourceServer ResourceServerInfo, campaignId, campaignName, camClass, camType, camCategory, fromEmail, subject, message, toEmail string) {
+func SendEmail(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, camClass, camType, camCategory, fromEmail, subject, message, toEmail string) {
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, camClass, camType, camCategory, "1", campaignId, campaignName, toEmail, toEmail, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
+	InitiateSessionInfo(company, tenant, 240, camClass, camType, camCategory, "1", campaignId, scheduleId, campaignName, toEmail, toEmail, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
 	emailRequest := GenerateEmail(fromEmail, subject, message, toEmail)
 	SaveEmailInformation(emailRequest)
 
