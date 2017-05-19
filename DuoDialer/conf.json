@@ -11,7 +11,7 @@
 	"LbPort": "2226",
 	"Port":"2226",
 	"CampaignRequestFrequency": 10,
-	"CampaignServiceHost": "127.0.0.1",
+	"CampaignServiceHost": "campaignmanager.app.veery.cloud",
 	"CampaignServicePort": "8827",
 	"CallServerHost": "159.203.160.47",
 	"CallServerPort": "8080",
