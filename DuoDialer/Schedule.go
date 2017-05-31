@@ -80,54 +80,113 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time, timeZone stri
 
 	for _, appmnt := range appoinments {
 		fmt.Println("CheckAppoinments: ", appmnt.AppointmentName)
-		fmt.Println("daysOfWeek: ", appmnt.DaysOfWeek)
-		daysOfWeek := strings.Split(appmnt.DaysOfWeek, ",")
-		if stringInSlice(timeNow.Weekday().String(), daysOfWeek) {
-			fmt.Println("match daysOfWeek: ", timeNow.Weekday().String())
+		fmt.Println("RecurrencePattern: ", appmnt.RecurrencePattern)
 
-			tempstartDate, _ := time.Parse(layout2, appmnt.StartDate)
-			tempendDate, _ := time.Parse(layout2, appmnt.EndDate)
+		tempstartDate, _ := time.Parse(layout2, appmnt.StartDate)
+		tempendDate, _ := time.Parse(layout2, appmnt.EndDate)
 
+		switch appmnt.RecurrencePattern {
+		case "NONE":
 			splitStartTime := strings.Split(appmnt.StartTime, ":")
 			splitEndTime := strings.Split(appmnt.EndTime, ":")
 
-			startDate := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), 0, 0, 0, 0, location)
-			endDate := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), 0, 0, 0, 0, location)
+			tempStartHr := 0
+			tempStartMin := 0
+			tempEndHr := 0
+			tempEndMin := 0
 
-			fmt.Println("appoinment startDate: ", startDate.String())
-			fmt.Println("appoinment endDate: ", endDate.String())
+			if len(splitStartTime) == 2 {
+				tempStartHr, _ = strconv.Atoi(splitStartTime[0])
+				tempStartMin, _ = strconv.Atoi(splitStartTime[1])
+			}
 
-			if startDate.Before(timeNow) && endDate.After(timeNow) {
-				tempStartHr := 0
-				tempStartMin := 0
-				tempEndHr := 0
-				tempEndMin := 0
+			if len(splitEndTime) == 2 {
+				tempEndHr, _ = strconv.Atoi(splitEndTime[0])
+				tempEndMin, _ = strconv.Atoi(splitEndTime[1])
+			}
 
-				if len(splitStartTime) == 2 {
-					tempStartHr, _ = strconv.Atoi(splitStartTime[0])
-					tempStartMin, _ = strconv.Atoi(splitStartTime[1])
-				}
+			localStartTime := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), tempStartHr, tempStartMin, 0, 0, location)
+			localEndTime := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), tempEndHr, tempEndMin, 0, 0, location)
 
-				if len(splitEndTime) == 2 {
-					tempEndHr, _ = strconv.Atoi(splitEndTime[0])
-					tempEndMin, _ = strconv.Atoi(splitEndTime[1])
-				}
+			fmt.Println("serverTimeLocal: ", timeNow.String())
+			fmt.Println("appoinment startTime: ", localStartTime.String())
+			fmt.Println("appoinment enendTimedDate: ", localEndTime.String())
 
-				localStartTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), tempStartHr, tempStartMin, 0, 0, location)
-				localEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), tempEndHr, tempEndMin, 0, 0, location)
+			if localStartTime.Before(timeNow) && localEndTime.After(timeNow) {
+				fmt.Println("match appoinment date&time: ", timeNow.String())
 
-				fmt.Println("serverTimeLocal: ", timeNow.String())
-				fmt.Println("appoinment startTime: ", localStartTime.String())
-				fmt.Println("appoinment enendTimedDate: ", localEndTime.String())
+				endTime = localEndTime
+				appinment = appmnt
+				return
+			}
+			break
+		case "DAILY":
+			localStartTime := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), 0, 0, 0, 0, location)
+			localEndTime := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), 0, 0, 0, 0, location)
 
-				if localStartTime.Before(timeNow) && localEndTime.After(timeNow) {
-					fmt.Println("match appoinment date&time: ", timeNow.String())
+			fmt.Println("serverTimeLocal: ", timeNow.String())
+			fmt.Println("appoinment startTime: ", localStartTime.String())
+			fmt.Println("appoinment enendTimedDate: ", localEndTime.String())
 
-					endTime = localEndTime
-					appinment = appmnt
-					return
+			if localStartTime.Before(timeNow) && localEndTime.After(timeNow) {
+				fmt.Println("match appoinment date&time: ", timeNow.String())
+
+				endTime = localEndTime
+				appinment = appmnt
+				return
+			}
+			break
+		case "WEEKLY":
+			fmt.Println("daysOfWeek: ", appmnt.DaysOfWeek)
+			daysOfWeek := strings.Split(appmnt.DaysOfWeek, ",")
+			if stringInSlice(timeNow.Weekday().String(), daysOfWeek) {
+				fmt.Println("match daysOfWeek: ", timeNow.Weekday().String())
+
+				splitStartTime := strings.Split(appmnt.StartTime, ":")
+				splitEndTime := strings.Split(appmnt.EndTime, ":")
+
+				startDate := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), 0, 0, 0, 0, location)
+				endDate := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), 0, 0, 0, 0, location)
+
+				fmt.Println("appoinment startDate: ", startDate.String())
+				fmt.Println("appoinment endDate: ", endDate.String())
+
+				if startDate.Before(timeNow) && endDate.After(timeNow) {
+					tempStartHr := 0
+					tempStartMin := 0
+					tempEndHr := 0
+					tempEndMin := 0
+
+					if len(splitStartTime) == 2 {
+						tempStartHr, _ = strconv.Atoi(splitStartTime[0])
+						tempStartMin, _ = strconv.Atoi(splitStartTime[1])
+					}
+
+					if len(splitEndTime) == 2 {
+						tempEndHr, _ = strconv.Atoi(splitEndTime[0])
+						tempEndMin, _ = strconv.Atoi(splitEndTime[1])
+					}
+
+					localStartTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), tempStartHr, tempStartMin, 0, 0, location)
+					localEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), tempEndHr, tempEndMin, 0, 0, location)
+
+					fmt.Println("serverTimeLocal: ", timeNow.String())
+					fmt.Println("appoinment startTime: ", localStartTime.String())
+					fmt.Println("appoinment enendTimedDate: ", localEndTime.String())
+
+					if localStartTime.Before(timeNow) && localEndTime.After(timeNow) {
+						fmt.Println("match appoinment date&time: ", timeNow.String())
+
+						endTime = localEndTime
+						appinment = appmnt
+						return
+					}
 				}
 			}
+
+			break
+		default:
+			break
 		}
 	}
 
