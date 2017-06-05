@@ -366,10 +366,11 @@ type ArdsResult struct {
 }
 
 type ResourceDetails struct {
-	ContactName string
-	Domain      string
-	ContactType string
-	ResourceId  string
+	ContactName  string
+	Domain       string
+	ContactType  string
+	ResourceId   string
+	ResourceName string
 }
 
 type ArdsCallbackInfo struct {

@@ -50,7 +50,8 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 			} else {
 				numberWithData := strings.Split(numRes.CampContactInfo.ContactId, ":")
 				if len(numberWithData) > 1 {
-					numberAndExtraD := fmt.Sprintf("%s:%s:%s", numberWithData[0], "1", numberWithData[1])
+					exData := strings.Join(numberWithData[1:], ":")
+					numberAndExtraD := fmt.Sprintf("%s:%s:%s", numberWithData[0], "1", exData)
 					numbers = append(numbers, numberAndExtraD)
 				} else {
 					numberWithoutExtraData := fmt.Sprintf("%s:%s:", numRes.CampContactInfo.ContactId, "1")

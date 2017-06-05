@@ -112,7 +112,7 @@ func RemoveRequest(company, tenant, sessionId string) {
 		}
 	}()
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
-	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	internalAuthToken := fmt.Sprintf("%s:%s", tenant, company)
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request/%s", CreateHost(ardsServiceHost, ardsServicePort), sessionId)
