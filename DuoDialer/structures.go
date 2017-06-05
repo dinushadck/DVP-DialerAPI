@@ -391,12 +391,12 @@ type ArdsResSlot struct {
 
 //--------------------Notification--------------------
 type PushData struct {
-	From      string
-	To        string
-	Direction string
-	Message   string
-	Callback  string
-	Ref       string
+	From        string
+	To          string
+	Direction   string
+	Message     string
+	CallbackURL string
+	Ref         string
 }
 
 type ReplyData struct {

@@ -70,7 +70,7 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 	ardsReq.SessionId = uuid
 	ardsReq.ServerType = "DIALER"
 	ardsReq.RequestType = "CALL"
-	ardsReq.Priority = "L"
+	ardsReq.Priority = "0"
 	ardsReq.RequestServerId = dialerId
 	ardsReq.Attributes = attributes
 	ardsReq.OtherInfo = otherData

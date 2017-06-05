@@ -61,9 +61,9 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo, reqOData RequestOther
 	pushD := PushData{}
 	pushD.From = campaignId
 	pushD.To = resourceInfo.ResourceInfo.ResourceId
-	pushD.Direction = "BY"
+	pushD.Direction = "STATEFUL"
 	pushD.Message = reqOData.StrData
-	pushD.Callback = fmt.Sprintf("http://%s/DVP/DialerAPI/PreviewCallBack", CreateHost(lbIpAddress, lbPort))
+	pushD.CallbackURL = fmt.Sprintf("http://%s/DVP/DialerAPI/PreviewCallBack", CreateHost(lbIpAddress, lbPort))
 	pushD.Ref = refDataStr
 
 	jsonData, _ := json.Marshal(pushD)
