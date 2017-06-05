@@ -151,34 +151,34 @@ func (dvp DVP) ArdsCallback() string {
 			fmt.Println("Recovered in ArdsCallback", r)
 		}
 	}()
-	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
-	if company != 0 && tenant != 0 {
-		fmt.Println("---------------Start ArdsCallback---------")
-		jResult, _ := url.QueryUnescape(dvp.Context.Request().URL.RawQuery)
-		log := fmt.Sprintf("Start ArdsCallback :%s ", jResult)
-		fmt.Println(log)
+	//company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
+	//if company != 0 && tenant != 0 {
+	fmt.Println("---------------Start ArdsCallback---------")
+	jResult, _ := url.QueryUnescape(dvp.Context.Request().URL.RawQuery)
+	log := fmt.Sprintf("Start ArdsCallback :%s ", jResult)
+	fmt.Println(log)
 
-		var ardsCallbackInfo ArdsCallbackInfo
-		var reqOData RequestOtherData
-		json.Unmarshal([]byte(jResult), &ardsCallbackInfo)
-		json.Unmarshal([]byte(ardsCallbackInfo.OtherInfo), &reqOData)
+	var ardsCallbackInfo ArdsCallbackInfo
+	var reqOData RequestOtherData
+	json.Unmarshal([]byte(jResult), &ardsCallbackInfo)
+	json.Unmarshal([]byte(ardsCallbackInfo.OtherInfo), &reqOData)
 
-		go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
+	go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
 
-		switch reqOData.DialoutMec {
-		case "PREVIEW":
-			SendPreviewDataToAgent(ardsCallbackInfo, reqOData)
-			break
-		case "AGENT":
-			log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: Class: %s :: Type: %s :: Category: %s :: SessionId: %s", ardsCallbackInfo.ResourceInfo.ContactName, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
-			fmt.Println(log3)
-			DialAgent(ardsCallbackInfo.ResourceInfo.ContactName, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
-			break
-		}
-
-	} else {
-		dvp.RB().SetResponseCode(403)
+	switch reqOData.DialoutMec {
+	case "PREVIEW":
+		SendPreviewDataToAgent(ardsCallbackInfo, reqOData)
+		break
+	case "AGENT":
+		log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: Class: %s :: Type: %s :: Category: %s :: SessionId: %s", ardsCallbackInfo.ResourceInfo.ContactName, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
+		fmt.Println(log3)
+		DialAgent(ardsCallbackInfo.ResourceInfo.ContactName, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
+		break
 	}
+
+	//} else {
+	//	dvp.RB().SetResponseCode(403)
+	//}
 
 	return ""
 }
