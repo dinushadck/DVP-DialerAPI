@@ -44,8 +44,19 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	json.Unmarshal(response, &phoneNumberResult)
 	if phoneNumberResult.IsSuccess == true {
 		for _, numRes := range phoneNumberResult.Result {
-			numberWithExtraD := fmt.Sprintf("%s:%s:%s", numRes.CampContactInfo.ContactId, "1", numRes.ExtraData)
-			numbers = append(numbers, numberWithExtraD)
+			if numRes.ExtraData != "" {
+				numberWithExtraD := fmt.Sprintf("%s:%s:%s", numRes.CampContactInfo.ContactId, "1", numRes.ExtraData)
+				numbers = append(numbers, numberWithExtraD)
+			} else {
+				numberWithData := strings.Split(numRes.CampContactInfo.ContactId, ":")
+				if len(numberWithData) > 1 {
+					numberAndExtraD := fmt.Sprintf("%s:%s:%s", numberWithData[0], "1", numberWithData[1])
+					numbers = append(numbers, numberAndExtraD)
+				} else {
+					numberWithoutExtraData := fmt.Sprintf("%s:%s:", numRes.CampContactInfo.ContactId, "1")
+					numbers = append(numbers, numberWithoutExtraData)
+				}
+			}
 		}
 	}
 	return numbers
