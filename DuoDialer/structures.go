@@ -337,10 +337,11 @@ type PubEvents struct {
 
 //--------------------Ards--------------------
 type RequestServer struct {
-	ServerType  string
-	RequestType string
-	CallbackUrl string
-	ServerID    string
+	ServerType     string
+	RequestType    string
+	CallbackUrl    string
+	ServerID       string
+	CallbackOption string
 }
 
 type RequestOtherData struct {

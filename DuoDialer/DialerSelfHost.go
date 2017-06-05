@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/DuoSoftware/gorest"
-	"net/url"
+	//"net/url"
 	"strconv"
 	"strings"
 )
@@ -20,7 +20,7 @@ type DVP struct {
 	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
 	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ScheduleId:int}/{ContactNumber:string}" output:"bool"`
-	ardsCallback           gorest.EndPoint `method:"GET" path:"/DialerAPI/ArdsCallback/" output:"string"`
+	ardsCallback           gorest.EndPoint `method:"POST" path:"/DialerAPI/ArdsCallback/" postdata:"ArdsCallbackInfo"`
 	sendSms                gorest.EndPoint `method:"GET" path:"/DialerAPI/SendSms/{DnisNumber:string}/{Message:string}" output:"bool"`
 	clickToCall            gorest.EndPoint `method:"GET" path:"/DialerAPI/ClickToCall/{DnisNumber:string}/{Extention:string}" output:"bool"`
 }
@@ -145,7 +145,7 @@ func (dvp DVP) Dial(AniNumber, DnisNumber, Extention, CallserverId string) bool 
 	}
 }
 
-func (dvp DVP) ArdsCallback() string {
+func (dvp DVP) ArdsCallback(ardsCallbackInfo ArdsCallbackInfo) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in ArdsCallback", r)
@@ -154,13 +154,13 @@ func (dvp DVP) ArdsCallback() string {
 	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 		fmt.Println("---------------Start ArdsCallback---------")
-		jResult, _ := url.QueryUnescape(dvp.Context.Request().URL.RawQuery)
-		log := fmt.Sprintf("Start ArdsCallback :%s ", jResult)
-		fmt.Println(log)
+		//jResult, _ := url.QueryUnescape(dvp.Context.Request().URL.RawQuery)
+		//log := fmt.Sprintf("Start ArdsCallback :%s ", jResult)
+		//fmt.Println(log)
 
-		var ardsCallbackInfo ArdsCallbackInfo
+		//var ardsCallbackInfo ArdsCallbackInfo
 		var reqOData RequestOtherData
-		json.Unmarshal([]byte(jResult), &ardsCallbackInfo)
+		//json.Unmarshal([]byte(jResult), &ardsCallbackInfo)
 		json.Unmarshal([]byte(ardsCallbackInfo.OtherInfo), &reqOData)
 
 		go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
@@ -176,11 +176,11 @@ func (dvp DVP) ArdsCallback() string {
 			break
 		}
 
+		dvp.RB().SetResponseCode(200)
+
 	} else {
 		dvp.RB().SetResponseCode(403)
 	}
-
-	return ""
 }
 
 func (dvp DVP) PreviewCallBack(rdata ReceiveData) {

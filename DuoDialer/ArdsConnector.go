@@ -30,6 +30,7 @@ func AddRequestServer() {
 	reqServer.ServerType = "DIALER"
 	reqServer.RequestType = "CALL"
 	reqServer.CallbackUrl = cbUrl
+	reqServer.CallbackOption = "POST"
 
 	jsonData, _ := json.Marshal(reqServer)
 
