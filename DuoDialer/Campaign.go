@@ -586,6 +586,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, extention)
 										break
 									case "PREVIEW":
+										fmt.Println("Start Preview Dialer")
 										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
 										break
 									case "AGENT":
