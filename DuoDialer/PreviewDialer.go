@@ -75,6 +75,7 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo, reqOData RequestOther
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	req.Header.Set("companyinfo", internalAuthToken)
+	req.Header.Set("eventname", "preview_dialer_message")
 	fmt.Println("request:", serviceurl)
 	fmt.Println(string(jsonData))
 
