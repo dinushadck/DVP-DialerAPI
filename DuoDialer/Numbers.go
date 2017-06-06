@@ -104,7 +104,9 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (str
 	}
 	numberWithTryCount := RedisListLpop(listId)
 	numberInfos := strings.Split(numberWithTryCount, ":")
-	if len(numberInfos) == 3 {
+	if len(numberInfos) > 3 {
+		return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":")
+	} else if len(numberInfos) == 3 {
 		return numberInfos[0], numberInfos[1], numberInfos[2]
 	} else if len(numberInfos) == 2 {
 		return numberInfos[0], numberInfos[1], ""
