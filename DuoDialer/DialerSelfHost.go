@@ -189,34 +189,36 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			fmt.Println("Recovered in PreviewCallBack", r)
 		}
 	}()
-	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
-	if company != 0 && tenant != 0 {
-		log := fmt.Sprintf("Start PreviewCallBack Ref:%s ", rdata.Ref)
-		log1 := fmt.Sprintf("Start PreviewCallBack TKey:%s ", rdata.Reply.Tkey)
-		log2 := fmt.Sprintf("Start PreviewCallBack Message:%s ", rdata.Reply.Message)
-		fmt.Println(log)
-		fmt.Println(log1)
-		fmt.Println(log2)
+	//company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
+	//if company != 0 && tenant != 0 {
+	log := fmt.Sprintf("Start PreviewCallBack Ref:%s ", rdata.Ref)
+	log1 := fmt.Sprintf("Start PreviewCallBack TKey:%s ", rdata.Reply.Tkey)
+	log2 := fmt.Sprintf("Start PreviewCallBack Message:%s ", rdata.Reply.Message)
+	fmt.Println(log)
+	fmt.Println(log1)
+	fmt.Println(log2)
 
-		var refData ArdsCallbackInfo
-		json.Unmarshal([]byte(rdata.Ref), &refData)
+	var refData ArdsCallbackInfo
+	json.Unmarshal([]byte(rdata.Ref), &refData)
 
-		var reqOData RequestOtherData
-		json.Unmarshal([]byte(refData.OtherInfo), &reqOData)
+	var reqOData RequestOtherData
+	json.Unmarshal([]byte(refData.OtherInfo), &reqOData)
 
-		if rdata.Reply.Message == "ACCEPTED" {
-			fmt.Println("Start Dial Priview Number")
-			log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: Class: %s :: Type: %s :: Category: %s :: SessionId: %s", refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.ServerType, refData.RequestType, refData.SessionID)
-			fmt.Println(log3)
-			DialAgent(refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.ServerType, refData.RequestType, refData.SessionID)
-		} else {
-			fmt.Println("Start Reject Priview Number")
-			AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
-		}
+	if rdata.Reply.Message == "ACCEPTED" {
+		fmt.Println("Start Dial Priview Number")
+		log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: Class: %s :: Type: %s :: Category: %s :: SessionId: %s", refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.ServerType, refData.RequestType, refData.SessionID)
+		fmt.Println(log3)
+		DialAgent(refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.ServerType, refData.RequestType, refData.SessionID)
 	} else {
-		dvp.RB().SetResponseCode(403)
-		return
+		fmt.Println("Start Reject Priview Number")
+		AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
 	}
+
+	return
+	//} else {
+	//	dvp.RB().SetResponseCode(403)
+	//	return
+	//}
 }
 
 func (dvp DVP) SendSms(DnisNumber, Message string) bool {
