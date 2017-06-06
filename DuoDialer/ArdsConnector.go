@@ -115,7 +115,7 @@ func RemoveRequest(company, tenant, sessionId string) {
 	internalAuthToken := fmt.Sprintf("%s:%s", tenant, company)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request/%s", CreateHost(ardsServiceHost, ardsServicePort), sessionId)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request/%s/NONE", CreateHost(ardsServiceHost, ardsServicePort), sessionId)
 	fmt.Println("Start RemoveRequest: ", request)
 	req, _ := http.NewRequest("DELETE", request, nil)
 	req.Header.Set("authorization", jwtToken)
