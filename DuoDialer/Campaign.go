@@ -695,7 +695,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							smsData["company"] = company
 							smsData["tenant"] = tenant
 							smsData["to"] = number
-							emailData["from"] = defaultAni
+							smsData["from"] = defaultAni
 							smsData["subject"] = campaignName
 
 							if len(templates) > 0 {
