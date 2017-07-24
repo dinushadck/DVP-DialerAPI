@@ -43,6 +43,12 @@ var clusterConfigServicePort string
 var casServerHost string
 var v5_1SecurityToken string
 var accessToken string
+var rabbitMQHost string
+var rabbitMQPort string
+var rabbitMQUser string
+var rabbitMQPassword string
+var fileServiceHost string
+var fileServicePort string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -97,6 +103,12 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.CasServerHost = "localhost:20946"
 		defconfiguration.V5_1SecurityToken = ""
 		defconfiguration.AccessToken = ""
+		defconfiguration.RabbitMQHost = "45.55.142.207"
+		defconfiguration.RabbitMQPort = "5672"
+		defconfiguration.RabbitMQUser = "guest"
+		defconfiguration.RabbitMQPassword = "guest"
+		defconfiguration.FileServiceHost = "fileservice.app.veery.cloud"
+		defconfiguration.FileServicePort = "5645"
 	}
 
 	return defconfiguration
@@ -137,6 +149,12 @@ func LoadDefaultConfig() {
 	casServerHost = defconfiguration.CasServerHost
 	v5_1SecurityToken = defconfiguration.V5_1SecurityToken
 	accessToken = defconfiguration.AccessToken
+	rabbitMQHost = defconfiguration.RabbitMQHost
+	rabbitMQPort = defconfiguration.RabbitMQPort
+	rabbitMQUser = defconfiguration.RabbitMQUser
+	rabbitMQPassword = defconfiguration.RabbitMQPassword
+	fileServiceHost = defconfiguration.FileServiceHost
+	fileServicePort = defconfiguration.FileServicePort
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -191,6 +209,12 @@ func LoadConfiguration() {
 		casServerHost = os.Getenv(envconfiguration.CasServerHost)
 		v5_1SecurityToken = os.Getenv(envconfiguration.V5_1SecurityToken)
 		accessToken = os.Getenv(envconfiguration.AccessToken)
+		rabbitMQHost = os.Getenv(envconfiguration.RabbitMQHost)
+		rabbitMQPort = os.Getenv(envconfiguration.RabbitMQPort)
+		rabbitMQUser = os.Getenv(envconfiguration.RabbitMQUser)
+		rabbitMQPassword = os.Getenv(envconfiguration.RabbitMQPassword)
+		fileServiceHost = os.Getenv(envconfiguration.FileServiceHost)
+		fileServicePort = os.Getenv(envconfiguration.FileServicePort)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -286,6 +310,24 @@ func LoadConfiguration() {
 		}
 		if accessToken == "" {
 			accessToken = defConfig.AccessToken
+		}
+		if rabbitMQHost == "" {
+			rabbitMQHost = defConfig.RabbitMQHost
+		}
+		if rabbitMQPort == "" {
+			rabbitMQPort = defConfig.RabbitMQPort
+		}
+		if rabbitMQUser == "" {
+			rabbitMQUser = defConfig.RabbitMQUser
+		}
+		if rabbitMQPassword == "" {
+			rabbitMQPassword = defConfig.RabbitMQPassword
+		}
+		if fileServiceHost == "" {
+			fileServiceHost = defConfig.FileServiceHost
+		}
+		if fileServicePort == "" {
+			fileServicePort = defConfig.FileServicePort
 		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)

@@ -75,13 +75,13 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		var dial bool
 		if contactType == "PRIVATE" {
 			dial = true
-			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s}user/%s@%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, contactName, domain)
+			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}user/%s@%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, contactName, domain)
 		} else if contactType == "PUBLIC" {
 			dial = true
-			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PUBLIC_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s}sofia/external/%s@%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, contactName, domain)
+			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PUBLIC_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}sofia/external/%s@%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, contactName, domain)
 		} else if contactType == "TRUNK" {
 			dial = true
-			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s}sofia/gateway/%s/%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, domain, contactName)
+			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}sofia/gateway/%s/%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, domain, contactName)
 		} else {
 			dial = false
 			fmt.Println("Invalied ContactType")
@@ -125,20 +125,22 @@ func RequestCampaignAttributeInfo(company, tenant int, campaignId string) []stri
 	attributeDetails := make([]string, 0)
 
 	response := RequestCampaignAddtionalData(company, tenant, campaignId, "PREVIEW", "ARDS", "ATTRIBUTE")
-	if response != "" {
+	if len(response) > 0 && response[0] != "" {
 		var attInfo []string
-		json.Unmarshal([]byte(response), &attInfo)
+		json.Unmarshal([]byte(response[0]), &attInfo)
 		attributeDetails = attInfo
 	}
 	return attributeDetails
 }
 
-func RequestCampaignAddtionalData(company, tenant int, campaignId, class, ctype, category string) string {
+func RequestCampaignAddtionalData(company, tenant int, campaignId, class, ctype, category string) []string {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RequestCampaignAddtionalData", r)
 		}
 	}()
+
+	additionalData := make([]string, 0)
 	//Request campaign from Campaign Manager service
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
@@ -154,7 +156,7 @@ func RequestCampaignAddtionalData(company, tenant int, campaignId, class, ctype,
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
-		return ""
+		return additionalData
 	}
 	defer resp.Body.Close()
 
@@ -164,11 +166,15 @@ func RequestCampaignAddtionalData(company, tenant int, campaignId, class, ctype,
 		var campaignAdditionalDataResult CampaignAdditionalDataResult
 		json.Unmarshal(response, &campaignAdditionalDataResult)
 		if campaignAdditionalDataResult.IsSuccess == true {
-			return campaignAdditionalDataResult.Result.AdditionalData
+
+			for _, data := range campaignAdditionalDataResult.Result {
+				additionalData = append(additionalData, data.AdditionalData)
+			}
+			return additionalData
 		} else {
-			return ""
+			return additionalData
 		}
 	} else {
-		return ""
+		return additionalData
 	}
 }

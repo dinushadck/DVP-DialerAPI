@@ -60,7 +60,7 @@ func GetCallserverInfo(company, tenant int) CallServerResult {
 	return CallServerResult{}
 }
 
-func GetSmsServerInfo(company, tenant int) ResourceServerInfo {
+func GetSmsAndEmailServerInfo() ResourceServerInfo {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in GetSmsserverInfo", r)
@@ -68,52 +68,11 @@ func GetSmsServerInfo(company, tenant int) ResourceServerInfo {
 	}()
 
 	var smsServerApiResult ResourceServerInfo
-	smsServerApiResult.ResourceServerId = "SMS1"
-	smsServerApiResult.Url = "159.203.109.43:1401"
-	smsServerApiResult.MaxChannelCount = 5
+	smsServerApiResult.ResourceServerId = "EmailAndSms"
+	smsServerApiResult.Url = fmt.Sprintf("amqp://%s:%s@%s:%s/", rabbitMQUser, rabbitMQPassword, rabbitMQHost, rabbitMQPort)
+	smsServerApiResult.MaxChannelCount = -1
 
 	return smsServerApiResult
-}
-
-func GetEmailServerInfo(company, tenant int) ResourceServerInfo {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Recovered in GetSmsserverInfo", r)
-		}
-	}()
-	authToken := fmt.Sprintf("%d:%d", tenant, company)
-
-	client := &http.Client{}
-
-	request := fmt.Sprintf("http://%s/DuoMessageTemplate/EmailService.svc/Json/getEmailServeDetails/%d/%d", casServerHost, company, tenant)
-	fmt.Println("Start GetSmsserverInfo request: ", request)
-	req, _ := http.NewRequest("GET", request, nil)
-	req.Header.Add("Authorization", authToken)
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err.Error())
-		return ResourceServerInfo{}
-	}
-	defer resp.Body.Close()
-
-	response, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("Result: ", string(response))
-
-	var smsServerApiResult ResourceServerInfo
-	var resData string
-	conErr1 := json.Unmarshal(response, &resData)
-	if conErr1 != nil {
-		fmt.Println(conErr1.Error())
-	}
-	fmt.Println("tempData: ", resData)
-	conErr := json.Unmarshal([]byte(resData), &smsServerApiResult)
-	if conErr != nil {
-		fmt.Println(conErr.Error())
-	}
-	if smsServerApiResult.ResourceServerId != "" {
-		return smsServerApiResult
-	}
-	return ResourceServerInfo{}
 }
 
 func RegisterCallServer(company, tenant int) ResourceServerInfo {
@@ -147,50 +106,25 @@ func RegisterCallServer(company, tenant int) ResourceServerInfo {
 	return defResourceServerInfo
 }
 
-func RegisterSmsServer(company, tenant int) ResourceServerInfo {
+func RegisterSmsAndEmailServer() ResourceServerInfo {
 	defResourceServerInfo := ResourceServerInfo{}
 
 	//Get CallServer info
-	pickedSmsServer := GetSmsServerInfo(company, tenant)
-	log := fmt.Sprintf("SmsSrver id: %d :: URL: %s", pickedSmsServer.ResourceServerId, pickedSmsServer.Url)
+	pickedSmsAndEmailServer := GetSmsAndEmailServerInfo()
+	log := fmt.Sprintf("SmsAndEmailSrver id: %s :: URL: %s", pickedSmsAndEmailServer.ResourceServerId, pickedSmsAndEmailServer.Url)
 	fmt.Println(log)
-	if pickedSmsServer.ResourceServerId != "" {
-		resourceServerKey := fmt.Sprintf("ResourceServer:%s", pickedSmsServer.ResourceServerId)
-		resourceServerjson, _ := json.Marshal(pickedSmsServer)
+	if pickedSmsAndEmailServer.ResourceServerId != "" {
+		resourceServerKey := fmt.Sprintf("ResourceServer:%s", pickedSmsAndEmailServer.ResourceServerId)
+		resourceServerjson, _ := json.Marshal(pickedSmsAndEmailServer)
 		addResult := RedisSet(resourceServerKey, string(resourceServerjson))
 
 		if addResult == "OK" {
-			rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", pickedSmsServer.ResourceServerId)
-			rsmcl := fmt.Sprintf("ResourceServerMaxCallLimit:%s", pickedSmsServer.ResourceServerId)
-			countStr := strconv.Itoa(pickedSmsServer.MaxChannelCount)
+			rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", pickedSmsAndEmailServer.ResourceServerId)
+			rsmcl := fmt.Sprintf("ResourceServerMaxCallLimit:%s", pickedSmsAndEmailServer.ResourceServerId)
+			countStr := strconv.Itoa(pickedSmsAndEmailServer.MaxChannelCount)
 			RedisSet(rsck, "0")
 			RedisSet(rsmcl, countStr)
-			return pickedSmsServer
-		}
-	}
-
-	return defResourceServerInfo
-}
-
-func RegisterEmailServer(company, tenant int) ResourceServerInfo {
-	defResourceServerInfo := ResourceServerInfo{}
-
-	//Get CallServer info
-	pickedEmailServer := GetEmailServerInfo(company, tenant)
-	log := fmt.Sprintf("SmsSrver id: %d :: URL: %s", pickedEmailServer.ResourceServerId, pickedEmailServer.Url)
-	fmt.Println(log)
-	if pickedEmailServer.ResourceServerId != "" {
-		resourceServerKey := fmt.Sprintf("ResourceServer:%s", pickedEmailServer.ResourceServerId)
-		resourceServerjson, _ := json.Marshal(pickedEmailServer)
-		addResult := RedisSet(resourceServerKey, string(resourceServerjson))
-
-		if addResult == "OK" {
-			rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", pickedEmailServer.ResourceServerId)
-			rsmcl := fmt.Sprintf("ResourceServerMaxCallLimit:%s", pickedEmailServer.ResourceServerId)
-			countStr := strconv.Itoa(pickedEmailServer.MaxChannelCount)
-			RedisSet(rsck, "0")
-			RedisSet(rsmcl, countStr)
-			return pickedEmailServer
+			return pickedSmsAndEmailServer
 		}
 	}
 
@@ -210,9 +144,9 @@ func GetResourceServerInfo(company, tenant int, serverId, serverType string) Res
 		case "call":
 			return RegisterCallServer(company, tenant)
 		case "sms":
-			return RegisterSmsServer(company, tenant)
+			return RegisterSmsAndEmailServer()
 		case "email":
-			return RegisterEmailServer(company, tenant)
+			return RegisterSmsAndEmailServer()
 		}
 
 		return ResourceServerInfo{}

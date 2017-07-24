@@ -227,7 +227,7 @@ func (dvp DVP) SendSms(DnisNumber, Message string) bool {
 		log := fmt.Sprintf("Start Send SMS DNIS:%s # Message:%s ", DnisNumber, Message)
 		fmt.Println(log)
 
-		SendSmsDirect(company, tenant, Message, DnisNumber)
+		//SendSmsDirect(company, tenant, Message, DnisNumber)
 		return true
 	} else {
 		dvp.RB().SetResponseCode(403)

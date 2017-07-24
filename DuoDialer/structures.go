@@ -41,6 +41,12 @@ type Configuration struct {
 	CasServerHost            string
 	V5_1SecurityToken        string
 	AccessToken              string
+	RabbitMQHost             string
+	RabbitMQPort             string
+	RabbitMQUser             string
+	RabbitMQPassword         string
+	FileServiceHost          string
+	FileServicePort          string
 }
 
 type EnvConfiguration struct {
@@ -75,6 +81,12 @@ type EnvConfiguration struct {
 	CasServerHost            string
 	V5_1SecurityToken        string
 	AccessToken              string
+	RabbitMQHost             string
+	RabbitMQPort             string
+	RabbitMQUser             string
+	RabbitMQPassword         string
+	FileServiceHost          string
+	FileServicePort          string
 }
 
 //--------------------Campaign--------------------
@@ -93,6 +105,7 @@ type Campaign struct {
 	OperationalStatus  string
 	CampScheduleInfo   []CampaignShedule
 	CampConfigurations CampaignConfigInfo
+	CampAdditionalData CampaignAdditionalData
 }
 
 type CampaignResult struct {
@@ -226,7 +239,7 @@ type CampaignAdditionalData struct {
 type CampaignAdditionalDataResult struct {
 	CustomMessage string
 	IsSuccess     bool
-	Result        CampaignAdditionalData
+	Result        []CampaignAdditionalData
 }
 
 //--------------------Dialer--------------------
@@ -419,8 +432,8 @@ type Result struct {
 	Result        string
 }
 
-//-------------------CAS SMS---------------------------
-type Sms struct {
+//-------------------SmsAndEmail---------------------------
+type SmsAndEmail struct {
 	ShortMessageInfo SmsInfo
 	SecurityToken    string
 }
@@ -443,33 +456,6 @@ type SmsInfo struct {
 }
 
 type SmsAttachments struct {
-	FileAttachments      []string
-	ReferenceAttachments []string
-}
-
-//-------------------CAS Email---------------------------
-type Email struct {
-	EmailInformation EmailInformation
-	SecurityToken    string
-}
-
-type EmailInformation struct {
-	Attachments       EmailAttachments
-	CcEmailAddresses  []string
-	CompanyID         int
-	Content           string
-	Date              string
-	FileAttachments   []string
-	GUTranID          int
-	ID                int
-	MessageRefID      string
-	OperationalStatus string
-	Subject           string
-	ToEmailAddresses  []string
-	URLAttachments    []string
-}
-
-type EmailAttachments struct {
 	FileAttachments      []string
 	ReferenceAttachments []string
 }

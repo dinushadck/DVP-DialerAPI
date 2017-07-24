@@ -544,6 +544,12 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 		//timeNow := time.Now().UTC()
 		//appmntEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), endTime.Hour(), endTime.Minute(), endTime.Second(), 0, time.UTC)
 
+		maxChannelLimit := GetMaxChannelLimit(resourceServerInfos.ResourceServerId)
+		maxCampaignChannelLimit := GetCampMaxChannelLimit(campaignId)
+		if maxCampaignChannelLimit < 1 {
+			maxCampaignChannelLimit = 10
+		}
+
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
 			if campStatus == "Running" {
@@ -551,30 +557,32 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 				fmt.Println("endTime: ", appmntEndTime.String())
 				fmt.Println("timeNW: ", tm.String())
 				if tm.Before(appmntEndTime) {
-					cchannelCountS, cchannelCountC := GetConcurrentChannelCount(resourceServerInfos.ResourceServerId, campaignId)
-					maxChannelLimit := GetMaxChannelLimit(resourceServerInfos.ResourceServerId)
-					maxCampaignChannelLimit := GetCampMaxChannelLimit(campaignId)
-					fmt.Println("resourceServerInfos.CallServerId: ", resourceServerInfos.ResourceServerId)
-					fmt.Println("MaxCallServerChannelLimit: ", maxChannelLimit)
-					fmt.Println("maxCampaignChannelLimit: ", maxCampaignChannelLimit)
-					fmt.Println("ConcurrentResourceServerChannel: ", cchannelCountS)
-					fmt.Println("ConcurrentCampaignChannel: ", cchannelCountC)
 
-					if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
-						number, tryCount, numExtraData := GetNumberToDial(company, tenant, campaignId, camScheduleId)
-						if number == "" {
-							numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
-							if numberCount == 0 {
-								//SetCampaignStatus(campaignId, "End", company, tenant)
-								//RemoveCampaignFromDialer(campaignId, company, tenant)
-								SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
-								//SetCampChannelMaxLimitDirect(campaignId, "0")
-								return
-							}
-						} else {
-							switch CampaignChannel {
-							case "CALL":
-								//trunkCode, ani, dnis := "OutTrunk001", defaultAni, number
+					switch CampaignChannel {
+
+					case "CALL":
+
+						cchannelCountS, cchannelCountC := GetConcurrentChannelCount(resourceServerInfos.ResourceServerId, campaignId)
+
+						fmt.Println("resourceServerInfos.CallServerId: ", resourceServerInfos.ResourceServerId)
+						fmt.Println("MaxCallServerChannelLimit: ", maxChannelLimit)
+						fmt.Println("maxCampaignChannelLimit: ", maxCampaignChannelLimit)
+						fmt.Println("ConcurrentResourceServerChannel: ", cchannelCountS)
+						fmt.Println("ConcurrentCampaignChannel: ", cchannelCountC)
+
+						if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
+							number, tryCount, numExtraData := GetNumberToDial(company, tenant, campaignId, camScheduleId)
+							if number == "" {
+								numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
+								if numberCount == 0 {
+									//SetCampaignStatus(campaignId, "End", company, tenant)
+									//RemoveCampaignFromDialer(campaignId, company, tenant)
+									SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+									//SetCampChannelMaxLimitDirect(campaignId, "0")
+									return
+								}
+							} else {
+
 								trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, defaultAni, number)
 								uuid := GetUuid()
 								if trunkCode != "" && uuid != "" {
@@ -594,27 +602,133 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 										break
 									}
 								}
-								break
-							case "SMS":
-								//message := RequestCampaignAddtionalData(company, tenant, campaignId, "SMS", "mode1", "BLAST")
-								//if message != "" {
-								//	go SendSms(company, tenant, resourceServerInfos, campaignId, camClass, camType, camCategory, defaultAni, message, number)
-								//}
-								break
-							case "EMAIL":
-								defEmailInfo := EmailAdditionalData{}
-								emailInfo := RequestEmailInfo(company, tenant, campaignId)
-								if emailInfo != defEmailInfo {
-									go SendEmail(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, camClass, camType, camCategory, emailInfo.FromAddresss, emailInfo.Subject, emailInfo.Body, number)
-								}
-								break
+
+								time.Sleep(100 * time.Millisecond)
 							}
-							time.Sleep(100 * time.Millisecond)
+						} else {
+							fmt.Println("dialer waiting...")
+							time.Sleep(500 * time.Millisecond)
 						}
-					} else {
-						fmt.Println("dialer waiting...")
-						time.Sleep(500 * time.Millisecond)
+						break
+
+					case "EMAIL":
+
+						templates := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "EMAIL", "TEMPLATE")
+						attachmentNames := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "EMAIL", "ATTACHMENT")
+
+						email, _, numExtraData := GetNumberToDial(company, tenant, campaignId, camScheduleId)
+						if email == "" {
+							emailCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
+							if emailCount == 0 {
+								SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+								return
+							}
+						} else {
+							emailData := make(map[string]interface{})
+
+							emailData["company"] = company
+							emailData["tenant"] = tenant
+							emailData["to"] = email
+							emailData["subject"] = campaignName
+
+							if len(templates) > 0 {
+								emailData["template"] = templates[0]
+
+								if numExtraData != "" {
+									var params map[string]interface{}
+									json.Unmarshal([]byte(numExtraData), &params)
+
+									emailData["Parameters"] = params
+								}
+
+								if len(attachmentNames) > 0 {
+
+									attachments := make([]map[string]interface{}, 0)
+									for _, attachmentName := range attachmentNames {
+
+										attachment := make(map[string]interface{})
+
+										downloadUrl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/InternalFileService/File/DownloadLatest/%d/%d/%s", CreateHost(fileServiceHost, fileServicePort), tenant, company, attachmentName)
+										attachment["name"] = attachmentName
+										attachment["url"] = downloadUrl
+
+										attachments = append(attachments, attachment)
+									}
+
+									emailData["attachments"] = attachments
+
+								}
+
+								publishData, pubDataConvErr := json.Marshal(emailData)
+								fmt.Println("Email Pub data: ", string(publishData))
+								if pubDataConvErr == nil {
+									fmt.Println("Start Publish to rabbitMQ")
+									RabbitMQPublish("EMAILOUT", publishData)
+								}
+
+							} else {
+								fmt.Println("No Tamplate Found")
+							}
+
+						}
+
+						dialRateStr := string(60000 / maxCampaignChannelLimit)
+						dialRate, _ := time.ParseDuration(dialRateStr)
+						time.Sleep(dialRate * time.Millisecond)
+						break
+
+					case "SMS":
+
+						templates := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "SMS", "TEMPLATE")
+
+						number, _, numExtraData := GetNumberToDial(company, tenant, campaignId, camScheduleId)
+						if number == "" {
+							numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
+							if numberCount == 0 {
+								SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+								return
+							}
+						} else {
+							smsData := make(map[string]interface{})
+
+							smsData["company"] = company
+							smsData["tenant"] = tenant
+							smsData["to"] = number
+							smsData["subject"] = campaignName
+
+							if len(templates) > 0 {
+								smsData["template"] = templates[0]
+
+								if numExtraData != "" {
+									var params map[string]interface{}
+									json.Unmarshal([]byte(numExtraData), &params)
+
+									smsData["Parameters"] = params
+								}
+
+								publishData, pubDataConvErr := json.Marshal(smsData)
+								fmt.Println("SMS Pub data: ", string(publishData))
+								if pubDataConvErr == nil {
+									fmt.Println("Start Publish to rabbitMQ")
+									RabbitMQPublish("SMSOUT", publishData)
+								}
+
+							} else {
+								fmt.Println("No Tamplate Found")
+							}
+
+						}
+
+						dialRateStr := string(60000 / maxCampaignChannelLimit)
+						dialRate, _ := time.ParseDuration(dialRateStr)
+						time.Sleep(dialRate * time.Millisecond)
+						break
+
+					default:
+						break
+
 					}
+
 				} else {
 					SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
 					SetCampChannelMaxLimitDirect(campaignId, "0")
