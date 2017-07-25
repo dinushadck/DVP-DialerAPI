@@ -49,6 +49,10 @@ var rabbitMQUser string
 var rabbitMQPassword string
 var fileServiceHost string
 var fileServicePort string
+var redisMode string
+var redisClusterName string
+var sentinelHosts string
+var sentinelPort string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -109,6 +113,11 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.RabbitMQPassword = "guest"
 		defconfiguration.FileServiceHost = "fileservice.app.veery.cloud"
 		defconfiguration.FileServicePort = "5645"
+		defconfiguration.RedisMode = "instance"
+		//instance, cluster, sentinel
+		defconfiguration.RedisClusterName = "redis-cluster"
+		defconfiguration.SentinelHosts = "138.197.90.92,45.55.205.92,138.197.90.92"
+		defconfiguration.SentinelPort = "16389"
 	}
 
 	return defconfiguration
@@ -155,6 +164,10 @@ func LoadDefaultConfig() {
 	rabbitMQPassword = defconfiguration.RabbitMQPassword
 	fileServiceHost = defconfiguration.FileServiceHost
 	fileServicePort = defconfiguration.FileServicePort
+	redisMode = defconfiguration.RedisMode
+	redisClusterName = defconfiguration.RedisClusterName
+	sentinelHosts = defconfiguration.SentinelHosts
+	sentinelPort = defconfiguration.SentinelPort
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -215,6 +228,10 @@ func LoadConfiguration() {
 		rabbitMQPassword = os.Getenv(envconfiguration.RabbitMQPassword)
 		fileServiceHost = os.Getenv(envconfiguration.FileServiceHost)
 		fileServicePort = os.Getenv(envconfiguration.FileServicePort)
+		redisMode = os.Getenv(envconfiguration.RedisMode)
+		redisClusterName = os.Getenv(envconfiguration.RedisClusterName)
+		sentinelHosts = os.Getenv(envconfiguration.SentinelHosts)
+		sentinelPort = os.Getenv(envconfiguration.SentinelPort)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -329,14 +346,29 @@ func LoadConfiguration() {
 		if fileServicePort == "" {
 			fileServicePort = defConfig.FileServicePort
 		}
+		if redisMode == "" {
+			redisMode = defConfig.RedisMode
+		}
+		if redisClusterName == "" {
+			redisClusterName = defConfig.RedisClusterName
+		}
+		if sentinelHosts == "" {
+			sentinelHosts = defConfig.SentinelHosts
+		}
+		if sentinelPort == "" {
+			sentinelPort = defConfig.SentinelPort
+		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 		securityIp = fmt.Sprintf("%s:%s", securityIp, securityPort)
 	}
 
+	fmt.Println("RedisMode:", redisMode)
 	fmt.Println("redisIp:", redisIp)
 	fmt.Println("redisDb:", redisDb)
 	fmt.Println("securityIp:", securityIp)
+	fmt.Println("SentinelHosts:", sentinelHosts)
+	fmt.Println("SentinelPort:", sentinelPort)
 	fmt.Println("dialerId:", dialerId)
 	fmt.Println("campaignLimit:", campaignLimit)
 }

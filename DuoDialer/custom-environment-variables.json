@@ -33,5 +33,9 @@
 	"RabbitMQUser": "SYS_RABBITMQ_USER",
 	"RabbitMQPassword":"SYS_RABBITMQ_PASSWORD",
 	"FileServiceHost": "SYS_FILESERVICE_HOST",
-    "FileServicePort": "SYS_FILESERVICE_PORT"
+    "FileServicePort": "SYS_FILESERVICE_PORT",
+	"RedisMode":"SYS_REDIS_MODE",
+	"RedisClusterName":"SYS_REDIS_SENTINEL_NAME",
+	"SentinelHosts": "SYS_REDIS_SENTINEL_HOSTS",
+	"SentinelPort": "SYS_REDIS_SENTINEL_PORT"
 }

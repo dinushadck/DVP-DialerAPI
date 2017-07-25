@@ -47,6 +47,10 @@ type Configuration struct {
 	RabbitMQPassword         string
 	FileServiceHost          string
 	FileServicePort          string
+	RedisMode                string
+	RedisClusterName         string
+	SentinelHosts            string
+	SentinelPort             string
 }
 
 type EnvConfiguration struct {
@@ -87,6 +91,10 @@ type EnvConfiguration struct {
 	RabbitMQPassword         string
 	FileServiceHost          string
 	FileServicePort          string
+	RedisMode                string
+	RedisClusterName         string
+	SentinelHosts            string
+	SentinelPort             string
 }
 
 //--------------------Campaign--------------------

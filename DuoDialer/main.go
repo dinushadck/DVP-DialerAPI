@@ -2,7 +2,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/DuoSoftware/gorest"
 	"github.com/rs/cors"
@@ -17,27 +16,13 @@ func errHndlr(err error) {
 	}
 }
 
+func errHndlrNew(errorFrom, command string, err error) {
+	if err != nil {
+		fmt.Println("error:", errorFrom, ":: ", command, ":: ", err)
+	}
+}
+
 func main() {
-	params := make(map[string]interface{})
-	attachment := make(map[string]interface{})
-	attachments := make([]map[string]interface{}, 0)
-
-	params["name"] = "Heshan Indika"
-	params["Code"] = "123456"
-
-	attachment["name"] = "sample.csv"
-	attachment["url"] = "http://abc.app.veery.cloud/rrr/eee"
-
-	attachments = append(attachments, attachment)
-
-	data := make(map[string]interface{})
-	data["to"] = "heshan.i@duosoftware.com"
-	data["subject"] = "Test Mail"
-	data["Parameters "] = params
-	data["attachments  "] = attachments
-
-	aaa, _ := json.Marshal(data)
-	fmt.Println(string(aaa))
 
 	InitiateDuoDialer()
 

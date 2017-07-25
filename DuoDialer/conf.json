@@ -35,5 +35,9 @@
 	"RabbitMQUser": "admin",
 	"RabbitMQPassword":"admin",
 	"FileServiceHost": "fileservice.app.veery.cloud",
-    "FileServicePort": "5645"
+    "FileServicePort": "5645",
+	"RedisMode":"instance",
+	"RedisClusterName": "redis-cluster",
+	"SentinelHosts": "138.197.90.92,45.55.205.92,138.197.90.92",
+	"SentinelPort": "16389"
 }
