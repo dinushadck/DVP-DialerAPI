@@ -147,7 +147,7 @@ func RequestCampaignAddtionalData(company, tenant int, campaignId, class, ctype,
 
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/AdditinalData/%s/%s/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, class, ctype, category)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/AdditionalData/%s/%s/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, class, ctype, category)
 	fmt.Println("Start RequestCampaign request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
