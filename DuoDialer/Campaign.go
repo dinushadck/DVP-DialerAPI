@@ -674,7 +674,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 						}
 
 						dialRateStr := string(60000 / maxCampaignChannelLimit)
-						dialRate, _ := time.ParseDuration(dialRateStr)
+						dialRate, _ := time.ParseDuration(dialRateStr + "ms")
 						time.Sleep(dialRate * time.Millisecond)
 						break
 
@@ -722,7 +722,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 						}
 
 						dialRateStr := string(60000 / maxCampaignChannelLimit)
-						dialRate, _ := time.ParseDuration(dialRateStr)
+						dialRate, _ := time.ParseDuration(dialRateStr + "ms")
 						time.Sleep(dialRate * time.Millisecond)
 						break
 
