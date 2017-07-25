@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -624,6 +625,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								return
 							}
 						} else {
+							sessionId := uuid.NewV4().String()
 							emailData := make(map[string]interface{})
 
 							emailData["company"] = company
@@ -631,6 +633,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							emailData["to"] = email
 							emailData["from"] = defaultAni
 							emailData["subject"] = campaignName
+
+							InitiateSessionInfo(company, tenant, 240, "Campaign", "Email", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, email, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId)
 
 							if len(templates) > 0 {
 								emailData["template"] = templates[0]
@@ -665,12 +669,21 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								if pubDataConvErr == nil {
 									fmt.Println("Start Publish to rabbitMQ")
 									RabbitMQPublish("EMAILOUT", publishData)
+
+									SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
+									SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_success")
+								} else {
+									SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
+									SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 								}
 
 							} else {
 								fmt.Println("No Tamplate Found")
+								SetSessionInfo(campaignId, sessionId, "Reason", "No Tamplate Found")
+								SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 							}
 
+							go UploadSessionInfo(campaignId, sessionId)
 						}
 
 						dialRateStr := strconv.Itoa(60000 / maxCampaignChannelLimit)
@@ -690,6 +703,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								return
 							}
 						} else {
+							sessionId := uuid.NewV4().String()
 							smsData := make(map[string]interface{})
 
 							smsData["company"] = company
@@ -697,6 +711,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							smsData["to"] = number
 							smsData["from"] = defaultAni
 							smsData["subject"] = campaignName
+
+							InitiateSessionInfo(company, tenant, 240, "Campaign", "SMS", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, number, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId)
 
 							if len(templates) > 0 {
 								smsData["template"] = templates[0]
@@ -713,12 +729,20 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								if pubDataConvErr == nil {
 									fmt.Println("Start Publish to rabbitMQ")
 									RabbitMQPublish("SMSOUT", publishData)
+									SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
+									SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_success")
+								} else {
+									SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
+									SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 								}
 
 							} else {
 								fmt.Println("No Tamplate Found")
+								SetSessionInfo(campaignId, sessionId, "Reason", "No Tamplate Found")
+								SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 							}
 
+							go UploadSessionInfo(campaignId, sessionId)
 						}
 
 						dialRateStr := strconv.Itoa(60000 / maxCampaignChannelLimit)
