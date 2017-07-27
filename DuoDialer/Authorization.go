@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/fzzy/radix/redis"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func loadJwtMiddleware() *jwtmiddleware.JWTMiddleware {
@@ -148,23 +146,4 @@ func ResponseGenerator(isSuccess bool, customMessage, result, exception string) 
 	res.Exception = exception
 	res.Result = result
 	return res
-}
-
-func SecurityGet(key string) string {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Recovered in RedisGet", r)
-		}
-	}()
-	client, err := redis.DialTimeout("tcp", securityIp, time.Duration(10)*time.Second)
-	errHndlr(err)
-	defer client.Close()
-
-	//authServer
-	authE := client.Cmd("auth", redisPassword)
-	errHndlr(authE.Err)
-
-	strObj, _ := client.Cmd("get", key).Str()
-	//fmt.Println(strObj)
-	return strObj
 }

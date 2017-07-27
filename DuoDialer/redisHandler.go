@@ -9,6 +9,7 @@ import (
 	"github.com/mediocregopher/radix.v2/sentinel"
 	"github.com/mediocregopher/radix.v2/util"
 	"strings"
+	"time"
 )
 
 var sentinelPool *sentinel.Client
@@ -562,6 +563,35 @@ func RedisListLlen(lname string) int {
 
 	result, _ := client.Cmd("llen", lname).Int()
 	return result
+}
+
+func SecurityGet(key string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisGet", r)
+		}
+	}()
+
+	var client *redis.Client
+	var err error
+
+	if redisMode == "sentinel" {
+		client, err = sentinelPool.GetMaster(redisClusterName)
+		errHndlrNew("OnEvent", "getConnFromSentinel", err)
+		defer sentinelPool.PutMaster(redisClusterName, client)
+	} else {
+		client, err = redis.DialTimeout("tcp", securityIp, time.Duration(10)*time.Second)
+		errHndlr(err)
+		defer client.Close()
+
+		//authServer
+		authE := client.Cmd("auth", redisPassword)
+		errHndlr(authE.Err)
+	}
+
+	strObj, _ := client.Cmd("get", key).Str()
+	//fmt.Println(strObj)
+	return strObj
 }
 
 // Redis PubSub

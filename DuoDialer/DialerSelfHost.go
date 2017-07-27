@@ -124,7 +124,10 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 			sc.AddPreviewCallback(company, tenant, callbackInfo["PhoneNumber"].(string), callbackInfo["PriviewData"].(string), "", attributeDetails)
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "ivr" {
-			fmt.Println("IVR Callback")
+
+			sc := ScheduleCallback{}
+			sc.DialIvrCallback(company, tenant, callbackInfo["PhoneNumber"].(string), callbackInfo["Extention"].(string))
+
 		} else {
 
 			fmt.Println("Invalied Callback")
