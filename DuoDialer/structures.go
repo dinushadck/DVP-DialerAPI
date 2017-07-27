@@ -167,6 +167,8 @@ type CampaignCallbackObj struct {
 	DialoutTime      time.Time
 }
 
+type CallbackInfo map[string]interface{}
+
 type CampaignConfigInfo struct {
 	ConfigureId        int
 	ChannelConcurrency int

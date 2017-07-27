@@ -15,7 +15,7 @@ type DVP struct {
 	decrMaxChannelLimit    gorest.EndPoint `method:"POST" path:"/DialerAPI/DecrMaxChannelLimit/" postdata:"string"`
 	setMaxChannelLimit     gorest.EndPoint `method:"POST" path:"/DialerAPI/SetMaxChannelLimit/" postdata:"string"`
 	previewCallBack        gorest.EndPoint `method:"POST" path:"/DialerAPI/PreviewCallBack/" postdata:"ReceiveData"`
-	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CampaignCallbackObj"`
+	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CallbackInfo"`
 	getTotalDialCount      gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalDialCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
@@ -85,15 +85,52 @@ func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string
 	}
 }
 
-func (dvp DVP) ResumeCallback(callbackInfo CampaignCallbackObj) {
+func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
-		log := fmt.Sprintf("Start ResumeCallback CampaignId:%d # ContactId:%s ", callbackInfo.CampaignId, callbackInfo.ContactId)
-		fmt.Println(log)
 
 		fmt.Println("Company: ", company)
 		fmt.Println("Tenant: ", tenant)
-		ResumeCampaignCallback(company, tenant, callbackInfo.CallBackCount, callbackInfo.CampaignId, callbackInfo.ContactId)
+
+		callbackData, _ := json.Marshal(callbackInfo)
+		fmt.Println("Start ResumeCallback :: ", string(callbackData))
+
+		if strings.ToLower(callbackInfo["CallbackType"].(string)) == "callback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "internal" {
+
+			ResumeCampaignCallback(company, tenant, callbackInfo["CallBackCount"].(int), callbackInfo["CampaignId"].(int), callbackInfo["ContactId"].(string))
+
+		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "agent" {
+
+			attributeInterface := callbackInfo["AttributeInfo"].([]interface{})
+
+			callbackDataAttributeInfo, _ := json.Marshal(callbackInfo["AttributeInfo"].([]interface{}))
+			fmt.Println("callbackDataAttributeInfo :: ", string(callbackDataAttributeInfo))
+
+			attributeDetails := make([]string, len(attributeInterface))
+			fmt.Println("callbackDataAttributeInfo length :: ", len(attributeInterface))
+
+			for i := range attributeInterface {
+				attributeDetails[i] = attributeInterface[i].(string)
+			}
+			//for _, i := range attributeInterface {
+			//	attributeInfoI, _ := json.Marshal(i)
+			//	fmt.Println("i ::", attributeInfoI)
+			//	attributeDetails = append(attributeDetails, i.(string))
+			//}
+
+			fmt.Println("attributeDetails ::", attributeDetails)
+
+			sc := ScheduleCallback{}
+			sc.AddPreviewCallback(company, tenant, callbackInfo["PhoneNumber"].(string), callbackInfo["PriviewData"].(string), "", attributeDetails)
+
+		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "ivr" {
+			fmt.Println("IVR Callback")
+		} else {
+
+			fmt.Println("Invalied Callback")
+
+		}
+
 	} else {
 		dvp.RB().SetResponseCode(403)
 	}
@@ -167,6 +204,9 @@ func (dvp DVP) ArdsCallback() string {
 
 	switch reqOData.DialoutMec {
 	case "PREVIEW":
+		SendPreviewDataToAgent(ardsCallbackInfo, reqOData)
+		break
+	case "ScheduledPreviewCallback":
 		SendPreviewDataToAgent(ardsCallbackInfo, reqOData)
 		break
 	case "AGENT":

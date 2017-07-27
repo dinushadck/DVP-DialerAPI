@@ -75,7 +75,7 @@ func UploadCallbackInfo(company, tenant int, callbackTime time.Time, campaignId,
 
 	jsonData, _ := json.Marshal(callback)
 
-	serviceurl := fmt.Sprintf("http://%s/CallbackServerSelfHost/Callback/AddCallback", CreateHost(callbackServerHost, callbackServerPort))
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/Callback/AddCallback", CreateHost(callbackServerHost, callbackServerPort))
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
