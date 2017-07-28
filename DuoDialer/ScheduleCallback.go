@@ -61,14 +61,14 @@ func ScheduleIvrCallback(company, tenant int, phoneNumber, extention string) {
 	resourceServerInfos := RegisterCallServer(company, tenant)
 	trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, "", phoneNumber)
 
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "ScheduleCallbak", "IVR", "1", campaignId, "", campaignName, sessionId, dnis, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId)
+
 	fmt.Println("Start DialNumber: ", sessionId, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
 
 	customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
 	param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, ani)
 	furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
 	data := " xml dialer"
-
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "ScheduleCallbak", "IVR", "1", campaignId, "", campaignName, sessionId, dnis, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId)
 
 	resp, err := Dial(resourceServerInfos.Url, param, furl, data)
 
