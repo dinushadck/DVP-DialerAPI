@@ -120,11 +120,11 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 
 			fmt.Println("attributeDetails ::", attributeDetails)
 
-			SchedulePreviewCallback(company, tenant, callbackInfo["PhoneNumber"].(string), callbackInfo["PriviewData"].(string), "", attributeDetails)
+			SchedulePreviewCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["PriviewData"].(string), "", attributeDetails)
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "ivr" {
 
-			ScheduleIvrCallback(company, tenant, callbackInfo["PhoneNumber"].(string), callbackInfo["Extention"].(string))
+			ScheduleIvrCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["Extention"].(string))
 
 		} else {
 

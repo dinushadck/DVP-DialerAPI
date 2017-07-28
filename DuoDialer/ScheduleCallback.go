@@ -3,18 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"strings"
 	"time"
 )
 
-func SchedulePreviewCallback(company, tenant int, phoneNumber, previewData, extention string, attributeInfo []string) {
+func SchedulePreviewCallback(company, tenant int, sessionId, phoneNumber, previewData, extention string, attributeInfo []string) {
 
 	campaignId := "ScheduleCallbak"
 	campaignName := "ScheduleCallbak"
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
-	sessionId := uuid.NewV4().String()
 
 	resourceServerInfos := RegisterCallServer(company, tenant)
 	trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, "", phoneNumber)
@@ -50,9 +48,7 @@ func SchedulePreviewCallback(company, tenant int, phoneNumber, previewData, exte
 
 }
 
-func ScheduleIvrCallback(company, tenant int, phoneNumber, extention string) {
-
-	sessionId := uuid.NewV4().String()
+func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention string) {
 
 	campaignId := "ScheduleCallbak"
 	campaignName := "ScheduleCallbak"
