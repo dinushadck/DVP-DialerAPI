@@ -9,10 +9,7 @@ import (
 	"time"
 )
 
-type ScheduleCallback struct {
-}
-
-func (scheduleCallback ScheduleCallback) AddPreviewCallback(company, tenant int, phoneNumber, previewData, extention string, attributeInfo []string) {
+func SchedulePreviewCallback(company, tenant int, phoneNumber, previewData, extention string, attributeInfo []string) {
 
 	campaignId := "ScheduleCallbak"
 	campaignName := "ScheduleCallbak"
@@ -53,7 +50,7 @@ func (scheduleCallback ScheduleCallback) AddPreviewCallback(company, tenant int,
 
 }
 
-func (scheduleCallback ScheduleCallback) DialIvrCallback(company, tenant int, phoneNumber, extention string) {
+func ScheduleIvrCallback(company, tenant int, phoneNumber, extention string) {
 
 	sessionId := uuid.NewV4().String()
 
