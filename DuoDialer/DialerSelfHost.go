@@ -97,7 +97,10 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 
 		if strings.ToLower(callbackInfo["CallbackType"].(string)) == "callback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "internal" {
 
-			ResumeCampaignCallback(company, tenant, callbackInfo["CallBackCount"].(int), callbackInfo["CampaignId"].(int), callbackInfo["ContactId"].(string))
+			callbackCount, _ := strconv.Atoi(callbackInfo["CallBackCount"].(string))
+			campaignId, _ := strconv.Atoi(callbackInfo["CampaignId"].(string))
+
+			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string))
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "agent" {
 

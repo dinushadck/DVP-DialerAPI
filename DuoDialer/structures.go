@@ -158,12 +158,12 @@ type CampaignCallback struct {
 }
 
 type CampaignCallbackObj struct {
-	CampaignId       int
+	CampaignId       string
 	CallbackClass    string
 	CallbackType     string
 	CallbackCategory string
 	ContactId        string
-	CallBackCount    int
+	CallBackCount    string
 	DialoutTime      time.Time
 }
 

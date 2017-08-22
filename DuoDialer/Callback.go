@@ -233,11 +233,11 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 							fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
 							if validateAppoinment {
 								callbackObj := CampaignCallbackObj{}
-								callbackObj.CampaignId = camIdInt
+								callbackObj.CampaignId = campaignId
 								callbackObj.CallbackClass = "DIALER"
 								callbackObj.CallbackType = "CALLBACK"
 								callbackObj.CallbackCategory = "INTERNAL"
-								callbackObj.CallBackCount = _tryCount
+								callbackObj.CallBackCount = tryCount
 								callbackObj.ContactId = phoneNumber
 								callbackObj.DialoutTime = callbackTime
 
