@@ -134,9 +134,16 @@ func RemoveNumbers(company, tenant int, campaignId string) {
 
 func RemoveNumberStatusKey(company, tenant int, campaignId string) {
 
-	searchKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:*", company, tenant, campaignId)
-	relatedNumberStatusKey := RedisSearchKeys(searchKey)
+	searchKeyPhoneNumberPage := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:*", company, tenant, campaignId)
+	searchKeyPhoneNumberLoading := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:*", company, tenant, campaignId)
+	relatedNumberStatusKey := RedisSearchKeys(searchKeyPhoneNumberPage)
+	relatedNumberStatusKeyNumberLoading := RedisSearchKeys(searchKeyPhoneNumberLoading)
+
 	for _, key := range relatedNumberStatusKey {
+		RedisRemove(key)
+	}
+
+	for _, key := range relatedNumberStatusKeyNumberLoading {
 		RedisRemove(key)
 	}
 }
