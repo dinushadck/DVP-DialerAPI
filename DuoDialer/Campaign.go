@@ -221,6 +221,7 @@ func RemoveCampaignFromDialer(campaignId string, company, tenant int) {
 		DecrementOnGoingCampaignCount()
 		RemoveCampaignStatus(campaignId, company, tenant)
 		RemoveNumbers(company, tenant, campaignId)
+		RemoveNumberStatusKey(company, tenant, campaignId)
 		RemoveCampChannelMaxLimit(campaignId)
 		RemoveCampaignConnectedCount(company, tenant, campaignId)
 		RemoveCampaignDialCount(company, tenant, campaignId)

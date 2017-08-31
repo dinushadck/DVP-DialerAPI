@@ -16,8 +16,13 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	}()
 	numbers := make([]string, 0)
 	pageKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
-	pageNumberToRequest := RedisIncr(pageKey)
-	fmt.Println("pageNumber: ", pageNumberToRequest)
+
+	numberOffsetToRequest := "0"
+
+	if numberLimit == 500 {
+		numberOffsetToRequest = RedisGet(pageKey)
+	}
+	fmt.Println("numberOffsetToRequest: ", numberOffsetToRequest)
 
 	// Get phone number from campign service and append
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
@@ -25,7 +30,7 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	fmt.Println("Start GetPhoneNumbers Auth: ", internalAuthToken, " CampaignId: ", campaignId, " camScheduleId: ", camScheduleId)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Numbers/%s/%d/%d", CreateHost(campaignServiceHost, campaignServicePort), campaignId, camScheduleId, numberLimit, pageNumberToRequest)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/NumbersByOffset/%s/%d/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, camScheduleId, numberLimit, numberOffsetToRequest)
 	fmt.Println("Start GetPhoneNumbers request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
@@ -59,6 +64,8 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 				}
 			}
 		}
+
+		RedisIncrBy(pageKey, len(phoneNumberResult.Result))
 	}
 	return numbers
 }
@@ -70,7 +77,7 @@ func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId str
 	fmt.Println("Number count = ", len(numbers))
 	if len(numbers) == 0 {
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
-		RedisSet(numLoadingStatusKey, "done")
+		RedisSet(numLoadingStatusKey, "waiting")
 	} else {
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 		RedisSet(numLoadingStatusKey, "waiting")
@@ -97,10 +104,6 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (str
 		if numberCount < 500 {
 			LoadNumbers(company, tenant, 500, campaignId, camScheduleId)
 		}
-	} else if numLoadingStatus == "done" && numberCount == 0 {
-		pageKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
-		RedisRemove(numLoadingStatusKey)
-		RedisRemove(pageKey)
 	}
 	numberWithTryCount := RedisListLpop(listId)
 	numberInfos := strings.Split(numberWithTryCount, ":")
@@ -125,6 +128,15 @@ func RemoveNumbers(company, tenant int, campaignId string) {
 	searchKey := fmt.Sprintf("CampaignNumbers:%d:%d:%s:*", company, tenant, campaignId)
 	relatedNumberList := RedisSearchKeys(searchKey)
 	for _, key := range relatedNumberList {
+		RedisRemove(key)
+	}
+}
+
+func RemoveNumberStatusKey(company, tenant int, campaignId string) {
+
+	searchKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:*", company, tenant, campaignId)
+	relatedNumberStatusKey := RedisSearchKeys(searchKey)
+	for _, key := range relatedNumberStatusKey {
 		RedisRemove(key)
 	}
 }
