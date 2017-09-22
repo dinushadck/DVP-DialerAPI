@@ -102,7 +102,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		var dial bool
 		if contactType == "PRIVATE" {
 			dial = true
-			param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=%s,origination_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", sessionId, sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, fromNumber)
+			param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=%s,origination_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", sessionId, sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, phoneNumber)
 			furl = fmt.Sprintf("user/%s@%s", contactName, domain)
 		} else if contactType == "PUBLIC" {
 			dial = true
