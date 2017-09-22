@@ -47,7 +47,7 @@ func DirectDialCampaign(company, tenant, campaignId, ScheduleId int, number stri
 func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourceServerId string) bool {
 
 	internalAccessToken := fmt.Sprintf("%d:%d", tenant, company)
-	trunkCode, ani, dnis := GetTrunkCode(internalAccessToken, fromNumber, phoneNumber)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAccessToken, fromNumber, phoneNumber)
 	uuid := GetUuid()
 	if trunkCode != "" && uuid != "" {
 		fmt.Println("Start AddDirectDialRequest: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
@@ -63,7 +63,13 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourc
 
 		fmt.Println("Start DialDirectNumber: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
 		customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
-		param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, uuid, ani)
+
+		var param string
+		if xGateway != "" {
+			param = fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30,sip_h_X-Gateway=%s}", subChannelName, campaignId, customCompanyStr, uuid, ani, xGateway)
+		} else {
+			param = fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, uuid, ani)
+		}
 		furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, dnis, extention)
 		data := " xml dialer"
 

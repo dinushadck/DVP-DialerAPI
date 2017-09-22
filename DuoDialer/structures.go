@@ -292,6 +292,7 @@ type CallRule struct {
 	GatewayCode string
 	DNIS        string
 	ANI         string
+	IpUrl       string
 }
 
 //--------------------Limit API--------------------

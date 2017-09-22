@@ -585,22 +585,22 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								}
 							} else {
 
-								trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, defaultAni, number)
+								trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number)
 								uuid := GetUuid()
 								if trunkCode != "" && uuid != "" {
 									switch dialoutMec {
 									case "BLAST":
-										go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, tryCount, extention)
+										go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, tryCount, extention)
 										break
 									case "FIFO":
-										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, extention)
+										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, extention)
 										break
 									case "PREVIEW":
 										fmt.Println("Start Preview Dialer")
-										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention)
 										break
 									case "AGENT":
-										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, numExtraData, tryCount, extention)
+										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention)
 										break
 									}
 								}

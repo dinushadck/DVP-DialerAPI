@@ -29,7 +29,7 @@ func GetUuid() string {
 	}
 }
 
-func GetTrunkCode(internalAuthToken, ani, dnis string) (trunkCode, rAni, rDnis string) {
+func GetTrunkCode(internalAuthToken, ani, dnis string) (trunkCode, rAni, rDnis, xGateway string) {
 	fmt.Println("Start GetTrunkCode: ", internalAuthToken, ": ", ani, ": ", dnis)
 	client := &http.Client{}
 
@@ -44,7 +44,7 @@ func GetTrunkCode(internalAuthToken, ani, dnis string) (trunkCode, rAni, rDnis s
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
-		return "", "", ""
+		return "", "", "", ""
 	}
 	defer resp.Body.Close()
 
@@ -54,9 +54,9 @@ func GetTrunkCode(internalAuthToken, ani, dnis string) (trunkCode, rAni, rDnis s
 	json.Unmarshal(response, &apiResult)
 	if apiResult.IsSuccess == true {
 		fmt.Println("callRule: ", apiResult.Result.GatewayCode, "ANI: ", apiResult.Result.ANI, "DNIS: ", apiResult.Result.DNIS)
-		return apiResult.Result.GatewayCode, apiResult.Result.ANI, apiResult.Result.DNIS
+		return apiResult.Result.GatewayCode, apiResult.Result.ANI, apiResult.Result.DNIS, apiResult.Result.IpUrl
 	} else {
-		return "", "", ""
+		return "", "", "", ""
 	}
 }
 

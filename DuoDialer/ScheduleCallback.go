@@ -15,12 +15,13 @@ func SchedulePreviewCallback(company, tenant int, sessionId, phoneNumber, previe
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
 	resourceServerInfos := RegisterCallServer(company, tenant)
-	trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, "", phoneNumber)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, "", phoneNumber)
 
 	InitiateSessionInfo(company, tenant, 240, "Campaign", "ScheduleCallbak", "PreviewDial", "1", campaignId, "", campaignName, sessionId, dnis, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId)
 	SetSessionInfo(campaignId, sessionId, "FromNumber", ani)
 	SetSessionInfo(campaignId, sessionId, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, sessionId, "Extention", extention)
+	SetSessionInfo(campaignId, sessionId, "XGateway", xGateway)
 
 	reqOtherData := RequestOtherData{}
 	reqOtherData.CampaignId = campaignId
@@ -55,14 +56,20 @@ func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention 
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
 	resourceServerInfos := RegisterCallServer(company, tenant)
-	trunkCode, ani, dnis := GetTrunkCode(internalAuthToken, "", phoneNumber)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, "", phoneNumber)
 
 	InitiateSessionInfo(company, tenant, 240, "Campaign", "ScheduleCallbak", "IVR", "1", campaignId, "", campaignName, sessionId, dnis, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId)
 
 	fmt.Println("Start DialNumber: ", sessionId, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
 
 	customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
-	param := fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, ani)
+
+	var param string
+	if xGateway != "" {
+		param = fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30, sip_h_X-Gateway=%s}", subChannelName, campaignId, customCompanyStr, sessionId, ani, xGateway)
+	} else {
+		param = fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,DVP_OPERATION_CAT=DIALER,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, ani)
+	}
 	furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
 	data := " xml dialer"
 

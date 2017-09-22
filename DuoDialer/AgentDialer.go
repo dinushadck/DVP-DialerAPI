@@ -10,8 +10,8 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
-	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
+func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string) {
+	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention, ": ", xGateway)
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
@@ -19,6 +19,7 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 	SetSessionInfo(campaignId, uuid, "FromNumber", fromNumber)
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, uuid, "Extention", extention)
+	SetSessionInfo(campaignId, uuid, "XGateway", xGateway)
 
 	//get attribute info from redis ** after put data stucture to cam service
 	attributeInfo := make([]string, 0)
@@ -62,6 +63,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		phoneNumber := sessionInfo["Number"]
 		extention := sessionInfo["Extention"]
 		callServerId := sessionInfo["ServerId"]
+		xGateway := sessionInfo["XGateway"]
 
 		companyInt, _ := strconv.Atoi(company)
 		tenantInt, _ := strconv.Atoi(tenant)
@@ -93,9 +95,10 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,origination_caller_id_number=94112500500,originate_timeout=30}sofia/gateway/DemoTrunk/18705056540%20&bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER}user/heshan@duo.media1.veery.cloud)
 
 		//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,origination_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=18705056560}user/heshan@duo.media1.veery.cloud%20&bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,origination_caller_id_number=94112500500,originate_timeout=30}sofia/gateway/DemoTrunk/18705056560)
-		//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=0f480a01-3b1d-46bd-b1aa-d97f389def85,origination_uuid=0f480a01-3b1d-46bd-b1aa-d97f389def85,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=94777888888}user/heshan@duo.media1.veery.cloud%20&bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,origination_caller_id_number=94777888888,originate_timeout=30}sofia/gateway/DemoTrunk/18705056540)
+		//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=3ce432e7-9c3a-4c9c-b432-10951883ad60,origination_uuid=3ce432e7-9c3a-4c9c-b432-10951883ad60,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=94777888999}user/heshan@duo.media1.veery.cloud%20&bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,origination_caller_id_number=94777888999,originate_timeout=30}sofia/gateway/DemoTrunk/18705056540)
 		var param string
 		var furl string
+		var data string
 		var dial bool
 		if contactType == "PRIVATE" {
 			dial = true
@@ -112,7 +115,12 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			fmt.Println("Invalied ContactType")
 		}
 
-		data := fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30}sofia/gateway/%s/%s)", subChannelName, campaignId, customCompanyStr, fromNumber, trunkCode, phoneNumber)
+		if xGateway != "" {
+
+			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30,sip_h_X-Gateway=%s}sofia/gateway/%s/%s)", subChannelName, campaignId, customCompanyStr, fromNumber, xGateway, trunkCode, phoneNumber)
+		} else {
+			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30}sofia/gateway/%s/%s)", subChannelName, campaignId, customCompanyStr, fromNumber, trunkCode, phoneNumber)
+		}
 
 		if dial == true {
 			SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")

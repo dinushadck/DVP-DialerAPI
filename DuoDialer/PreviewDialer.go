@@ -9,8 +9,8 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, numExtraData, tryCount, extention string) {
-	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
+func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string) {
+	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention, ": ", xGateway)
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
@@ -18,6 +18,7 @@ func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInf
 	SetSessionInfo(campaignId, uuid, "FromNumber", fromNumber)
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, uuid, "Extention", extention)
+	SetSessionInfo(campaignId, uuid, "XGateway", xGateway)
 
 	//get attribute info from redis ** after put data stucture to cam service
 	attributeInfo := make([]string, 0)
