@@ -72,65 +72,70 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		fmt.Println("Start DialPreviewNumber: ", sessionId, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention)
 		customCompanyStr := fmt.Sprintf("%s_%s", company, tenant)
 
-		/*
-			param := fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, fromNumber)
-			furl := fmt.Sprintf("sofia/gateway/%s/%s ", trunkCode, phoneNumber)
+		if fromNumber != "" && trunkCode != "" && phoneNumber != "" && extention != "" {
+			/*
+				param := fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, customCompanyStr, sessionId, fromNumber)
+				furl := fmt.Sprintf("sofia/gateway/%s/%s ", trunkCode, phoneNumber)
+				var data string
+				var dial bool
+				if contactType == "PRIVATE" {
+					dial = true
+					data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}user/%s@%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, contactName, domain)
+				} else if contactType == "PUBLIC" {
+					dial = true
+					data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PUBLIC_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}sofia/external/%s@%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, contactName, domain)
+				} else if contactType == "TRUNK" {
+					dial = true
+					data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}sofia/gateway/%s/%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, domain, contactName)
+				} else {
+					dial = false
+					fmt.Println("Invalied ContactType")
+				}
+			*/
+
+			//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,origination_caller_id_number=94112500500,originate_timeout=30}sofia/gateway/DemoTrunk/18705056540%20&bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER}user/heshan@duo.media1.veery.cloud)
+
+			//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,origination_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=18705056560}user/heshan@duo.media1.veery.cloud%20&bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,origination_caller_id_number=94112500500,originate_timeout=30}sofia/gateway/DemoTrunk/18705056560)
+			//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=3ce432e7-9c3a-4c9c-b432-10951883ad60,origination_uuid=3ce432e7-9c3a-4c9c-b432-10951883ad60,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=94777888999}user/heshan@duo.media1.veery.cloud%20&bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,origination_caller_id_number=94777888999,originate_timeout=30}sofia/gateway/DemoTrunk/18705056540)
+			var param string
+			var furl string
 			var data string
 			var dial bool
 			if contactType == "PRIVATE" {
 				dial = true
-				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}user/%s@%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, contactName, domain)
+				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", resourceId, tenant, company, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber)
+				furl = fmt.Sprintf("user/%s@%s", contactName, domain)
 			} else if contactType == "PUBLIC" {
 				dial = true
-				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=PUBLIC_USER,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}sofia/external/%s@%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, contactName, domain)
+				furl = fmt.Sprintf("sofia/external/%s@%s", contactName, domain)
 			} else if contactType == "TRUNK" {
 				dial = true
-				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,ards_client_uuid=%s,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER}sofia/gateway/%s/%s)", sessionId, resourceId, tenant, company, ardsServerType, ardsReqType, domain, contactName)
+				furl = fmt.Sprintf("sofia/gateway/%s/%s", domain, contactName)
 			} else {
 				dial = false
 				fmt.Println("Invalied ContactType")
 			}
-		*/
 
-		//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,return_ring_ready=true,ignore_early_media=false,origination_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,origination_caller_id_number=94112500500,originate_timeout=30}sofia/gateway/DemoTrunk/18705056540%20&bridge({sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER}user/heshan@duo.media1.veery.cloud)
+			if xGateway != "" {
 
-		//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,origination_uuid=a63cc8f7-56f6-4dee-a907-f67a9392d56c,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=18705056560}user/heshan@duo.media1.veery.cloud%20&bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,origination_caller_id_number=94112500500,originate_timeout=30}sofia/gateway/DemoTrunk/18705056560)
-		//http://159.203.160.47:8080/api/originate?%20{sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_client_uuid=3ce432e7-9c3a-4c9c-b432-10951883ad60,origination_uuid=3ce432e7-9c3a-4c9c-b432-10951883ad60,ards_resource_id=111,tenantid=1,companyid=103,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=94777888999}user/heshan@duo.media1.veery.cloud%20&bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=dialerDialer2,CampaignId=106,CustomCompanyStr=103_1,OperationType=Dialer,origination_caller_id_number=94777888999,originate_timeout=30}sofia/gateway/DemoTrunk/18705056540)
-		var param string
-		var furl string
-		var data string
-		var dial bool
-		if contactType == "PRIVATE" {
-			dial = true
-			param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,ards_resource_id=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", resourceId, tenant, company, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber)
-			furl = fmt.Sprintf("user/%s@%s", contactName, domain)
-		} else if contactType == "PUBLIC" {
-			dial = true
-			furl = fmt.Sprintf("sofia/external/%s@%s", contactName, domain)
-		} else if contactType == "TRUNK" {
-			dial = true
-			furl = fmt.Sprintf("sofia/gateway/%s/%s", domain, contactName)
+				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30,sip_h_X-Gateway=%s}sofia/gateway/%s/%s)", subChannelName, campaignId, customCompanyStr, fromNumber, xGateway, trunkCode, phoneNumber)
+			} else {
+				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30}sofia/gateway/%s/%s)", subChannelName, campaignId, customCompanyStr, fromNumber, trunkCode, phoneNumber)
+			}
+
+			if dial == true {
+				SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
+
+				resp, err := Dial(resourceServer.Url, param, furl, data)
+				HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
+			} else {
+				SetSessionInfo(campaignId, sessionId, "Reason", "Invalied ContactType")
+				AgentReject(company, tenant, campaignId, sessionId, ardsReqType, resourceId, "Invalied ContactType")
+			}
 		} else {
-			dial = false
-			fmt.Println("Invalied ContactType")
+			RemoveRequest(company, tenant, sessionId)
 		}
 
-		if xGateway != "" {
-
-			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30,sip_h_X-Gateway=%s}sofia/gateway/%s/%s)", subChannelName, campaignId, customCompanyStr, fromNumber, xGateway, trunkCode, phoneNumber)
-		} else {
-			data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30}sofia/gateway/%s/%s)", subChannelName, campaignId, customCompanyStr, fromNumber, trunkCode, phoneNumber)
-		}
-
-		if dial == true {
-			SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
-
-			resp, err := Dial(resourceServer.Url, param, furl, data)
-			HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
-		} else {
-			SetSessionInfo(campaignId, sessionId, "Reason", "Invalied ContactType")
-			AgentReject(company, tenant, campaignId, sessionId, ardsReqType, resourceId, "Invalied ContactType")
-		}
 	}
 }
 
