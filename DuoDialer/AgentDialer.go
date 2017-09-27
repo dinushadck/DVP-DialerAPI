@@ -118,7 +118,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 
 			if xGateway != "" {
 
-				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30,sip_h_X-Gateway=%s}sofia/gateway/%s/%s)", subChannelName, tenant, company, sessionId, campaignId, customCompanyStr, fromNumber, xGateway, trunkCode, phoneNumber)
+				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30,sip_h_X-Gateway=%s,ignore_early_media=false}sofia/gateway/%s/%s)", subChannelName, tenant, company, sessionId, campaignId, customCompanyStr, fromNumber, xGateway, trunkCode, phoneNumber)
 			} else {
 				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,originate_timeout=30}sofia/gateway/%s/%s)", subChannelName, tenant, company, sessionId, campaignId, customCompanyStr, fromNumber, trunkCode, phoneNumber)
 			}
