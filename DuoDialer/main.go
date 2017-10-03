@@ -62,9 +62,10 @@ func main() {
 					RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
 				} else {
 
-					campStatus := GetCampaignStatus(campIdStr, campaign.CompanyId, campaign.TenantId)
+					//campStatus := GetCampaignStatus(campIdStr, campaign.CompanyId, campaign.TenantId)
+
+					campStatus := UpdateCampaignStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 					fmt.Println("campStatus: ", campStatus)
-					UpdateCampaignStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
 
 					if campStatus == "Resume" || campStatus == "Start" || campStatus == "PauseByDialer" || campStatus == "Waiting for Appoinment" {
 						//tempCampaignStartDate, _ := time.Parse(layout2, campaign.CampConfigurations.StartDate)
