@@ -75,23 +75,29 @@ func ClearTimeoutChannels(campaignId string) {
 		category := sessionInfo["Category"]
 		resourceId := sessionInfo["Resource"]
 		ardsCategory := sessionInfo["ArdsCategory"]
+		expierTimeStr := sessionInfo["ExpireTime"]
+
+		expierTime, _ := strconv.ParseFloat(expierTimeStr, 64)
 
 		dtt, _ := time.Parse(layout4, dtime)
 		ctt, _ := time.Parse(layout4, ctime)
-		if ctime == "" && tn.Sub(dtt).Seconds() > 240 {
-			if category == "PreviewDial" && resourceId != "" && ardsCategory != "" {
-				go ClearResourceSlotWhenReject(company, tenant, ardsCategory, resourceId, sessionid)
+
+		if expierTime > 1 {
+			if ctime == "" && tn.Sub(dtt).Seconds() > expierTime {
+				if category == "PreviewDial" && resourceId != "" && ardsCategory != "" {
+					go ClearResourceSlotWhenReject(company, tenant, ardsCategory, resourceId, sessionid)
+				}
+				DecrConcurrentChannelCount(sid, cid)
+				SetSessionInfo(cid, sessionid, "reason", "ChannelCreate timeout")
+				go UploadSessionInfo(cid, sessionid)
+			} else if atime == "" && ctime != "" && tn.Sub(ctt).Seconds() > expierTime {
+				if category == "PreviewDial" && resourceId != "" && ardsCategory != "" {
+					go ClearResourceSlotWhenReject(company, tenant, ardsCategory, resourceId, sessionid)
+				}
+				DecrConcurrentChannelCount(sid, cid)
+				SetSessionInfo(cid, sessionid, "reason", "ChannelAnswer timeout")
+				go UploadSessionInfo(cid, sessionid)
 			}
-			DecrConcurrentChannelCount(sid, cid)
-			SetSessionInfo(cid, sessionid, "reason", "ChannelCreate timeout")
-			go UploadSessionInfo(cid, sessionid)
-		} else if atime == "" && ctime != "" && tn.Sub(ctt).Seconds() > 240 {
-			if category == "PreviewDial" && resourceId != "" && ardsCategory != "" {
-				go ClearResourceSlotWhenReject(company, tenant, ardsCategory, resourceId, sessionid)
-			}
-			DecrConcurrentChannelCount(sid, cid)
-			SetSessionInfo(cid, sessionid, "reason", "ChannelAnswer timeout")
-			go UploadSessionInfo(cid, sessionid)
 		}
 	}
 }
