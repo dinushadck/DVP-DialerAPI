@@ -299,7 +299,7 @@ func RequestCampaign(requestCount int) []Campaign {
 	return campaignDetails
 }
 
-func UpdateCampaignStatus(company, tenant int, campaignId string) {
+func UpdateCampaignStatus(company, tenant int, campaignId string) (actualState string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in UpdateCampaignStatus", r)
@@ -312,6 +312,8 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 	client := &http.Client{}
 
 	currentState := GetCampaignStatus(campaignId, company, tenant)
+	actualState = currentState
+
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/State/%s/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId, currentState)
 	fmt.Println("Start UpdateCampaignStatus request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
@@ -343,15 +345,19 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 				switch state {
 				case "stop":
 					SetCampaignStatus(campIdStr, "Stop", company, tenant)
+					actualState = "Stop"
 					break
 				case "pause":
 					SetCampaignStatus(campIdStr, "Pause", company, tenant)
+					actualState = "Pause"
 					break
 				case "resume":
 					SetCampaignStatus(campIdStr, "Resume", company, tenant)
+					actualState = "Resume"
 					break
 				case "end":
 					SetCampaignStatus(campIdStr, "End", company, tenant)
+					actualState = "End"
 					break
 				default:
 					break
@@ -359,6 +365,8 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 			}
 		}
 	}
+
+	return
 }
 
 func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
