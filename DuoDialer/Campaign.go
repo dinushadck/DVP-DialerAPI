@@ -336,18 +336,21 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) {
 
 			campIdStr := strconv.Itoa(camId)
 
-			if campaignId == campIdStr && dialerId == dId && currentState != state {
+			currentStateLower := strings.ToLower(currentState)
+			stateLower := strings.ToLower(state)
+
+			if campaignId == campIdStr && dialerId == dId && currentStateLower != stateLower {
 				switch state {
-				case "Stop":
+				case "stop":
 					SetCampaignStatus(campIdStr, "Stop", company, tenant)
 					break
-				case "Pause":
+				case "pause":
 					SetCampaignStatus(campIdStr, "Pause", company, tenant)
 					break
-				case "Resume":
+				case "resume":
 					SetCampaignStatus(campIdStr, "Resume", company, tenant)
 					break
-				case "End":
+				case "end":
 					SetCampaignStatus(campIdStr, "End", company, tenant)
 					break
 				default:
