@@ -63,7 +63,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		phoneNumber := sessionInfo["Number"]
 		extention := sessionInfo["Extention"]
 		callServerId := sessionInfo["ServerId"]
-		xGateway := sessionInfo["XGateway"]
+		//xGateway := sessionInfo["XGateway"]
 		campaignName := sessionInfo["CampaignName"]
 
 		companyInt, _ := strconv.Atoi(company)
