@@ -151,6 +151,7 @@ func AgentReject(company, tenant, campaignId, sessionId, requestType, resourceId
 		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")
 		ClearResourceSlotWhenReject(company, tenant, requestType, resourceId, sessionId)
+		//RejectRequest(company, tenant, sessionId)
 		go UploadSessionInfo(campaignId, sessionId)
 	}
 }
