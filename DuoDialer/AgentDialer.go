@@ -117,12 +117,14 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 				fmt.Println("Invalied ContactType")
 			}
 
-			if xGateway != "" {
+			//			if xGateway != "" {
 
-				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CampaignName='%s',CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,DVP_OPERATION_CAT=CUSTOMER,originate_timeout=30,sip_h_X-Gateway=%s,ignore_early_media=false}sofia/gateway/%s/%s)", subChannelName, tenant, company, sessionId, campaignId, campaignName, customCompanyStr, fromNumber, xGateway, trunkCode, phoneNumber)
-			} else {
-				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CampaignName='%s',CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,DVP_OPERATION_CAT=CUSTOMER,originate_timeout=30}sofia/gateway/%s/%s)", subChannelName, tenant, company, sessionId, campaignId, campaignName, customCompanyStr, fromNumber, trunkCode, phoneNumber)
-			}
+			//				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CampaignName='%s',CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,DVP_OPERATION_CAT=CUSTOMER,originate_timeout=30,sip_h_X-Gateway=%s,ignore_early_media=false}sofia/gateway/%s/%s)", subChannelName, tenant, company, sessionId, campaignId, campaignName, customCompanyStr, fromNumber, xGateway, trunkCode, phoneNumber)
+			//			} else {
+			//				data = fmt.Sprintf(" &bridge({sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CampaignName='%s',CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,DVP_OPERATION_CAT=CUSTOMER,originate_timeout=30}sofia/gateway/%s/%s)", subChannelName, tenant, company, sessionId, campaignId, campaignName, customCompanyStr, fromNumber, trunkCode, phoneNumber)
+			//			}
+
+			data = fmt.Sprintf(" %s xml dialer", phoneNumber)
 
 			if dial == true {
 				SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
