@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/satori/go.uuid"
 )
 
 //----------Ongoing Campaign Count-----------------------
@@ -550,6 +551,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 
 		if campStatus == "Start" || (campStatus == "Waiting for Appoinment" && !RedisCheckKeyExist(numLoadingStatusKey)) {
+			SetDncNumbersFromNumberBase(company, tenant)
 			LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
 		}
 

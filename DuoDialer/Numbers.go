@@ -70,6 +70,40 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	return numbers
 }
 
+func SetDncNumbersFromNumberBase(company, tenant int) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in SetDncNumbersFromNumberBase", r)
+		}
+	}()
+
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	fmt.Println("Start SetDncNumbersFromNumberBase Auth: ", internalAuthToken)
+	client := &http.Client{}
+
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Dnc", CreateHost(campaignServiceHost, campaignServicePort))
+	fmt.Println("Start GetDncPhoneNumbers request: ", request)
+	req, _ := http.NewRequest("GET", request, nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer resp.Body.Close()
+
+	response, _ := ioutil.ReadAll(resp.Body)
+
+	var dncNumberResult DncNumberResult
+	json.Unmarshal(response, &dncNumberResult)
+	if dncNumberResult.IsSuccess == true {
+		dncNumberKey := fmt.Sprintf("DncNumber:%d:%d", tenant, company)
+		RedisSetAdd(dncNumberKey, dncNumberResult.Result)
+	}
+}
+
 func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId string) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	numbers := GetNumbersFromNumberBase(company, tenant, numberLimit, campaignId, camScheduleId)
@@ -80,10 +114,13 @@ func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId str
 		RedisSet(numLoadingStatusKey, "waiting")
 	} else {
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
+		dncNumberKey := fmt.Sprintf("DncNumber:%d:%d", tenant, company)
 		RedisSet(numLoadingStatusKey, "waiting")
 		for _, number := range numbers {
-			fmt.Println("Adding number to campaign: ", number)
-			RedisListRpush(listId, number)
+			if !RedisSetIsMember(dncNumberKey, number) {
+				fmt.Println("Adding number to campaign: ", number)
+				RedisListRpush(listId, number)
+			}
 		}
 	}
 }

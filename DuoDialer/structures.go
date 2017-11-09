@@ -203,6 +203,12 @@ type PhoneNumberResult struct {
 	Result        []CampaignContactInfo
 }
 
+type DncNumberResult struct {
+	CustomMessage string
+	IsSuccess     bool
+	Result        []string
+}
+
 type CallbackConfiguration struct {
 	IsSuccess bool
 	Result    []DisconnectReason

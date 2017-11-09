@@ -3,13 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/pubsub"
 	"github.com/mediocregopher/radix.v2/redis"
 	"github.com/mediocregopher/radix.v2/sentinel"
 	"github.com/mediocregopher/radix.v2/util"
-	"strings"
-	"time"
 )
 
 var sentinelPool *sentinel.Client
@@ -407,24 +408,6 @@ func RedisHashSetField(hkey, field, value string) bool {
 	}
 }
 
-//func RedisHashSetNxField(hkey, field, value string) bool {
-//	defer func() {
-//		if r := recover(); r != nil {
-//			fmt.Println("Recovered in RedisHashSetField", r)
-//		}
-//	}()
-//	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
-//	errHndlr(err)
-//	defer client.Close()
-
-//	// select database
-//	r := client.Cmd("select", redisDb)
-//	errHndlr(r.Err)
-
-//	result, _ := client.Cmd("hsetnx", hkey, field, value).Bool()
-//	return result
-//}
-
 func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
 	defer func() {
 		if r := recover(); r != nil {
@@ -450,24 +433,6 @@ func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
 	fmt.Println(true)
 	return true
 }
-
-//func RedisRemoveHashField(hkey, field string) bool {
-//	defer func() {
-//		if r := recover(); r != nil {
-//			fmt.Println("Recovered in RedisRemoveHashField", r)
-//		}
-//	}()
-//	client, err := redis.DialTimeout("tcp", redisIp, time.Duration(10)*time.Second)
-//	errHndlr(err)
-//	defer client.Close()
-
-//	// select database
-//	r := client.Cmd("select", redisDb)
-//	errHndlr(r.Err)
-
-//	result, _ := client.Cmd("hdel", hkey, field).Bool()
-//	return result
-//}
 
 // Redis List Methods
 
@@ -600,6 +565,61 @@ func SecurityGet(key string) string {
 	strObj, _ := client.Cmd("get", key).Str()
 	//fmt.Println(strObj)
 	return strObj
+}
+
+// Redis Set Methods
+
+func RedisSetAdd(key string, members []string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisListLpop", r)
+		}
+	}()
+	var client *redis.Client
+	var err error
+
+	if redisMode == "sentinel" {
+		client, err = sentinelPool.GetMaster(redisClusterName)
+		errHndlrNew("OnEvent", "getConnFromSentinel", err)
+		defer sentinelPool.PutMaster(redisClusterName, client)
+	} else {
+		client, err = redisPool.Get()
+		errHndlrNew("OnEvent", "getConnFromPool", err)
+		defer redisPool.Put(client)
+	}
+
+	saddResult, _ := client.Cmd("sadd", key, members).Str()
+	fmt.Println("saddResult : %s :: %s", key, saddResult)
+	return saddResult
+}
+
+func RedisSetIsMember(key, value string) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisListLpop", r)
+		}
+	}()
+	var client *redis.Client
+	var err error
+
+	if redisMode == "sentinel" {
+		client, err = sentinelPool.GetMaster(redisClusterName)
+		errHndlrNew("OnEvent", "getConnFromSentinel", err)
+		defer sentinelPool.PutMaster(redisClusterName, client)
+	} else {
+		client, err = redisPool.Get()
+		errHndlrNew("OnEvent", "getConnFromPool", err)
+		defer redisPool.Put(client)
+	}
+
+	sismemberResult, _ := client.Cmd("sismember", key, value).Int()
+	fmt.Println("sismember : %s:%s :: %s", key, value, sismemberResult)
+
+	if sismemberResult == 1 {
+		return true
+	} else {
+		return false
+	}
 }
 
 // Redis PubSub
