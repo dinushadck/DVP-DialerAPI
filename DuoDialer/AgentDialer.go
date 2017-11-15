@@ -104,7 +104,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			var dial bool
 			if contactType == "PRIVATE" {
 				dial = true
-				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber)
+				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", subChannelName, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber)
 				furl = fmt.Sprintf("user/%s@%s", contactName, domain)
 			} else if contactType == "PUBLIC" {
 				dial = true
@@ -125,7 +125,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			//			}
 
 			//call recording enable
-			data = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CampaignName='%s',CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,DVP_OPERATION_CAT=CUSTOMER,originate_timeout=30} %s xml dialer", subChannelName, tenant, company, sessionId, campaignId, campaignName, customCompanyStr, fromNumber, phoneNumber)
+			data = fmt.Sprintf(" %s xml dialer", subChannelName, tenant, company, sessionId, campaignId, campaignName, customCompanyStr, fromNumber, phoneNumber)
 
 			if dial == true {
 				SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
