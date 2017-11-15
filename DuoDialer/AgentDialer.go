@@ -125,7 +125,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			//			}
 
 			//call recording enable
-			data = fmt.Sprintf(" %s xml dialer", phoneNumber)
+			data = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CUSTOM_PUBID=%s,tenantid=%s,companyid=%s,ards_client_uuid=%s,CampaignId=%s,CampaignName='%s',CustomCompanyStr=%s,OperationType=Dialer,origination_caller_id_number=%s,DVP_OPERATION_CAT=CUSTOMER,originate_timeout=30} %s xml dialer", subChannelName, tenant, company, sessionId, campaignId, campaignName, customCompanyStr, fromNumber, phoneNumber)
 
 			if dial == true {
 				SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
