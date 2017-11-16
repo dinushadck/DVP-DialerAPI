@@ -410,6 +410,7 @@ type ArdsCallbackInfo struct {
 	RequestType  string
 	SessionID    string
 	OtherInfo    string
+	Skills       string
 	ResourceInfo ResourceDetails
 }
 

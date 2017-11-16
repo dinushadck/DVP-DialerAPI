@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/DuoSoftware/gorest"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/DuoSoftware/gorest"
 )
 
 type DVP struct {
@@ -205,6 +206,8 @@ func (dvp DVP) ArdsCallback() string {
 	json.Unmarshal([]byte(ardsCallbackInfo.OtherInfo), &reqOData)
 
 	go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
+
+	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "ArdsQueueName", ardsCallbackInfo.Skills)
 
 	switch reqOData.DialoutMec {
 	case "PREVIEW":
