@@ -103,87 +103,91 @@ func RemoveScheduleStatusOther(oDialerId, campaignId, scheduleId string, company
 
 //----------Campaign-----------------------
 func AddCampaignToDialer(campaignD Campaign) {
-	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
-	searchCamp := fmt.Sprintf("Campaign:*:%d:%d:%d", campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
-	existingKeys := RedisSearchKeys(searchCamp)
+	if len(campaignD.CampScheduleInfo) > 0 {
+		campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%d", dialerId, campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
+		searchCamp := fmt.Sprintf("Campaign:*:%d:%d:%d", campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId)
+		existingKeys := RedisSearchKeys(searchCamp)
 
-	companyToken := fmt.Sprintf("%d:%d", campaignD.TenantId, campaignD.CompanyId)
+		companyToken := fmt.Sprintf("%d:%d", campaignD.TenantId, campaignD.CompanyId)
 
-	defaultScheduleId := strconv.Itoa(campaignD.CampScheduleInfo[0].ScheduleId)
-	defaultStartDate, defaultEndDate, defaultTimeZone := GetTimeZoneFroSchedule(companyToken, defaultScheduleId)
+		defaultScheduleId := strconv.Itoa(campaignD.CampScheduleInfo[0].ScheduleId)
+		defaultStartDate, defaultEndDate, defaultTimeZone := GetTimeZoneFroSchedule(companyToken, defaultScheduleId)
 
-	location, _ := time.LoadLocation(defaultTimeZone)
-	defaultCampaignStartDate, _ := time.Parse(layout2, defaultStartDate)
-	defaultCampaignEndDate, _ := time.Parse(layout2, defaultEndDate)
+		location, _ := time.LoadLocation(defaultTimeZone)
+		defaultCampaignStartDate, _ := time.Parse(layout2, defaultStartDate)
+		defaultCampaignEndDate, _ := time.Parse(layout2, defaultEndDate)
 
-	tempCampaignStartDate := time.Date(defaultCampaignStartDate.Year(), defaultCampaignStartDate.Month(), defaultCampaignStartDate.Day(), 0, 0, 0, 0, location)
-	tempCampaignEndDate := time.Date(defaultCampaignEndDate.Year(), defaultCampaignEndDate.Month(), defaultCampaignEndDate.Day(), 0, 0, 0, 0, location)
+		tempCampaignStartDate := time.Date(defaultCampaignStartDate.Year(), defaultCampaignStartDate.Month(), defaultCampaignStartDate.Day(), 0, 0, 0, 0, location)
+		tempCampaignEndDate := time.Date(defaultCampaignEndDate.Year(), defaultCampaignEndDate.Month(), defaultCampaignEndDate.Day(), 0, 0, 0, 0, location)
 
-	campaignD.CampConfigurations.StartDate = tempCampaignStartDate
-	campaignD.CampConfigurations.EndDate = tempCampaignEndDate
-	campaignD.CampConfigurations.StartTimeZone = defaultTimeZone
-	campaignD.CampConfigurations.EndTimeZone = defaultTimeZone
+		campaignD.CampConfigurations.StartDate = tempCampaignStartDate
+		campaignD.CampConfigurations.EndDate = tempCampaignEndDate
+		campaignD.CampConfigurations.StartTimeZone = defaultTimeZone
+		campaignD.CampConfigurations.EndTimeZone = defaultTimeZone
 
-	for i, campSchedule := range campaignD.CampScheduleInfo {
-		scheduleId := strconv.Itoa(campSchedule.ScheduleId)
-		startDate, endDate, timeZone := GetTimeZoneFroSchedule(companyToken, scheduleId)
+		for i, campSchedule := range campaignD.CampScheduleInfo {
+			scheduleId := strconv.Itoa(campSchedule.ScheduleId)
+			startDate, endDate, timeZone := GetTimeZoneFroSchedule(companyToken, scheduleId)
 
-		scheduleLocation, _ := time.LoadLocation(timeZone)
-		scheduleStartDate, _ := time.Parse(layout2, startDate)
-		scheduleEndDate, _ := time.Parse(layout2, endDate)
+			scheduleLocation, _ := time.LoadLocation(timeZone)
+			scheduleStartDate, _ := time.Parse(layout2, startDate)
+			scheduleEndDate, _ := time.Parse(layout2, endDate)
 
-		tempScheduleStartDate := time.Date(scheduleStartDate.Year(), scheduleStartDate.Month(), scheduleStartDate.Day(), 0, 0, 0, 0, scheduleLocation)
-		tempScheduleEndDate := time.Date(scheduleEndDate.Year(), scheduleEndDate.Month(), scheduleEndDate.Day(), 0, 0, 0, 0, scheduleLocation)
+			tempScheduleStartDate := time.Date(scheduleStartDate.Year(), scheduleStartDate.Month(), scheduleStartDate.Day(), 0, 0, 0, 0, scheduleLocation)
+			tempScheduleEndDate := time.Date(scheduleEndDate.Year(), scheduleEndDate.Month(), scheduleEndDate.Day(), 0, 0, 0, 0, scheduleLocation)
 
-		campaignD.CampScheduleInfo[i].StartDate = tempScheduleStartDate
-		campaignD.CampScheduleInfo[i].EndDate = tempScheduleEndDate
-		campaignD.CampScheduleInfo[i].TimeZone = timeZone
+			campaignD.CampScheduleInfo[i].StartDate = tempScheduleStartDate
+			campaignD.CampScheduleInfo[i].EndDate = tempScheduleEndDate
+			campaignD.CampScheduleInfo[i].TimeZone = timeZone
 
-		fmt.Println("Add Schedule Time Zone::", timeZone)
-		fmt.Println("Add Schedule Start Time::", tempScheduleStartDate.String())
-		fmt.Println("Add Schedule End Time::", tempScheduleEndDate.String())
+			fmt.Println("Add Schedule Time Zone::", timeZone)
+			fmt.Println("Add Schedule Start Time::", tempScheduleStartDate.String())
+			fmt.Println("Add Schedule End Time::", tempScheduleEndDate.String())
 
-		if tempScheduleStartDate.Before(tempCampaignStartDate) {
-			campaignD.CampConfigurations.StartDate = tempScheduleStartDate
-			campaignD.CampConfigurations.StartTimeZone = timeZone
+			if tempScheduleStartDate.Before(tempCampaignStartDate) {
+				campaignD.CampConfigurations.StartDate = tempScheduleStartDate
+				campaignD.CampConfigurations.StartTimeZone = timeZone
+			}
+
+			if tempScheduleEndDate.After(tempCampaignEndDate) {
+				campaignD.CampConfigurations.EndDate = tempScheduleEndDate
+				campaignD.CampConfigurations.EndTimeZone = timeZone
+			}
 		}
 
-		if tempScheduleEndDate.After(tempCampaignEndDate) {
-			campaignD.CampConfigurations.EndDate = tempScheduleEndDate
-			campaignD.CampConfigurations.EndTimeZone = timeZone
-		}
-	}
-
-	if len(existingKeys) == 0 {
-		campaignJson, _ := json.Marshal(campaignD)
-		result := RedisAdd(campaignKey, string(campaignJson))
-		fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
-		if result == "OK" {
+		if len(existingKeys) == 0 {
+			campaignJson, _ := json.Marshal(campaignD)
+			result := RedisAdd(campaignKey, string(campaignJson))
+			fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+			if result == "OK" {
+				campIdStr := strconv.Itoa(campaignD.CampaignId)
+				channelCountStr := strconv.Itoa(campaignD.CampConfigurations.ChannelConcurrency)
+				//SetCampaignTimeZone(campIdStr, campaignD.CompanyId, campaignD.TenantId, timeZone)
+				IncrementOnGoingCampaignCount()
+				SetCampChannelMaxLimitDirect(campIdStr, channelCountStr)
+				AddCampaignCallbackConfigInfo(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId)
+				SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
+				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
+				UpdateCampaignStartAndEndDate(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId, campaignD.CampConfigurations.StartDate.Format("02 Jan 06 15:04 -0700"), campaignD.CampConfigurations.EndDate.Format("02 Jan 06 15:04 -0700"))
+			}
+		} else {
+			splitVals := strings.Split(existingKeys[0], ":")
+			preDialerId := splitVals[1]
 			campIdStr := strconv.Itoa(campaignD.CampaignId)
-			channelCountStr := strconv.Itoa(campaignD.CampConfigurations.ChannelConcurrency)
-			//SetCampaignTimeZone(campIdStr, campaignD.CompanyId, campaignD.TenantId, timeZone)
-			IncrementOnGoingCampaignCount()
-			SetCampChannelMaxLimitDirect(campIdStr, channelCountStr)
-			AddCampaignCallbackConfigInfo(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId)
-			SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
-			UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
-			UpdateCampaignStartAndEndDate(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId, campaignD.CampConfigurations.StartDate.Format("02 Jan 06 15:04 -0700"), campaignD.CampConfigurations.EndDate.Format("02 Jan 06 15:04 -0700"))
+			RemoveCampaignFromOtherDialer(preDialerId, campIdStr, campaignD.CompanyId, campaignD.TenantId)
+
+			campaignJson, _ := json.Marshal(campaignD)
+			result := RedisAdd(campaignKey, string(campaignJson))
+			fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+			if result == "OK" {
+				//SetCampaignTimeZone(campIdStr, campaignD.CompanyId, campaignD.TenantId, timeZone)
+				IncrementOnGoingCampaignCount()
+				SetCampaignStatus(campIdStr, "Resume", campaignD.CompanyId, campaignD.TenantId)
+				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
+			}
 		}
 	} else {
-		splitVals := strings.Split(existingKeys[0], ":")
-		preDialerId := splitVals[1]
-		campIdStr := strconv.Itoa(campaignD.CampaignId)
-		RemoveCampaignFromOtherDialer(preDialerId, campIdStr, campaignD.CompanyId, campaignD.TenantId)
-
-		campaignJson, _ := json.Marshal(campaignD)
-		result := RedisAdd(campaignKey, string(campaignJson))
-		fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
-		if result == "OK" {
-			//SetCampaignTimeZone(campIdStr, campaignD.CompanyId, campaignD.TenantId, timeZone)
-			IncrementOnGoingCampaignCount()
-			SetCampaignStatus(campIdStr, "Resume", campaignD.CompanyId, campaignD.TenantId)
-			UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
-		}
+		fmt.Println("Add Campaign to Redis failed: Error: No shedule info found")
 	}
 }
 
