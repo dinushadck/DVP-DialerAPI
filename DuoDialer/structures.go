@@ -339,6 +339,8 @@ type Appoinment struct {
 
 //--------------------Events--------------------
 type SubEvents struct {
+	TenantId         string
+	CompanyId        string
 	SwitchName       string
 	CampaignId       string
 	SessionId        string

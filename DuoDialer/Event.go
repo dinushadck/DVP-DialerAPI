@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/DuoSoftware/log4go"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/DuoSoftware/log4go"
 )
 
 var eventLog = log4go.NewLogger()
@@ -18,12 +18,14 @@ func OnEvent(eventInfo SubEvents) {
 		fmt.Println("SessionId: ", eventInfo.SessionId)
 		fmt.Println("EventName: ", eventInfo.EventName)
 		fmt.Println("EventCategory: ", eventInfo.EventCategory)
-		fmt.Println("SwitchName: ", eventInfo.SwitchName)
+		fmt.Println("CampaignId: ", eventInfo.CampaignId)
+		fmt.Println("Tenant: ", eventInfo.TenantId)
+		fmt.Println("Company: ", eventInfo.CompanyId)
 
-		authInfoArr := strings.Split(eventInfo.AuthData, "_")
-		if len(authInfoArr) == 2 {
-			company, _ := strconv.Atoi(authInfoArr[0])
-			tenant, _ := strconv.Atoi(authInfoArr[1])
+		//authInfoArr := strings.Split(eventInfo.AuthData, "_")
+		if eventInfo.TenantId != "" && eventInfo.CompanyId != "" {
+			company, _ := strconv.Atoi(eventInfo.CompanyId)
+			tenant, _ := strconv.Atoi(eventInfo.TenantId)
 
 			fmt.Println("company: ", company)
 			fmt.Println("tenant: ", tenant)
