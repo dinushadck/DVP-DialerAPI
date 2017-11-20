@@ -69,22 +69,33 @@ func InitiateRedis() {
 
 // Redis String Methods
 func RedisAdd(key, value string) string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisSet", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	isExists, _ := client.Cmd("EXISTS", key).Int()
@@ -100,22 +111,33 @@ func RedisAdd(key, value string) string {
 }
 
 func RedisSet(key, value string) string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisSet", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	result, sErr := client.Cmd("set", key, value).Str()
@@ -125,22 +147,33 @@ func RedisSet(key, value string) string {
 }
 
 func RedisSetNx(key, value string) int {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisSet", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	result, sErr := client.Cmd("setnx", key, value).Int()
@@ -150,22 +183,33 @@ func RedisSetNx(key, value string) int {
 }
 
 func RedisGet(key string) string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisGet", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	strObj, _ := client.Cmd("get", key).Str()
@@ -183,24 +227,35 @@ func AppendIfMissing(windowList []string, i string) []string {
 }
 
 func RedisSearchKeys(pattern string) []string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisSearchKeys", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	matchingKeys := make([]string, 0)
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	fmt.Println("Start ScanAndGetKeys:: ", pattern)
@@ -216,22 +271,33 @@ func RedisSearchKeys(pattern string) []string {
 }
 
 func RedisIncr(key string) int {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisSet", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	result, sErr := client.Cmd("incr", key).Int()
@@ -241,22 +307,33 @@ func RedisIncr(key string) int {
 }
 
 func RedisIncrBy(key string, value int) int {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisSet", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	result, sErr := client.Cmd("incrby", key, value).Int()
@@ -266,22 +343,33 @@ func RedisIncrBy(key string, value int) int {
 }
 
 func RedisRemove(key string) bool {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisRemove", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	tempResult, sErr := client.Cmd("del", key).Int()
@@ -296,22 +384,33 @@ func RedisRemove(key string) bool {
 }
 
 func RedisCheckKeyExist(key string) bool {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in CheckKeyExist", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	tempResult, sErr := client.Cmd("exists", key).Int()
@@ -327,22 +426,33 @@ func RedisCheckKeyExist(key string) bool {
 // Redis Hashes Methods
 
 func RedisHashGetAll(hkey string) map[string]string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisHashGetAll", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 	strHash, _ := client.Cmd("hgetall", hkey).Map()
 	bytes, err := json.Marshal(strHash)
@@ -355,22 +465,33 @@ func RedisHashGetAll(hkey string) map[string]string {
 }
 
 func RedisHashGetField(hkey, field string) string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisHashGetAll", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 	strValue, _ := client.Cmd("hget", hkey, field).Str()
 	if err != nil {
@@ -381,22 +502,33 @@ func RedisHashGetField(hkey, field string) string {
 }
 
 func RedisHashSetField(hkey, field, value string) bool {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisHashSetField", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	tempResult, _ := client.Cmd("hset", hkey, field, value).Int()
@@ -409,22 +541,33 @@ func RedisHashSetField(hkey, field, value string) bool {
 }
 
 func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisHashSetField", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 	fmt.Println(data)
 	for key, value := range data {
@@ -437,22 +580,33 @@ func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
 // Redis List Methods
 
 func RedisListLpop(lname string) string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisListLpop", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	lpopItem, _ := client.Cmd("lpop", lname).Str()
@@ -461,22 +615,33 @@ func RedisListLpop(lname string) string {
 }
 
 func RedisListLpush(lname, value string) bool {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisListLpush", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	result, _ := client.Cmd("lpush", lname, value).Int()
@@ -488,22 +653,33 @@ func RedisListLpush(lname, value string) bool {
 }
 
 func RedisListRpush(lname, value string) bool {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisListLpush", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	result, _ := client.Cmd("rpush", lname, value).Int()
@@ -515,22 +691,33 @@ func RedisListRpush(lname, value string) bool {
 }
 
 func RedisListLlen(lname string) int {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisListLlen", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	result, _ := client.Cmd("llen", lname).Int()
@@ -538,24 +725,34 @@ func RedisListLlen(lname string) int {
 }
 
 func SecurityGet(key string) string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisGet", r)
 		}
-	}()
 
-	var client *redis.Client
-	var err error
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
+	}()
 
 	if redisMode == "sentinel" {
 		client, err = securitylPool.GetMaster(redisClusterName)
 		client.Cmd("select", "0")
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer securitylPool.PutMaster(redisClusterName, client)
+		//defer securitylPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redis.DialTimeout("tcp", securityIp, time.Duration(10)*time.Second)
 		errHndlr(err)
-		defer client.Close()
+		//defer client.Close()
 
 		//authServer
 		authE := client.Cmd("auth", redisPassword)
@@ -570,22 +767,33 @@ func SecurityGet(key string) string {
 // Redis Set Methods
 
 func RedisSetAdd(key string, members []string) string {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisListLpop", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	saddResult, _ := client.Cmd("sadd", key, members).Str()
@@ -594,22 +802,33 @@ func RedisSetAdd(key string, members []string) string {
 }
 
 func RedisSetIsMember(key, value string) bool {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisListLpop", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	sismemberResult, _ := client.Cmd("sismember", key, value).Int()
@@ -625,92 +844,128 @@ func RedisSetIsMember(key, value string) bool {
 // Redis PubSub
 
 func PubSub() {
+	var c2 *redis.Client
+	var err error
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in PubSub", r)
+		}
+
+		if c2 != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, c2)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
+	}()
+
 	subChannelName = fmt.Sprintf("dialer%s", dialerId)
+	for {
+		if redisMode == "sentinel" {
 
-	if redisMode == "sentinel" {
+			c2, err = sentinelPool.GetMaster(redisClusterName)
+			errHndlrNew("PubSub", "getConnFromPool", err)
+			//defer sentinelPool.PutMaster(redisClusterName, c2)
 
-		c2, err := sentinelPool.GetMaster(redisClusterName)
-		errHndlrNew("PubSub", "getConnFromPool", err)
-		defer sentinelPool.PutMaster(redisClusterName, c2)
+			psc := pubsub.NewSubClient(c2)
+			psr := psc.Subscribe(subChannelName)
+			//ppsr := psc.PSubscribe("*")
 
-		psc := pubsub.NewSubClient(c2)
-		psr := psc.Subscribe(subChannelName)
-		//ppsr := psc.PSubscribe("*")
+			//if ppsr.Err == nil {
 
-		//if ppsr.Err == nil {
+			for {
+				psr = psc.Receive()
+				if psr.Timeout() {
+					fmt.Println("psc.Receive Timeout:: ", psr.Timeout())
+					break
 
-		for {
-			psr = psc.Receive()
-			if psr.Err != nil {
+				}
+				if psr.Err != nil {
 
-				fmt.Println(psr.Err.Error())
+					fmt.Println("psc.Receive Err:: ", psr.Err.Error())
+					break
+				}
 
-				break
+				var subEvent = SubEvents{}
+				json.Unmarshal([]byte(psr.Message), &subEvent)
+				go OnEvent(subEvent)
+			}
+			//s := strings.Split("127.0.0.1:5432", ":")
+			//}
+
+			psc.Unsubscribe(subChannelName)
+
+		} else {
+			c2, err = redis.Dial("tcp", redisIp)
+			errHndlr(err)
+			defer c2.Close()
+
+			//authServer
+			authE := c2.Cmd("auth", redisPassword)
+			errHndlr(authE.Err)
+
+			psc := pubsub.NewSubClient(c2)
+			psr := psc.Subscribe(subChannelName)
+			//ppsr := psc.PSubscribe("*")
+
+			//if ppsr.Err == nil {
+
+			for {
+				psr = psc.Receive()
+				if psr.Timeout() {
+					fmt.Println("psc.Receive Timeout:: ", psr.Timeout())
+					break
+
+				}
+
+				if psr.Err != nil {
+
+					fmt.Println("psc.Receive Err:: ", psr.Err.Error())
+					break
+				}
+
+				var subEvent = SubEvents{}
+				json.Unmarshal([]byte(psr.Message), &subEvent)
+				go OnEvent(subEvent)
 			}
 
-			var subEvent = SubEvents{}
-			json.Unmarshal([]byte(psr.Message), &subEvent)
-			go OnEvent(subEvent)
+			psc.Unsubscribe(subChannelName)
+
 		}
-		//s := strings.Split("127.0.0.1:5432", ":")
-		//}
-
-		psc.Unsubscribe(subChannelName)
-
-	} else {
-		c2, err := redis.Dial("tcp", redisIp)
-		errHndlr(err)
-		defer c2.Close()
-
-		//authServer
-		authE := c2.Cmd("auth", redisPassword)
-		errHndlr(authE.Err)
-
-		psc := pubsub.NewSubClient(c2)
-		psr := psc.Subscribe(subChannelName)
-		//ppsr := psc.PSubscribe("*")
-
-		//if ppsr.Err == nil {
-
-		for {
-			psr = psc.Receive()
-			if psr.Err != nil {
-
-				fmt.Println(psr.Err.Error())
-
-				break
-			}
-
-			var subEvent = SubEvents{}
-			json.Unmarshal([]byte(psr.Message), &subEvent)
-			go OnEvent(subEvent)
-		}
-		//s := strings.Split("127.0.0.1:5432", ":")
-		//}
-
-		psc.Unsubscribe(subChannelName)
-
+		time.Sleep(1 * time.Second)
 	}
-
 }
 
 func Publish(channel, message string) {
+	var client *redis.Client
+	var err error
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RedisListLlen", r)
 		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
 	}()
-	var client *redis.Client
-	var err error
 
 	if redisMode == "sentinel" {
 		client, err = sentinelPool.GetMaster(redisClusterName)
 		errHndlrNew("OnEvent", "getConnFromSentinel", err)
-		defer sentinelPool.PutMaster(redisClusterName, client)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
 	} else {
 		client, err = redisPool.Get()
 		errHndlrNew("OnEvent", "getConnFromPool", err)
-		defer redisPool.Put(client)
+		//defer redisPool.Put(client)
 	}
 
 	client.Cmd("publish", channel, message)
