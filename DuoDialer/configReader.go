@@ -53,6 +53,7 @@ var redisMode string
 var redisClusterName string
 var sentinelHosts string
 var sentinelPort string
+var dvpEventType string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -118,6 +119,7 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.RedisClusterName = "redis-cluster"
 		defconfiguration.SentinelHosts = "138.197.90.92,45.55.205.92,138.197.90.92"
 		defconfiguration.SentinelPort = "16389"
+		defconfiguration.DvpEventType = "redis"
 	}
 
 	return defconfiguration
@@ -168,6 +170,7 @@ func LoadDefaultConfig() {
 	redisClusterName = defconfiguration.RedisClusterName
 	sentinelHosts = defconfiguration.SentinelHosts
 	sentinelPort = defconfiguration.SentinelPort
+	dvpEventType = defconfiguration.DvpEventType
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -232,6 +235,7 @@ func LoadConfiguration() {
 		redisClusterName = os.Getenv(envconfiguration.RedisClusterName)
 		sentinelHosts = os.Getenv(envconfiguration.SentinelHosts)
 		sentinelPort = os.Getenv(envconfiguration.SentinelPort)
+		dvpEventType = os.Getenv(envconfiguration.DvpEventType)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -358,6 +362,9 @@ func LoadConfiguration() {
 		if sentinelPort == "" {
 			sentinelPort = defConfig.SentinelPort
 		}
+		if dvpEventType == "" {
+			dvpEventType = defConfig.DvpEventType
+		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 		securityIp = fmt.Sprintf("%s:%s", securityIp, securityPort)
@@ -371,6 +378,7 @@ func LoadConfiguration() {
 	fmt.Println("SentinelPort:", sentinelPort)
 	fmt.Println("dialerId:", dialerId)
 	fmt.Println("campaignLimit:", campaignLimit)
+	fmt.Println("dvpEventType:", dvpEventType)
 }
 
 func LoadCallbackConfiguration() {

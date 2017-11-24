@@ -51,6 +51,7 @@ type Configuration struct {
 	RedisClusterName         string
 	SentinelHosts            string
 	SentinelPort             string
+	DvpEventType             string
 }
 
 type EnvConfiguration struct {
@@ -95,6 +96,7 @@ type EnvConfiguration struct {
 	RedisClusterName         string
 	SentinelHosts            string
 	SentinelPort             string
+	DvpEventType             string
 }
 
 //--------------------Campaign--------------------

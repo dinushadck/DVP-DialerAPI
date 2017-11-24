@@ -101,6 +101,16 @@ func PublishEvent(campaignId, sessionId string) {
 		jvalueStr := string(jvalue)
 		fmt.Println("Event Pub value: ", jvalueStr)
 
-		Publish("SYS:MONITORING:DVPEVENTS", jvalueStr)
+		if dvpEventType == "amqp" {
+
+			fmt.Println("Start Publish Event to rabbitMQ")
+			RabbitMQPublish("DVPEVENTS", jvalue)
+
+		} else {
+
+			Publish("SYS:MONITORING:DVPEVENTS", jvalueStr)
+
+		}
+
 	}
 }
