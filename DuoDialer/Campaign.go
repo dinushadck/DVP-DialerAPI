@@ -643,7 +643,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								return
 							}
 						} else {
-							sessionId := uuid.NewV4().String()
+							uuidV4, _ := uuid.NewV4()
+							sessionId := uuidV4.String()
 							emailData := make(map[string]interface{})
 
 							emailData["company"] = company
@@ -721,7 +722,9 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								return
 							}
 						} else {
-							sessionId := uuid.NewV4().String()
+							uuidV4, _ := uuid.NewV4()
+							sessionId := uuidV4.String()
+
 							smsData := make(map[string]interface{})
 
 							smsData["company"] = company
