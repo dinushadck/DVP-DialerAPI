@@ -215,6 +215,7 @@ func GetAllRunningCampaign() []Campaign {
 		json.Unmarshal([]byte(campJson), &camp)
 		allCampaigns = append(allCampaigns, camp)
 	}
+	fmt.Println("GetAllRunningCampaign:: ", allCampaigns)
 	return allCampaigns
 }
 
