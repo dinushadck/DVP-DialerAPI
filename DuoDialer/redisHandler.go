@@ -735,10 +735,11 @@ func SecurityGet(key string) string {
 
 		if client != nil {
 			if redisMode == "sentinel" {
-				sentinelPool.PutMaster(redisClusterName, client)
-			} else {
-				redisPool.Put(client)
+				securitylPool.PutMaster(redisClusterName, client)
 			}
+			//			else {
+			//				redisPool.Put(client)
+			//			}
 		} else {
 			fmt.Println("Cannot Put invalid connection")
 		}
