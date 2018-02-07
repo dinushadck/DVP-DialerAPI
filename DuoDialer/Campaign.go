@@ -571,6 +571,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
+			fmt.Println("Campaign Current State:: ", campStatus)
 			if campStatus == "Running" {
 				tm := time.Now().In(location)
 				fmt.Println("endTime: ", appmntEndTime.String())
@@ -797,6 +798,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 					SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
 					return
 				default:
+					fmt.Println("Start Set ForceFullyStop: Current State:: ", campStatus)
 					SetCampaignStatus(campaignId, "ForceFullyStop", company, tenant)
 					return
 				}
