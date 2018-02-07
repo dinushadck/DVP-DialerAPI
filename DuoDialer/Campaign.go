@@ -53,7 +53,7 @@ func DecrementOnGoingCampaignCountOther(oDialerId string) {
 func SetCampaignStatus(campaignId, status string, company, tenant int) {
 	campaignStatusKey := fmt.Sprintf("CampaignStatus:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
 	result := RedisSet(campaignStatusKey, status)
-	fmt.Println("SetCampaignStatus CampaignId: ", campaignStatusKey, " Result: ", result)
+	fmt.Println("SetCampaignStatus CampaignId: ", campaignStatusKey, " Status: ", status, " Result: ", result)
 }
 
 func GetCampaignStatus(campaignId string, company, tenant int) string {
