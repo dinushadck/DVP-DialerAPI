@@ -38,5 +38,7 @@
 	"RedisClusterName":"SYS_REDIS_SENTINEL_NAME",
 	"SentinelHosts": "SYS_REDIS_SENTINEL_HOSTS",
 	"SentinelPort": "SYS_REDIS_SENTINEL_PORT",
-	"DvpEventType": "HOST_DVPEVENTS_TYPE"
+	"DvpEventType": "HOST_DVPEVENTS_TYPE",
+	"UseAmqpAdapter": "HOST_USE_AMQP_ADAPTER",
+	"AmqpAdapterPort": "AMQP_ADAPTER_PORT"
 }

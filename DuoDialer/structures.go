@@ -52,6 +52,8 @@ type Configuration struct {
 	SentinelHosts            string
 	SentinelPort             string
 	DvpEventType             string
+	UseAmqpAdapter           string
+	AmqpAdapterPort          string
 }
 
 type EnvConfiguration struct {
@@ -97,6 +99,8 @@ type EnvConfiguration struct {
 	SentinelHosts            string
 	SentinelPort             string
 	DvpEventType             string
+	UseAmqpAdapter           string
+	AmqpAdapterPort          string
 }
 
 //--------------------Campaign--------------------

@@ -54,6 +54,8 @@ var redisClusterName string
 var sentinelHosts string
 var sentinelPort string
 var dvpEventType string
+var useAmqpAdapter string
+var amqpAdapterPort string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -120,6 +122,8 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.SentinelHosts = "138.197.90.92,45.55.205.92,138.197.90.92"
 		defconfiguration.SentinelPort = "16389"
 		defconfiguration.DvpEventType = "redis"
+		defconfiguration.UseAmqpAdapter = "false"
+		defconfiguration.AmqpAdapterPort = "3653"
 	}
 
 	return defconfiguration
@@ -171,6 +175,8 @@ func LoadDefaultConfig() {
 	sentinelHosts = defconfiguration.SentinelHosts
 	sentinelPort = defconfiguration.SentinelPort
 	dvpEventType = defconfiguration.DvpEventType
+	useAmqpAdapter = defconfiguration.UseAmqpAdapter
+	amqpAdapterPort = defconfiguration.AmqpAdapterPort
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -236,6 +242,8 @@ func LoadConfiguration() {
 		sentinelHosts = os.Getenv(envconfiguration.SentinelHosts)
 		sentinelPort = os.Getenv(envconfiguration.SentinelPort)
 		dvpEventType = os.Getenv(envconfiguration.DvpEventType)
+		useAmqpAdapter = os.Getenv(envconfiguration.UseAmqpAdapter)
+		amqpAdapterPort = os.Getenv(envconfiguration.AmqpAdapterPort)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -365,6 +373,12 @@ func LoadConfiguration() {
 		if dvpEventType == "" {
 			dvpEventType = defConfig.DvpEventType
 		}
+		if useAmqpAdapter == "" {
+			useAmqpAdapter = defConfig.UseAmqpAdapter
+		}
+		if amqpAdapterPort == "" {
+			amqpAdapterPort = defConfig.AmqpAdapterPort
+		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 		securityIp = fmt.Sprintf("%s:%s", securityIp, securityPort)
@@ -379,6 +393,8 @@ func LoadConfiguration() {
 	fmt.Println("dialerId:", dialerId)
 	fmt.Println("campaignLimit:", campaignLimit)
 	fmt.Println("dvpEventType:", dvpEventType)
+	fmt.Println("useAmqpAdapter:", useAmqpAdapter)
+	fmt.Println("amqpAdapterPort:", amqpAdapterPort)
 }
 
 func LoadCallbackConfiguration() {
