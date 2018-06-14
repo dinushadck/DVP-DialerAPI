@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func GetUuid() string {
+func GetUuid(callServerHost string) string {
 	uuidService := fmt.Sprintf("http://%s/api/create_uuid", CreateHost(callServerHost, callServerPort))
 	resp, err := http.Get(uuidService)
 	if err != nil {

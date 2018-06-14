@@ -24,7 +24,6 @@ type Configuration struct {
 	CampaignRequestFrequency time.Duration
 	CampaignServiceHost      string
 	CampaignServicePort      string
-	CallServerHost           string
 	CallServerPort           string
 	CallRuleServiceHost      string
 	CallRuleServicePort      string
@@ -71,7 +70,6 @@ type EnvConfiguration struct {
 	CampaignRequestFrequency string
 	CampaignServiceHost      string
 	CampaignServicePort      string
-	CallServerHost           string
 	CallServerPort           string
 	CallRuleServiceHost      string
 	CallRuleServicePort      string
@@ -276,6 +274,7 @@ type ResourceServerInfo struct {
 	ResourceServerId string
 	Url              string
 	MaxChannelCount  int
+	MainIp           string
 }
 
 //--------------------ClusterConfig API--------------------

@@ -93,7 +93,6 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.CampaignRequestFrequency = 300
 		defconfiguration.CampaignServiceHost = "192.168.0.143"
 		defconfiguration.CampaignServicePort = "2222"
-		defconfiguration.CallServerHost = "192.168.0.53"
 		defconfiguration.CallServerPort = "8080"
 		defconfiguration.CallRuleServiceHost = "192.168.0.89"
 		defconfiguration.CallRuleServicePort = "2220"
@@ -147,7 +146,6 @@ func LoadDefaultConfig() {
 	campaignRequestFrequency = defconfiguration.CampaignRequestFrequency
 	campaignServiceHost = defconfiguration.CampaignServiceHost
 	campaignServicePort = defconfiguration.CampaignServicePort
-	callServerHost = defconfiguration.CallServerHost
 	callServerPort = defconfiguration.CallServerPort
 	callRuleServiceHost = defconfiguration.CallRuleServiceHost
 	callRuleServicePort = defconfiguration.CallRuleServicePort
@@ -214,7 +212,6 @@ func LoadConfiguration() {
 		campaignRequestFrequencytemp := os.Getenv(envconfiguration.CampaignRequestFrequency)
 		campaignServiceHost = os.Getenv(envconfiguration.CampaignServiceHost)
 		campaignServicePort = os.Getenv(envconfiguration.CampaignServicePort)
-		callServerHost = os.Getenv(envconfiguration.CallServerHost)
 		callServerPort = os.Getenv(envconfiguration.CallServerPort)
 		callRuleServiceHost = os.Getenv(envconfiguration.CallRuleServiceHost)
 		callRuleServicePort = os.Getenv(envconfiguration.CallRuleServicePort)
@@ -288,9 +285,6 @@ func LoadConfiguration() {
 		}
 		if campaignServicePort == "" {
 			campaignServicePort = defConfig.CampaignServicePort
-		}
-		if callServerHost == "" {
-			callServerHost = defConfig.CallServerHost
 		}
 		if callServerPort == "" {
 			callServerPort = defConfig.CallServerPort
