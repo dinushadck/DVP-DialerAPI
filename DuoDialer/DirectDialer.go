@@ -52,7 +52,7 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourc
 	if trunkCode != "" {
 
 		resourceServer := GetResourceServerInfo(company, tenant, resourceServerId, "call")
-		uuid := GetUuid(resourceServer.MainIp)
+		uuid := GetUuid(resourceServer.Url)
 
 		if uuid != "" {
 			fmt.Println("Start AddDirectDialRequest: ", uuid, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
@@ -124,7 +124,7 @@ func ClickToCall(company, tenant int, phoneNumber, extention, resourceServerId s
 	//trunkCode, ani, dnis := GetTrunkCode(internalAccessToken, "", phoneNumber)
 
 	resourceServer := GetResourceServerInfo(company, tenant, resourceServerId, "call")
-	uuid := GetUuid(resourceServer.MainIp)
+	uuid := GetUuid(resourceServer.Url)
 	if uuid != "" {
 		fmt.Println("Start Add ClickToCall Request: ", uuid, ": ", ": ", phoneNumber, ": ", extention)
 		campaignId := "ClickToCall"

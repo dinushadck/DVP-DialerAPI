@@ -605,7 +605,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							} else {
 
 								trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number)
-								uuid := GetUuid(resourceServerInfos.MainIp)
+								uuid := GetUuid(resourceServerInfos.Url)
 								if trunkCode != "" && uuid != "" {
 									switch dialoutMec {
 									case "BLAST":

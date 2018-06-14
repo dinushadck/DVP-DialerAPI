@@ -10,7 +10,7 @@ import (
 )
 
 func GetUuid(callServerHost string) string {
-	uuidService := fmt.Sprintf("http://%s/api/create_uuid", CreateHost(callServerHost, callServerPort))
+	uuidService := fmt.Sprintf("http://%s/api/create_uuid", callServerHost)
 	resp, err := http.Get(uuidService)
 	if err != nil {
 		fmt.Println(err.Error())

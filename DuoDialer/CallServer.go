@@ -87,7 +87,7 @@ func RegisterCallServer(company, tenant int) ResourceServerInfo {
 		rs := ResourceServerInfo{}
 		rs.ResourceServerId = callServerIdStr
 		rs.MaxChannelCount = 50
-		rs.Url = fmt.Sprintf("%s", CreateHost(pickedCallServer.InternalMainIP, callServerPort))
+		rs.Url = fmt.Sprintf("%s", CreateHost(pickedCallServer.MainIp, callServerPort))
 
 		resourceServerKey := fmt.Sprintf("ResourceServer:%s", rs.ResourceServerId)
 		resourceServerjson, _ := json.Marshal(rs)

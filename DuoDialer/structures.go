@@ -274,7 +274,6 @@ type ResourceServerInfo struct {
 	ResourceServerId string
 	Url              string
 	MaxChannelCount  int
-	MainIp           string
 }
 
 //--------------------ClusterConfig API--------------------
@@ -286,6 +285,7 @@ type CallServerResult struct {
 	Category       string
 	InternalMainIP string
 	CompanyId      int
+	MainIp         string
 }
 type ClusterConfigApiResult struct {
 	IsSuccess bool
