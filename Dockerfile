@@ -4,9 +4,13 @@ FROM golang
 ARG MAJOR_VER
 # Copy the local package files to the container's workspace.
 #ADD . /go/src/github.com/golang/example/outyet
-RUN go get gopkg.in/DuoSoftware/DVP-DialerAPI.$MAJOR_VER/DuoDialer
+#RUN go get gopkg.in/DuoSoftware/DVP-DialerAPI.$MAJOR_VER/DuoDialer
 
-RUN go install gopkg.in/DuoSoftware/DVP-DialerAPI.$MAJOR_VER/DuoDialer
+RUN go get github.com/DuoSoftware/DVP-DialerAPI/DuoDialer
+
+#RUN go install gopkg.in/DuoSoftware/DVP-DialerAPI.$MAJOR_VER/DuoDialer
+
+RUN go install github.com/DuoSoftware/DVP-DialerAPI/DuoDialer
 
 ENTRYPOINT /go/bin/DuoDialer
 
