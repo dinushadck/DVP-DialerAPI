@@ -3,13 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/fatih/color"
 )
 
 func InitiateDuoDialer() {
+	//Get Environment variables and assign to variables
 	LoadConfiguration()
+	//Set up redis client
 	InitiateRedis()
+	//Get callback configurations from campaignmanager service
 	LoadCallbackConfiguration()
+	//Add dialer record to redis with dialer name set on env vars
 	AddDialerInfoToRedis()
+	//Create new go routing to listen to eventmonitor events EG:- CHANNEL_CREATE, CHANNEL_ANSWER
 	go PubSub()
 }
 
@@ -22,7 +29,7 @@ func AddDialerInfoToRedis() {
 	dialerKey := fmt.Sprintf("DialerInfo:%s:%s", lbIpAddress, dialerId)
 	dialerInfoJson, _ := json.Marshal(dialerInfo)
 	result := RedisAdd(dialerKey, string(dialerInfoJson))
-	fmt.Println("Add DialerInfo to Redis: ", result)
+	color.Green(fmt.Sprintf("Add DialerInfo to Redis: %s", result))
 	if result == "OK" {
 		AddOnGoingCampaignCount()
 	}

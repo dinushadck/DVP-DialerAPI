@@ -8,13 +8,15 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 //---------------------ClusterConfigService------------------------
 func GetCallserverInfo(company, tenant int) CallServerResult {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered in GetCallserverInfo", r)
+			color.Red(fmt.Sprintf("Recovered in GetCallserverInfo %+v", r))
 		}
 	}()
 	//Request campaign from Campaign Manager service
@@ -26,7 +28,7 @@ func GetCallserverInfo(company, tenant int) CallServerResult {
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CloudConfiguration/CallserversByCompany", CreateHost(clusterConfigServiceHost, clusterConfigServicePort))
-	fmt.Println("Start CallserversByCompany request: ", request)
+	DialerLog(fmt.Sprintf("Start CallserversByCompany request: %s", request))
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
@@ -39,7 +41,7 @@ func GetCallserverInfo(company, tenant int) CallServerResult {
 	defer resp.Body.Close()
 
 	response, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("Result: ", string(response))
+	DialerLog(fmt.Sprintf("Result: %s", string(response)))
 
 	var clusterConfigApiResult ClusterConfigApiResult
 	json.Unmarshal(response, &clusterConfigApiResult)
@@ -50,12 +52,17 @@ func GetCallserverInfo(company, tenant int) CallServerResult {
 			}
 		}
 		if len(activeCallServers) == 1 {
+			color.Green("One active callserver found")
 			return activeCallServers[0]
 		} else if len(activeCallServers) > 1 {
+			color.Green("Multiple callservers found - selecting random call server")
 			return activeCallServers[rand.Intn(len(activeCallServers))]
 		} else {
+			color.Yellow(fmt.Sprintf("No call servers found for company %d", company))
 			return CallServerResult{}
 		}
+	} else {
+		color.Yellow(fmt.Sprintf("Get call server request failed for company %d", company))
 	}
 	return CallServerResult{}
 }

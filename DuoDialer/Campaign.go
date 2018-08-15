@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/satori/go.uuid"
 )
 
@@ -24,20 +25,20 @@ func GetOnGoingCampaignCount() int {
 	dialerCampaignCountKey := fmt.Sprintf("DialerOnGoingCampaignCount:%s:%s", lbIpAddress, dialerId)
 	countStr := RedisGet(dialerCampaignCountKey)
 	count, _ := strconv.Atoi(countStr)
-	fmt.Println("OnGoingCampaignCount: ", countStr)
+	DialerLog(fmt.Sprintf("OnGoingCampaignCount: %s", countStr))
 	return count
 }
 
 func IncrementOnGoingCampaignCount() {
 	dialerCampaignCountKey := fmt.Sprintf("DialerOnGoingCampaignCount:%s:%s", lbIpAddress, dialerId)
 	incValue := RedisIncr(dialerCampaignCountKey)
-	fmt.Println("IncrementedOnGoingCampaignCount: ", incValue)
+	DialerLog(fmt.Sprintf("IncrementedOnGoingCampaignCount: %d", incValue))
 }
 
 func DecrementOnGoingCampaignCount() {
 	dialerCampaignCountKey := fmt.Sprintf("DialerOnGoingCampaignCount:%s:%s", lbIpAddress, dialerId)
 	dncValue := RedisIncrBy(dialerCampaignCountKey, -1)
-	fmt.Println("DecrementOnGoingCampaignCount: ", dncValue)
+	DialerLog(fmt.Sprintf("DecrementOnGoingCampaignCount: %d", dncValue))
 }
 
 func DecrementOnGoingCampaignCountOther(oDialerId string) {
@@ -45,7 +46,7 @@ func DecrementOnGoingCampaignCountOther(oDialerId string) {
 	searchdialer := RedisSearchKeys(dialerCampaignCountSKey)
 	if len(searchdialer) > 0 {
 		dncValue := RedisIncrBy(searchdialer[0], -1)
-		fmt.Println("DecrementOnGoingCampaignCountOther: ", dncValue)
+		DialerLog(fmt.Sprintf("DecrementOnGoingCampaignCountOther: %d", dncValue))
 	}
 }
 
@@ -53,52 +54,52 @@ func DecrementOnGoingCampaignCountOther(oDialerId string) {
 func SetCampaignStatus(campaignId, status string, company, tenant int) {
 	campaignStatusKey := fmt.Sprintf("CampaignStatus:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
 	result := RedisSet(campaignStatusKey, status)
-	fmt.Println("SetCampaignStatus CampaignId: ", campaignStatusKey, " Status: ", status, " Result: ", result)
+	DialerLog(fmt.Sprintf("SetCampaignStatus CampaignId: %s  Status: %s Result: %s", campaignStatusKey, status, result))
 }
 
 func GetCampaignStatus(campaignId string, company, tenant int) string {
 	campaignStatusKey := fmt.Sprintf("CampaignStatus:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
 	result := RedisGet(campaignStatusKey)
-	fmt.Println("GetCampaignStatus CampaignId: ", campaignStatusKey, " Result: ", result)
+	DialerLog(fmt.Sprintf("GetCampaignStatus CampaignId: %s Result: %s", campaignStatusKey, result))
 	return result
 }
 
 func RemoveCampaignStatus(campaignId string, company, tenant int) {
 	campaignStatusKey := fmt.Sprintf("CampaignStatus:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
 	result := RedisRemove(campaignStatusKey)
-	fmt.Println("GetCampaignStatus CampaignId: ", campaignStatusKey, " Result: ", result)
+	DialerLog(fmt.Sprintf("GetCampaignStatus CampaignId: %s  Result: %t", campaignStatusKey, result))
 }
 
 func RemoveCampaignStatusOther(oDialerId, campaignId string, company, tenant int) {
 	campaignStatusKey := fmt.Sprintf("CampaignStatus:%s:%d:%d:%s", oDialerId, company, tenant, campaignId)
 	result := RedisRemove(campaignStatusKey)
-	fmt.Println("RemoveCampaignStatusOther CampaignId: ", campaignStatusKey, " Result: ", result)
+	DialerLog(fmt.Sprintf("RemoveCampaignStatusOther CampaignId: %s Result: %t", campaignStatusKey, result))
 }
 
 //----------Campaign and schedule status-----------------
 func SetScheduleStatus(campaignId, scheduleId, status string, company, tenant int) {
 	scheduleStatusKey := fmt.Sprintf("ScheduleStatus:%s:%d:%d:%s:%s", dialerId, company, tenant, campaignId, scheduleId)
 	result := RedisSet(scheduleStatusKey, status)
-	fmt.Println("SetScheduleStatus CampaignId: ", scheduleStatusKey, " Result: ", result)
+	fmt.Println("SetScheduleStatus CampaignId: %s", scheduleStatusKey, " Result: %s", result)
 }
 
 func GetScheduleStatus(campaignId, scheduleId string, company, tenant int) string {
 	scheduleStatusKey := fmt.Sprintf("ScheduleStatus:%s:%d:%d:%s:%s", dialerId, company, tenant, campaignId, scheduleId)
 	result := RedisGet(scheduleStatusKey)
-	fmt.Println("GetScheduleStatus CampaignId: ", scheduleStatusKey, " Result: ", result)
+	fmt.Println("GetScheduleStatus CampaignId: %s", scheduleStatusKey, " Result: %s", result)
 	return result
 }
 
 func RemoveScheduleStatus(campaignId, scheduleId string, company, tenant int) {
 	scheduleStatusKey := fmt.Sprintf("ScheduleStatus:%s:%d:%d:%s:%s", dialerId, company, tenant, campaignId, scheduleId)
 	result := RedisRemove(scheduleStatusKey)
-	fmt.Println("GetScheduleStatus CampaignId: ", scheduleStatusKey, " Result: ", result)
+	fmt.Println("GetScheduleStatus CampaignId: %s", scheduleStatusKey, " Result: %s", result)
 }
 
 func RemoveScheduleStatusOther(oDialerId, campaignId, scheduleId string, company, tenant int) {
 	scheduleStatusKey := fmt.Sprintf("ScheduleStatus:%s:%d:%d:%s:%s", oDialerId, company, tenant, campaignId, scheduleId)
 	result := RedisRemove(scheduleStatusKey)
-	fmt.Println("RemoveScheduleStatusOther CampaignId: ", scheduleStatusKey, " Result: ", result)
+	fmt.Println("RemoveScheduleStatusOther CampaignId: %s", scheduleStatusKey, " Result: %s", result)
 }
 
 //----------Campaign-----------------------
@@ -140,9 +141,9 @@ func AddCampaignToDialer(campaignD Campaign) {
 			campaignD.CampScheduleInfo[i].EndDate = tempScheduleEndDate
 			campaignD.CampScheduleInfo[i].TimeZone = timeZone
 
-			fmt.Println("Add Schedule Time Zone::", timeZone)
-			fmt.Println("Add Schedule Start Time::", tempScheduleStartDate.String())
-			fmt.Println("Add Schedule End Time::", tempScheduleEndDate.String())
+			DialerLog(fmt.Sprintf("Add Schedule Time Zone::%s", timeZone))
+			DialerLog(fmt.Sprintf("Add Schedule Start Time::%s", tempScheduleStartDate.String()))
+			DialerLog(fmt.Sprintf("Add Schedule End Time::%s", tempScheduleEndDate.String()))
 
 			if tempScheduleStartDate.Before(tempCampaignStartDate) {
 				campaignD.CampConfigurations.StartDate = tempScheduleStartDate
@@ -158,7 +159,7 @@ func AddCampaignToDialer(campaignD Campaign) {
 		if len(existingKeys) == 0 {
 			campaignJson, _ := json.Marshal(campaignD)
 			result := RedisAdd(campaignKey, string(campaignJson))
-			fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+			DialerLog(fmt.Sprintf("Add Campaign to Redis: %s Result: %s", campaignKey, result))
 			if result == "OK" {
 				campIdStr := strconv.Itoa(campaignD.CampaignId)
 				channelCountStr := strconv.Itoa(campaignD.CampConfigurations.ChannelConcurrency)
@@ -166,6 +167,7 @@ func AddCampaignToDialer(campaignD Campaign) {
 				IncrementOnGoingCampaignCount()
 				SetCampChannelMaxLimitDirect(campIdStr, channelCountStr)
 				AddCampaignCallbackConfigInfo(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId)
+				color.Cyan("STARTING NEW CAMPAIGN - FROM THIS DIALER - SET STATUS TO START")
 				SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
 				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
 				UpdateCampaignStartAndEndDate(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId, campaignD.CampConfigurations.StartDate.Format("02 Jan 06 15:04 -0700"), campaignD.CampConfigurations.EndDate.Format("02 Jan 06 15:04 -0700"))
@@ -174,20 +176,22 @@ func AddCampaignToDialer(campaignD Campaign) {
 			splitVals := strings.Split(existingKeys[0], ":")
 			preDialerId := splitVals[1]
 			campIdStr := strconv.Itoa(campaignD.CampaignId)
+			color.Yellow(fmt.Sprintf("Removing campaign:%d From Prev Dialer :%s and assining to current Dialer :%s", campaignD.CampaignId, preDialerId, dialerId))
 			RemoveCampaignFromOtherDialer(preDialerId, campIdStr, campaignD.CompanyId, campaignD.TenantId)
 
 			campaignJson, _ := json.Marshal(campaignD)
 			result := RedisAdd(campaignKey, string(campaignJson))
-			fmt.Println("Add Campaign to Redis: ", campaignKey, " Result: ", result)
+			DialerLog(fmt.Sprintf("Add Campaign to Redis: %s  Result: %s", campaignKey, result))
 			if result == "OK" {
 				//SetCampaignTimeZone(campIdStr, campaignD.CompanyId, campaignD.TenantId, timeZone)
 				IncrementOnGoingCampaignCount()
+				color.Yellow("RESUMING CAMPAIGN - FROM THIS DIALER - SET STATUS TO RESUME")
 				SetCampaignStatus(campIdStr, "Resume", campaignD.CompanyId, campaignD.TenantId)
 				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
 			}
 		}
 	} else {
-		fmt.Println("Add Campaign to Redis failed: Error: No shedule info found")
+		color.Red("Add Campaign to Redis failed: Error: No shedule info found")
 	}
 }
 
@@ -215,14 +219,14 @@ func GetAllRunningCampaign() []Campaign {
 		json.Unmarshal([]byte(campJson), &camp)
 		allCampaigns = append(allCampaigns, camp)
 	}
-	fmt.Println("GetAllRunningCampaign:: ", allCampaigns)
+	DialerLog(fmt.Sprintf("GetAllRunningCampaign:: %+v", allCampaigns))
 	return allCampaigns
 }
 
 func RemoveCampaignFromDialer(campaignId string, company, tenant int) {
 	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%s", dialerId, company, tenant, campaignId)
 	result := RedisRemove(campaignKey)
-	fmt.Println("Remove Campaign from Redis: ", campaignKey, " Result: ", result)
+	DialerLog(fmt.Sprintf("Remove Campaign from Redis: %s  Result: %t", campaignKey, result))
 	if result == true {
 		DecrementOnGoingCampaignCount()
 		RemoveCampaignStatus(campaignId, company, tenant)
@@ -239,7 +243,7 @@ func RemoveCampaignFromDialer(campaignId string, company, tenant int) {
 func RemoveCampaignFromOtherDialer(oDialerId, campaignId string, company, tenant int) {
 	campaignKey := fmt.Sprintf("Campaign:%s:%d:%d:%s", oDialerId, company, tenant, campaignId)
 	result := RedisRemove(campaignKey)
-	fmt.Println("Remove Campaign from Redis: ", campaignKey, " Result: ", result)
+	DialerLog(fmt.Sprintf("Remove Campaign from Redis: %s Result: %s", campaignKey, result))
 	if result == true {
 		DecrementOnGoingCampaignCountOther(oDialerId)
 		RemoveCampaignStatusOther(oDialerId, campaignId, company, tenant)
@@ -278,7 +282,7 @@ func RequestCampaign(requestCount int) []Campaign {
 
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaigns/State/Pending/%d", CreateHost(campaignServiceHost, campaignServicePort), requestCount)
-	fmt.Println("Start RequestCampaign request: ", request)
+	DialerLog(fmt.Sprintf("Start RequestCampaign request: %s", request))
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("authorization", jwtToken)
@@ -291,44 +295,45 @@ func RequestCampaign(requestCount int) []Campaign {
 
 	response, _ := ioutil.ReadAll(resp.Body)
 
-	fmt.Println("Campaign Data:: ", string(response))
+	DialerLog(fmt.Sprintf("Campaign Data:: %s", string(response)))
 
 	var campaignResult CampaignResult
 	json.Unmarshal(response, &campaignResult)
 	if campaignResult.IsSuccess == true {
 		for _, camRes := range campaignResult.Result {
+			color.Magenta("Campaign found for dialing :: ", camRes)
 			campaignDetails = append(campaignDetails, camRes)
 		}
 	}
 
-	fmt.Println("campaignDetails:: ", campaignDetails)
+	DialerLog(fmt.Sprintf("campaignDetails:: %+v", campaignDetails))
 	return campaignDetails
 }
 
 func UpdateCampaignStatus(company, tenant int, campaignId string) (actualState string) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered in UpdateCampaignStatus", r)
+			color.Red(fmt.Sprintf("Recovered in UpdateCampaignStatus %+v", r))
 		}
 	}()
 	//Send CampaignStatus to Campaign Manager
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
-	fmt.Println("Start UpdateCampaignStatus Auth: ", internalAuthToken, " CampaignId: ", campaignId, " DialerId: ", dialerId)
+	DialerLog(fmt.Sprintf("Start UpdateCampaignStatus Auth: %s CampaignId: %s DialerId: %s", internalAuthToken, campaignId, dialerId))
 	client := &http.Client{}
 
 	currentState := GetCampaignStatus(campaignId, company, tenant)
 	actualState = currentState
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/State/%s/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId, currentState)
-	fmt.Println("Start UpdateCampaignStatus request: ", request)
+	DialerLog(fmt.Sprintf("Start UpdateCampaignStatus request: %s", request))
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	req.Header.Set("companyinfo", internalAuthToken)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err.Error())
+		color.Red(err.Error())
 	}
 	defer resp.Body.Close()
 
@@ -378,7 +383,7 @@ func UpdateCampaignStatus(company, tenant int, campaignId string) (actualState s
 func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered in UpdateCampaignStartStatus", r)
+			color.Red(fmt.Sprintf("Recovered in UpdateCampaignStartStatus %+v", r))
 		}
 	}()
 	//Send CampaignStatus to Campaign Manager
@@ -396,7 +401,7 @@ func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	req.Header.Set("companyinfo", internalAuthToken)
-	fmt.Println("request:", serviceurl)
+	DialerLog(fmt.Sprintf("request:%s", serviceurl))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -404,25 +409,25 @@ func UpdateCampaignStartStatus(company, tenant int, campaignId string) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
+	DialerLog(fmt.Sprintf("response Status:%s", resp.Status))
+	DialerLog(fmt.Sprintf("response Headers:%s", resp.Header))
 	body, errb := ioutil.ReadAll(resp.Body)
 	if errb != nil {
-		fmt.Println(err.Error())
+		color.Red(err.Error())
 	} else {
 		result := string(body)
-		fmt.Println("response Body:", result)
+		DialerLog(fmt.Sprintf("response Body:%s", result))
 	}
 }
 
 func UpdateCampaignStartAndEndDate(company, tenant, campaignId, configId int, startDate, endDate string) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered in UpdateCampaignStartAndEndDate", r)
+			color.Red(fmt.Sprintf("Recovered in UpdateCampaignStartAndEndDate %v", r))
 		}
 	}()
 
-	fmt.Println(company, " :: ", tenant, " :: ", campaignId, " :: ", configId, " :: ", startDate, " :: ", endDate)
+	//fmt.Println(company, " :: ", tenant, " :: ", campaignId, " :: ", configId, " :: ", startDate, " :: ", endDate)
 
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
@@ -432,22 +437,22 @@ func UpdateCampaignStartAndEndDate(company, tenant, campaignId, configId int, st
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	req.Header.Set("companyinfo", internalAuthToken)
-	fmt.Println("request:", serviceurl)
+	DialerLog(fmt.Sprintf("request:%s", serviceurl))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err.Error())
+		color.Red(err.Error())
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
+	DialerLog(fmt.Sprintf("response Status:%s", resp.Status))
+	DialerLog(fmt.Sprintf("response Headers:%s", resp.Header))
 	body, errb := ioutil.ReadAll(resp.Body)
 	if errb != nil {
-		fmt.Println(err.Error())
+		color.Red(err.Error())
 	} else {
 		result := string(body)
-		fmt.Println("response Body:", result)
+		DialerLog(fmt.Sprintf("response Body:%s", result))
 	}
 }
 
@@ -547,15 +552,18 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 	resourceServerInfos := GetResourceServerInfo(company, tenant, resourceServerId, CampaignChannel)
 
 	if appment != emtAppoinment && resourceServerInfos != defResourceServerInfo {
+		color.Green(fmt.Sprintf("APPOINTMENT FOUND FOR CAMPAIGN : %s", campaignId))
 		campStatus := GetCampaignStatus(campaignId, company, tenant)
 
 		SetCampaignStatus(campaignId, "Running", company, tenant)
+		color.Magenta("CAMPAIGN STATUS SET TO RUNNING")
 		maxChannelLimitStr := strconv.Itoa(campaignMaxChannelCount)
 		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
 
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 
 		if campStatus == "Start" || (campStatus == "Waiting for Appoinment" && !RedisCheckKeyExist(numLoadingStatusKey)) {
+			color.Cyan("LOADING NUMBER SET")
 			SetDncNumbersFromNumberBase(company, tenant)
 			LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
 		}
@@ -806,6 +814,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 			}
 		}
 	} else {
+		color.Yellow(fmt.Sprintf("APPOINTMENT OR RESOURCE SERVER NOT FOUND - SETTING CAMPAIGN : %s STATUS TO WAITING FOR APPOINTMENT", campaignId))
 		SetCampaignStatus(campaignId, "Waiting for Appoinment", company, tenant)
 		return
 	}

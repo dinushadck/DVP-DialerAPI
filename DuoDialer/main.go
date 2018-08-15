@@ -3,11 +3,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/DuoSoftware/gorest"
-	"github.com/rs/cors"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/DuoSoftware/gorest"
+	"github.com/fatih/color"
+	"github.com/rs/cors"
 )
 
 func errHndlr(err error) {
@@ -24,17 +26,26 @@ func errHndlrNew(errorFrom, command string, err error) {
 
 func main() {
 
+	//Innitiate configuration
 	InitiateDuoDialer()
 
+	//Initiate http api server for api calls
 	go InitiateService()
+	//Register Dialer on ARDS via service call
 	go AddRequestServer()
 
+	go EnableConsoleInput()
+
 	//AddPhoneNumberToCallback("1", "1", "1", "1", "0112546969", "USER_BUSY")
+	//MAIN THREAD
 	for {
+		//Get current campaign count
 		onGoingCampaignCount := GetOnGoingCampaignCount()
 		if onGoingCampaignCount < campaignLimit {
+			//Request for more campaigns
 			campaigns := RequestCampaign(campaignLimit - onGoingCampaignCount)
 			for _, campaign := range campaigns {
+				//Adding Campaign to Dialer
 				AddCampaignToDialer(campaign)
 			}
 		}
@@ -57,7 +68,8 @@ func main() {
 				go ClearTimeoutChannels(campIdStr)
 
 				if campaignEndDate.Before(tmEndLocation) {
-					fmt.Println("campaignEndDate before: ", tmEndLocation.String())
+					DialerLog(fmt.Sprintf("campaignEndDate before: %s", tmEndLocation.String()))
+					color.Yellow("ENDING CAMPAIGN DUE TO TIME EXPIRING - SET STATUS TO END")
 					SetCampaignStatus(campIdStr, "End", campaign.CompanyId, campaign.TenantId)
 					RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
 				} else {
@@ -65,7 +77,8 @@ func main() {
 					//campStatus := GetCampaignStatus(campIdStr, campaign.CompanyId, campaign.TenantId)
 
 					campStatus := UpdateCampaignStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
-					fmt.Println("campStatus: ", campStatus)
+					color.Red(fmt.Sprintf("%s : %s", campaign.CampaignName, campStatus))
+					DialerLog(fmt.Sprintf("campStatus: %s", campStatus))
 
 					if campStatus == "Resume" || campStatus == "Start" || campStatus == "PauseByDialer" || campStatus == "Waiting for Appoinment" {
 						//tempCampaignStartDate, _ := time.Parse(layout2, campaign.CampConfigurations.StartDate)
@@ -78,17 +91,19 @@ func main() {
 						//campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), 0, 0, 0, 0, location)
 						//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), 0, 0, 0, 0, location)
 
-						fmt.Println("Check Campaign: ", campIdStr)
-						fmt.Println("campaignStartDate: ", campaign.CampConfigurations.StartDate.String())
-						fmt.Println("campaignEndDate: ", campaign.CampConfigurations.EndDate.String())
+						DialerLog(fmt.Sprintf("Check Campaign: %s", campIdStr))
+						DialerLog(fmt.Sprintf("campaignStartDate: %s", campaign.CampConfigurations.StartDate.String()))
+						DialerLog(fmt.Sprintf("campaignEndDate: %s", campaign.CampConfigurations.EndDate.String()))
 
 						if campaignStartDate.Before(tmStartLocation) && campaignEndDate.After(tmEndLocation) {
-							fmt.Println("Continue campaign: ", campIdStr)
+							DialerLog(fmt.Sprintf("Continue campaign: %s", campIdStr))
 							if len(campaign.CampScheduleInfo) > 0 {
 
 								for _, schedule := range campaign.CampScheduleInfo {
 									scheduleId := strconv.Itoa(schedule.ScheduleId)
 									camScheduleId := strconv.Itoa(schedule.CamScheduleId)
+									//Start Dialing the campaign
+									color.Green(fmt.Sprintf("====== CAMPAIGN %s READY TO START ======", campaign.CampaignName))
 									go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency)
 								}
 							}
