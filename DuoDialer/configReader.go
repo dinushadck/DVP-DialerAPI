@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+
+	. "github.com/logrusorgru/aurora"
 )
 
 var dirPath string
@@ -407,18 +409,19 @@ func LoadCallbackConfiguration() {
 	req.Header.Set("authorization", jwtToken)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("LoadCallbackConfiguration Failed::", err.Error())
+		fmt.Println(Red("LoadCallbackConfiguration Failed::"), err.Error())
 	}
 	defer resp.Body.Close()
 
 	response, _ := ioutil.ReadAll(resp.Body)
 
+	fmt.Println(Green("Callback reasons loaded from DB"))
 	fmt.Println(string(response))
 
 	callbackConf := CallbackConfiguration{}
 	err = json.Unmarshal(response, &callbackConf)
 	if err != nil {
-		fmt.Println("error in LoadCallbackConfiguration::", err)
+		fmt.Println(Red("error in LoadCallbackConfiguration::"), err)
 	} else {
 		for _, conf := range callbackConf.Result {
 			for _, hangCause := range conf.HangupCause {

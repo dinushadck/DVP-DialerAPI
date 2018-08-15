@@ -213,7 +213,7 @@ func RedisGet(key string) string {
 	}
 
 	strObj, _ := client.Cmd("get", key).Str()
-	fmt.Println(strObj)
+	DialerLog(fmt.Sprintf("%+v", strObj))
 	return strObj
 }
 
@@ -258,7 +258,7 @@ func RedisSearchKeys(pattern string) []string {
 		//defer redisPool.Put(client)
 	}
 
-	fmt.Println("Start ScanAndGetKeys:: ", pattern)
+	DialerLog(fmt.Sprintf("Start ScanAndGetKeys:: %s", pattern))
 	scanResult := util.NewScanner(client, util.ScanOpts{Command: "SCAN", Pattern: pattern, Count: 1000})
 
 	for scanResult.HasNext() {
@@ -266,7 +266,7 @@ func RedisSearchKeys(pattern string) []string {
 		matchingKeys = AppendIfMissing(matchingKeys, scanResult.Next())
 	}
 
-	fmt.Println("Scan Result:: ", matchingKeys)
+	DialerLog(fmt.Sprintf("Scan Result:: %+v", matchingKeys))
 	return matchingKeys
 }
 

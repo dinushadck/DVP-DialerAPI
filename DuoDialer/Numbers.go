@@ -79,11 +79,11 @@ func SetDncNumbersFromNumberBase(company, tenant int) {
 
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
-	fmt.Println("Start SetDncNumbersFromNumberBase Auth: ", internalAuthToken)
+	DialerLog(fmt.Sprintf("Start SetDncNumbersFromNumberBase Auth: %s", internalAuthToken))
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Dnc", CreateHost(campaignServiceHost, campaignServicePort))
-	fmt.Println("Start GetDncPhoneNumbers request: ", request)
+	DialerLog(fmt.Sprintf("Start GetDncPhoneNumbers request: %s", request))
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
@@ -108,7 +108,7 @@ func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId str
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	numbers := GetNumbersFromNumberBase(company, tenant, numberLimit, campaignId, camScheduleId)
 
-	fmt.Println("Number count = ", len(numbers))
+	DialerLog(fmt.Sprintf("Number count = %d", len(numbers)))
 	if len(numbers) == 0 {
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 		RedisSet(numLoadingStatusKey, "waiting")

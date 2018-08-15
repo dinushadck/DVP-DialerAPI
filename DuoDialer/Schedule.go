@@ -8,19 +8,21 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 func GetAppoinmentsForSchedule(internalAuthToken, schedulrId string) Schedule {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered in GetAppoinmentsForSchedule", r)
+			color.Red(fmt.Sprintf("Recovered in GetAppoinmentsForSchedule %+v", r))
 		}
 	}()
-	fmt.Println("Start Get Schedule Schedule service")
+	DialerLog("Start Get Schedule Schedule service")
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	client := &http.Client{}
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/LimitAPI/Schedule/%s/Appointments/Info", CreateHost(scheduleServiceHost, scheduleServicePort), schedulrId)
-	fmt.Println("request: ", request)
+	DialerLog(fmt.Sprintf("request: %s", request))
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
@@ -29,12 +31,12 @@ func GetAppoinmentsForSchedule(internalAuthToken, schedulrId string) Schedule {
 	defer resp.Body.Close()
 
 	response, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("Schedulr API response:: ", string(response))
+	DialerLog(fmt.Sprintf("Schedulr API response:: %s", string(response)))
 	var apiResult ScheduleDetails
 	json.Unmarshal(response, &apiResult)
 
 	if len(apiResult.Result) > 0 {
-		fmt.Println("Schedulr apiResult.Result: ", apiResult.Result[0])
+		DialerLog(fmt.Sprintf("Schedulr apiResult.Result: %v", apiResult.Result[0]))
 		return apiResult.Result[0]
 	} else {
 		return Schedule{}
@@ -79,8 +81,8 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time, timeZone stri
 	location, _ := time.LoadLocation(timeZone)
 
 	for _, appmnt := range appoinments {
-		fmt.Println("CheckAppoinments: ", appmnt.AppointmentName)
-		fmt.Println("RecurrencePattern: ", appmnt.RecurrencePattern)
+		DialerLog(fmt.Sprintf("CheckAppoinments: %s", appmnt.AppointmentName))
+		DialerLog(fmt.Sprintf("RecurrencePattern: %s", appmnt.RecurrencePattern))
 
 		tempstartDate, _ := time.Parse(layout2, appmnt.StartDate)
 		tempendDate, _ := time.Parse(layout2, appmnt.EndDate)
@@ -108,12 +110,12 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time, timeZone stri
 			localStartTime := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), tempStartHr, tempStartMin, 0, 0, location)
 			localEndTime := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), tempEndHr, tempEndMin, 0, 0, location)
 
-			fmt.Println("serverTimeLocal: ", timeNow.String())
-			fmt.Println("appoinment startTime: ", localStartTime.String())
-			fmt.Println("appoinment enendTimedDate: ", localEndTime.String())
+			DialerLog(fmt.Sprintf("serverTimeLocal: %s", timeNow.String()))
+			DialerLog(fmt.Sprintf("appoinment startTime: %s", localStartTime.String()))
+			DialerLog(fmt.Sprintf("appoinment enendTimedDate: %s", localEndTime.String()))
 
 			if localStartTime.Before(timeNow) && localEndTime.After(timeNow) {
-				fmt.Println("match appoinment date&time: ", timeNow.String())
+				DialerLog(fmt.Sprintf("match appoinment date&time: %s", timeNow.String()))
 
 				endTime = localEndTime
 				appinment = appmnt
@@ -200,9 +202,9 @@ func CheckAppoinmentForCampaign(internalAuthToken, schedulrId string) (appointme
 	appointment, campaignEndTime = CheckAppoinments(schedule.Appointment, timeNow, schedule.TimeZone)
 	timeZone = schedule.TimeZone
 
-	fmt.Println("CheckAppoinmentForCampaign::: appointment :: ", appointment)
-	fmt.Println("CheckAppoinmentForCampaign::: campaignEndTime :: ", campaignEndTime)
-	fmt.Println("CheckAppoinmentForCampaign::: timeZone :: ", timeZone)
+	DialerLog(fmt.Sprintf("CheckAppoinmentForCampaign::: appointment :: %+v", appointment))
+	DialerLog(fmt.Sprintf("CheckAppoinmentForCampaign::: campaignEndTime :: %+v", campaignEndTime))
+	DialerLog(fmt.Sprintf("CheckAppoinmentForCampaign::: timeZone :: %+v", timeZone))
 	return
 }
 
