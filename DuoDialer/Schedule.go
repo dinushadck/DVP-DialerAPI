@@ -49,11 +49,11 @@ func GetTimeZoneFroSchedule(internalAuthToken, schedulrId string) (startDate, en
 			fmt.Println("Recovered in GetTimeZoneFroSchedule", r)
 		}
 	}()
-	fmt.Println("Start Get Schedule Schedule service")
+	DialerLog("Start Get Schedule Schedule service")
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	client := &http.Client{}
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/LimitAPI/Schedule/%s", CreateHost(scheduleServiceHost, scheduleServicePort), schedulrId)
-	fmt.Println("request: ", request)
+	DialerLog(fmt.Sprintf("request: %s", request))
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
@@ -67,7 +67,7 @@ func GetTimeZoneFroSchedule(internalAuthToken, schedulrId string) (startDate, en
 	json.Unmarshal(response, &apiResult)
 
 	if len(apiResult.Result) > 0 {
-		fmt.Println("Schedulr apiResult.Result: ", apiResult.Result[0])
+		DialerLog(fmt.Sprintf("Schedulr apiResult.Result: %+v", apiResult.Result[0]))
 		timeZone = apiResult.Result[0].TimeZone
 		startDate = apiResult.Result[0].StartDate
 		endDate = apiResult.Result[0].EndDate
@@ -126,12 +126,12 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time, timeZone stri
 			localStartTime := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), 0, 0, 0, 0, location)
 			localEndTime := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), 0, 0, 0, 0, location)
 
-			fmt.Println("serverTimeLocal: ", timeNow.String())
-			fmt.Println("appoinment startTime: ", localStartTime.String())
-			fmt.Println("appoinment enendTimedDate: ", localEndTime.String())
+			DialerLog(fmt.Sprintf("serverTimeLocal: %s", timeNow.String()))
+			DialerLog(fmt.Sprintf("appoinment startTime: %s", localStartTime.String()))
+			DialerLog(fmt.Sprintf("appoinment enendTimedDate: %s", localEndTime.String()))
 
 			if localStartTime.Before(timeNow) && localEndTime.After(timeNow) {
-				fmt.Println("match appoinment date&time: ", timeNow.String())
+				DialerLog(fmt.Sprintf("match appoinment date&time: %s", timeNow.String()))
 
 				endTime = localEndTime
 				appinment = appmnt
@@ -139,10 +139,10 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time, timeZone stri
 			}
 			break
 		case "WEEKLY":
-			fmt.Println("daysOfWeek: ", appmnt.DaysOfWeek)
+			DialerLog(fmt.Sprintf("daysOfWeek: %s", appmnt.DaysOfWeek))
 			daysOfWeek := strings.Split(appmnt.DaysOfWeek, ",")
 			if stringInSlice(timeNow.Weekday().String(), daysOfWeek) {
-				fmt.Println("match daysOfWeek: ", timeNow.Weekday().String())
+				DialerLog(fmt.Sprintf("match daysOfWeek: %s", timeNow.Weekday().String()))
 
 				splitStartTime := strings.Split(appmnt.StartTime, ":")
 				splitEndTime := strings.Split(appmnt.EndTime, ":")
@@ -150,8 +150,8 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time, timeZone stri
 				startDate := time.Date(tempstartDate.Year(), tempstartDate.Month(), tempstartDate.Day(), 0, 0, 0, 0, location)
 				endDate := time.Date(tempendDate.Year(), tempendDate.Month(), tempendDate.Day(), 0, 0, 0, 0, location)
 
-				fmt.Println("appoinment startDate: ", startDate.String())
-				fmt.Println("appoinment endDate: ", endDate.String())
+				DialerLog(fmt.Sprintf("appoinment startDate: %s", startDate.String()))
+				DialerLog(fmt.Sprintf("appoinment endDate: %s", endDate.String()))
 
 				if startDate.Before(timeNow) && endDate.After(timeNow) {
 					tempStartHr := 0
@@ -172,12 +172,12 @@ func CheckAppoinments(appoinments []Appoinment, timeNow time.Time, timeZone stri
 					localStartTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), tempStartHr, tempStartMin, 0, 0, location)
 					localEndTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), tempEndHr, tempEndMin, 0, 0, location)
 
-					fmt.Println("serverTimeLocal: ", timeNow.String())
-					fmt.Println("appoinment startTime: ", localStartTime.String())
-					fmt.Println("appoinment enendTimedDate: ", localEndTime.String())
+					DialerLog(fmt.Sprintf("serverTimeLocal: %s", timeNow.String()))
+					DialerLog(fmt.Sprintf("appoinment startTime: %s", localStartTime.String()))
+					DialerLog(fmt.Sprintf("appoinment enendTimedDate: %s", localEndTime.String()))
 
 					if localStartTime.Before(timeNow) && localEndTime.After(timeNow) {
-						fmt.Println("match appoinment date&time: ", timeNow.String())
+						DialerLog(fmt.Sprintf("match appoinment date&time: %s", timeNow.String()))
 
 						endTime = localEndTime
 						appinment = appmnt

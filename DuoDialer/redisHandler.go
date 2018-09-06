@@ -105,7 +105,7 @@ func RedisAdd(key, value string) string {
 	} else {
 		result, sErr := client.Cmd("set", key, value).Str()
 		errHndlr(sErr)
-		fmt.Println(result)
+		DialerLog(result)
 		return result
 	}
 }
@@ -142,7 +142,7 @@ func RedisSet(key, value string) string {
 
 	result, sErr := client.Cmd("set", key, value).Str()
 	errHndlr(sErr)
-	fmt.Println(result)
+	DialerLog(result)
 	return result
 }
 
@@ -178,7 +178,7 @@ func RedisSetNx(key, value string) int {
 
 	result, sErr := client.Cmd("setnx", key, value).Int()
 	errHndlr(sErr)
-	fmt.Println(result)
+	DialerLog(fmt.Sprintf("%d", result))
 	return result
 }
 
@@ -302,7 +302,7 @@ func RedisIncr(key string) int {
 
 	result, sErr := client.Cmd("incr", key).Int()
 	errHndlr(sErr)
-	fmt.Println(result)
+	DialerLog(fmt.Sprintf("%d", result))
 	return result
 }
 
@@ -338,7 +338,7 @@ func RedisIncrBy(key string, value int) int {
 
 	result, sErr := client.Cmd("incrby", key, value).Int()
 	errHndlr(sErr)
-	fmt.Println(result)
+	DialerLog(fmt.Sprintf("%d", result))
 	return result
 }
 
@@ -375,7 +375,7 @@ func RedisRemove(key string) bool {
 	tempResult, sErr := client.Cmd("del", key).Int()
 
 	errHndlr(sErr)
-	fmt.Println(tempResult)
+	DialerLog(fmt.Sprintf("%d", tempResult))
 	if tempResult == 1 {
 		return true
 	} else {
@@ -415,7 +415,7 @@ func RedisCheckKeyExist(key string) bool {
 
 	tempResult, sErr := client.Cmd("exists", key).Int()
 	errHndlr(sErr)
-	fmt.Println(tempResult)
+	DialerLog(fmt.Sprintf("%d", tempResult))
 	if tempResult == 1 {
 		return true
 	} else {
@@ -460,7 +460,7 @@ func RedisHashGetAll(hkey string) map[string]string {
 		fmt.Println(err)
 	}
 	text := string(bytes)
-	fmt.Println(text)
+	DialerLog(text)
 	return strHash
 }
 
@@ -497,7 +497,7 @@ func RedisHashGetField(hkey, field string) string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(strValue)
+	DialerLog(strValue)
 	return strValue
 }
 
@@ -569,11 +569,11 @@ func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
 		errHndlrNew("OnEvent", "getConnFromPool", err)
 		//defer redisPool.Put(client)
 	}
-	fmt.Println(data)
+	DialerLog(fmt.Sprintf("%+v", data))
 	for key, value := range data {
 		client.Cmd("hset", hkey, key, value)
 	}
-	fmt.Println(true)
+	//fmt.Println(true)
 	return true
 }
 
@@ -610,7 +610,7 @@ func RedisListLpop(lname string) string {
 	}
 
 	lpopItem, _ := client.Cmd("lpop", lname).Str()
-	fmt.Println(lpopItem)
+	DialerLog(lpopItem)
 	return lpopItem
 }
 
@@ -798,7 +798,7 @@ func RedisSetAdd(key string, members []string) string {
 	}
 
 	saddResult, _ := client.Cmd("sadd", key, members).Str()
-	fmt.Println("saddResult : %s :: %s", key, saddResult)
+	DialerLog(fmt.Sprintf("saddResult : %s :: %s", key, saddResult))
 	return saddResult
 }
 
@@ -833,7 +833,7 @@ func RedisSetIsMember(key, value string) bool {
 	}
 
 	sismemberResult, _ := client.Cmd("sismember", key, value).Int()
-	fmt.Println("sismember : %s:%s :: %s", key, value, sismemberResult)
+	DialerLog(fmt.Sprintf("sismember : %s:%s :: %s", key, value, sismemberResult))
 
 	if sismemberResult == 1 {
 		return true

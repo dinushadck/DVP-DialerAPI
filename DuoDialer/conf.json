@@ -1,7 +1,7 @@
 {
-	"SecurityIp":"45.55.142.207",
+	"SecurityIp":"138.197.90.92",
 	"SecurityPort":"6389",
-    "RedisIp": "45.55.142.207",
+    "RedisIp": "138.197.90.92",
 	"RedisPort": "6389",
 	"RedisPassword":"DuoS123",
 	"RedisDb": 7,

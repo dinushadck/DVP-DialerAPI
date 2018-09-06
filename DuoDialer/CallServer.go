@@ -52,10 +52,8 @@ func GetCallserverInfo(company, tenant int) CallServerResult {
 			}
 		}
 		if len(activeCallServers) == 1 {
-			color.Green("One active callserver found")
 			return activeCallServers[0]
 		} else if len(activeCallServers) > 1 {
-			color.Green("Multiple callservers found - selecting random call server")
 			return activeCallServers[rand.Intn(len(activeCallServers))]
 		} else {
 			color.Yellow(fmt.Sprintf("No call servers found for company %d", company))
@@ -88,8 +86,9 @@ func RegisterCallServer(company, tenant int) ResourceServerInfo {
 	//Get CallServer info
 	pickedCallServer := GetCallserverInfo(company, tenant)
 	log := fmt.Sprintf("Callserver id: %d :: ip: %s :: CompanyId: %d", pickedCallServer.Id, pickedCallServer.InternalMainIP, pickedCallServer.CompanyId)
-	fmt.Println(log)
+	DialerLog(log)
 	if pickedCallServer.InternalMainIP != "" {
+		color.Green(fmt.Sprintf("CALLSERVER PICKED : %s", pickedCallServer.MainIp))
 		callServerIdStr := strconv.Itoa(pickedCallServer.Id)
 		rs := ResourceServerInfo{}
 		rs.ResourceServerId = callServerIdStr
@@ -164,7 +163,7 @@ func GetConcurrentChannelCount(serverId, campaignId string) (concurrentOnServer,
 	rsckC := fmt.Sprintf("ResourceServerConcurrentCalls:%s:%s", serverId, campaignId)
 	rsck := fmt.Sprintf("ResourceServerConcurrentCalls:%s", serverId)
 	channelCountC := RedisGet(rsckC)
-	fmt.Println("RedisGet channelCountC: ", channelCountC)
+	DialerLog(fmt.Sprintf("RedisGet channelCountC: %s", channelCountC))
 
 	if channelCountC == "" {
 		RedisSet(rsckC, "0")
@@ -172,7 +171,7 @@ func GetConcurrentChannelCount(serverId, campaignId string) (concurrentOnServer,
 	}
 
 	channelCountS := RedisGet(rsck)
-	fmt.Println("RedisGet channelCountS: ", channelCountS)
+	DialerLog(fmt.Sprintf("RedisGet channelCountS: %s", channelCountS))
 	valueC, err := strconv.Atoi(channelCountC)
 	valueS, _ := strconv.Atoi(channelCountS)
 	if err != nil {

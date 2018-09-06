@@ -167,7 +167,7 @@ func AddCampaignToDialer(campaignD Campaign) {
 				IncrementOnGoingCampaignCount()
 				SetCampChannelMaxLimitDirect(campIdStr, channelCountStr)
 				AddCampaignCallbackConfigInfo(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId)
-				color.Cyan("STARTING NEW CAMPAIGN - FROM THIS DIALER - SET STATUS TO START")
+				color.Green("STARTING NEW CAMPAIGN - FROM THIS DIALER - SET STATUS TO START")
 				SetCampaignStatus(campIdStr, "Start", campaignD.CompanyId, campaignD.TenantId)
 				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
 				UpdateCampaignStartAndEndDate(campaignD.CompanyId, campaignD.TenantId, campaignD.CampaignId, campaignD.CampConfigurations.ConfigureId, campaignD.CampConfigurations.StartDate.Format("02 Jan 06 15:04 -0700"), campaignD.CampConfigurations.EndDate.Format("02 Jan 06 15:04 -0700"))
@@ -185,7 +185,6 @@ func AddCampaignToDialer(campaignD Campaign) {
 			if result == "OK" {
 				//SetCampaignTimeZone(campIdStr, campaignD.CompanyId, campaignD.TenantId, timeZone)
 				IncrementOnGoingCampaignCount()
-				color.Yellow("RESUMING CAMPAIGN - FROM THIS DIALER - SET STATUS TO RESUME")
 				SetCampaignStatus(campIdStr, "Resume", campaignD.CompanyId, campaignD.TenantId)
 				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
 			}
@@ -301,7 +300,7 @@ func RequestCampaign(requestCount int) []Campaign {
 	json.Unmarshal(response, &campaignResult)
 	if campaignResult.IsSuccess == true {
 		for _, camRes := range campaignResult.Result {
-			color.Magenta("Campaign found for dialing :: ", camRes)
+			color.Blue(fmt.Sprintf("Campaign FOUND FOR DIALING : %+v", camRes))
 			campaignDetails = append(campaignDetails, camRes)
 		}
 	}
@@ -556,7 +555,6 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 		campStatus := GetCampaignStatus(campaignId, company, tenant)
 
 		SetCampaignStatus(campaignId, "Running", company, tenant)
-		color.Magenta("CAMPAIGN STATUS SET TO RUNNING")
 		maxChannelLimitStr := strconv.Itoa(campaignMaxChannelCount)
 		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
 
@@ -580,11 +578,12 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
-			fmt.Println("Campaign Current State:: ", campStatus)
+			DialerLog(fmt.Sprintf("Campaign Current State:: %s", campStatus))
+			color.Red(fmt.Sprintf("%s : %s", campaignName, campStatus))
 			if campStatus == "Running" {
 				tm := time.Now().In(location)
-				fmt.Println("endTime: ", appmntEndTime.String())
-				fmt.Println("timeNW: ", tm.String())
+				DialerLog(fmt.Sprintf("endTime: %s", appmntEndTime.String()))
+				DialerLog(fmt.Sprintf("timeNW: %s", tm.String()))
 				if tm.Before(appmntEndTime) {
 
 					switch CampaignChannel {
@@ -593,11 +592,11 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 						cchannelCountS, cchannelCountC := GetConcurrentChannelCount(resourceServerInfos.ResourceServerId, campaignId)
 
-						fmt.Println("resourceServerInfos.CallServerId: ", resourceServerInfos.ResourceServerId)
-						fmt.Println("MaxCallServerChannelLimit: ", maxChannelLimit)
-						fmt.Println("maxCampaignChannelLimit: ", maxCampaignChannelLimit)
-						fmt.Println("ConcurrentResourceServerChannel: ", cchannelCountS)
-						fmt.Println("ConcurrentCampaignChannel: ", cchannelCountC)
+						DialerLog(fmt.Sprintf("resourceServerInfos.CallServerId: %s", resourceServerInfos.ResourceServerId))
+						DialerLog(fmt.Sprintf("MaxCallServerChannelLimit: %d", maxChannelLimit))
+						DialerLog(fmt.Sprintf("maxCampaignChannelLimit: %d", maxCampaignChannelLimit))
+						DialerLog(fmt.Sprintf("ConcurrentResourceServerChannel: %v", cchannelCountS))
+						DialerLog(fmt.Sprintf("ConcurrentCampaignChannel: %v", cchannelCountC))
 
 						if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
 							number, tryCount, numExtraData := GetNumberToDial(company, tenant, campaignId, camScheduleId)
@@ -617,25 +616,30 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								if trunkCode != "" && uuid != "" {
 									switch dialoutMec {
 									case "BLAST":
+										color.Cyan(fmt.Sprintf("======= STARTING BLAST DIALER : %s =======", campaignId))
 										go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, tryCount, extention)
 										break
 									case "FIFO":
+										color.Cyan(fmt.Sprintf("======= STARTING FIFO DIALER : %s =======", campaignId))
 										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, extention)
 										break
 									case "PREVIEW":
-										fmt.Println("Start Preview Dialer")
+										color.Cyan(fmt.Sprintf("======= STARTING PREVIEW DIALER : %s =======", campaignId))
 										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention)
 										break
 									case "AGENT":
+										color.Cyan(fmt.Sprintf("======= STARTING AGENT DIALER : %s =======", campaignId))
 										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention)
 										break
 									}
+								} else {
+									color.Yellow("======= TRUNK OR UUID NOT FOUND =======")
 								}
 
 								time.Sleep(100 * time.Millisecond)
 							}
 						} else {
-							fmt.Println("dialer waiting...")
+							DialerLog("dialer waiting...")
 							time.Sleep(500 * time.Millisecond)
 						}
 						break
@@ -786,6 +790,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 					}
 
 				} else {
+					color.Yellow("======== APPONITMENT ENDED - STATE CHANGED TO PAUSEDBYDIALER ========")
 					SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
 					SetCampChannelMaxLimitDirect(campaignId, "0")
 					return

@@ -22,16 +22,16 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	if numberLimit == 500 {
 		numberOffsetToRequest = RedisGet(pageKey)
 	}
-	fmt.Println("numberOffsetToRequest: ", numberOffsetToRequest)
+	DialerLog(fmt.Sprintf("numberOffsetToRequest: %s", numberOffsetToRequest))
 
 	// Get phone number from campign service and append
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
-	fmt.Println("Start GetPhoneNumbers Auth: ", internalAuthToken, " CampaignId: ", campaignId, " camScheduleId: ", camScheduleId)
+	DialerLog(fmt.Sprintf("Start GetPhoneNumbers Auth: %s  CampaignId: %s  camScheduleId: %s", internalAuthToken, campaignId, camScheduleId))
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/NumbersByOffset/%s/%d/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, camScheduleId, numberLimit, numberOffsetToRequest)
-	fmt.Println("Start GetPhoneNumbers request: ", request)
+	DialerLog(fmt.Sprintf("Start GetPhoneNumbers request: ", request))
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
@@ -156,7 +156,7 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (str
 }
 
 func GetNumberCount(company, tenant int, campaignId, camScheduleId string) int {
-	fmt.Println("Start GetNumberCount")
+	DialerLog("Start GetNumberCount")
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	return RedisListLlen(listId)
 }
