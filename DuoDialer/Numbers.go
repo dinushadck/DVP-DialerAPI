@@ -143,6 +143,8 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (str
 		if numberCount < 500 {
 			LoadNumbers(company, tenant, 500, campaignId, camScheduleId)
 		}
+	} else if numLoadingStatusKey == "" {
+		LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
 	}
 
 	color.Red(fmt.Sprintf("======= NUMBER LOADING STATUS : %s", numLoadingStatus))
