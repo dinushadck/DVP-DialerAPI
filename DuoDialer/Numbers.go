@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camScheduleId string) []string {
@@ -142,6 +144,8 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (str
 			LoadNumbers(company, tenant, 500, campaignId, camScheduleId)
 		}
 	}
+
+	color.Red(fmt.Sprintf("======= NUMBER LOADING STATUS : %s", numLoadingStatus))
 	numberWithTryCount := RedisListLpop(listId)
 	numberInfos := strings.Split(numberWithTryCount, ":")
 	if len(numberInfos) > 3 {
