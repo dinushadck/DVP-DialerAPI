@@ -143,7 +143,7 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (str
 		if numberCount < 500 {
 			LoadNumbers(company, tenant, 500, campaignId, camScheduleId)
 		}
-	} else if numLoadingStatusKey == "" {
+	} else if numLoadingStatus == "" {
 		LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
 	}
 
