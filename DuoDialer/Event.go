@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/DuoSoftware/log4go"
+	"github.com/fatih/color"
 )
 
 var eventLog = log4go.NewLogger()
@@ -36,23 +37,24 @@ func OnEvent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_CREATE":
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelCreatetime", time.Now().Format(layout4))
-				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
+				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory))
 				break
 			case "CHANNEL_ANSWER":
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "DialerStatus", "channel_answered")
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelAnswertime", time.Now().Format(layout4))
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
-				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
+				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory))
 				break
 			case "CHANNEL_DESTROY":
-				LogEvent(eventInfo)
+				//LogEvent(eventInfo)
+				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory))
 				hashKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				session := RedisCheckKeyExist(hashKey)
 				if session {
 					DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
 					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
-					fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
+					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				}
 				break
 			default:
