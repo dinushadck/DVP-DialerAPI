@@ -18,6 +18,7 @@ type DVP struct {
 	previewCallBack        gorest.EndPoint `method:"POST" path:"/DialerAPI/PreviewCallBack/" postdata:"ReceiveData"`
 	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CallbackInfo"`
 	getTotalDialCount      gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalDialCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
+	dialCall               gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCall/{DialNumber:string}/{CampaignId:string}" output:"bool"`
 	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
 	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ScheduleId:int}/{ContactNumber:string}" output:"bool"`
@@ -70,6 +71,11 @@ func (dvp DVP) GetTotalDialCount(companyId, tenantId int, campaignId string) int
 		dvp.RB().SetResponseCode(403)
 		return 0
 	}
+}
+
+func (dvp DVP) DialCall(dialNumber string, campaignId string) bool {
+	fmt.Println(fmt.Sprintf("Dial Number : %s, Campaign ID : %s", dialNumber, campaignId))
+	return true
 }
 
 func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string) int {

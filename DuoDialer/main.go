@@ -91,6 +91,8 @@ func main() {
 						//campaignStartDate := time.Date(tempCampaignStartDate.Year(), tempCampaignStartDate.Month(), tempCampaignStartDate.Day(), 0, 0, 0, 0, location)
 						//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), 0, 0, 0, 0, location)
 
+						color.Cyan(fmt.Sprintf("Integration Data : %s", campaign.CampConfigurations.IntegrationData))
+
 						DialerLog(fmt.Sprintf("Check Campaign: %s", campIdStr))
 						DialerLog(fmt.Sprintf("campaignStartDate: %s", campaign.CampConfigurations.StartDate.String()))
 						DialerLog(fmt.Sprintf("campaignEndDate: %s", campaign.CampConfigurations.EndDate.String()))

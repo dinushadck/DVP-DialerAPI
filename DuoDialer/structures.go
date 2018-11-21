@@ -182,6 +182,7 @@ type CampaignConfigInfo struct {
 	EndDate            time.Time
 	StartTimeZone      string
 	EndTimeZone        string
+	IntegrationData    string
 }
 
 type CampaignShedule struct {
