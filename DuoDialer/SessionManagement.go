@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 //Initiate dial session for a number
-func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string) {
+func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string, integrationData *IntegrationConfig) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
@@ -36,6 +38,11 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["DialerStatus"] = dialerStatus
 	data["TryCount"] = tryCount
 	data["ExpireTime"] = sessionExprTimeStr
+
+	if integrationData != nil {
+		intgrData, _ := json.Marshal(*integrationData)
+		data["IntegrationData"] = string(intgrData)
+	}
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetMultipleField(hashKey, data)
 	PublishEvent(campaignId, sessionId)
@@ -46,6 +53,49 @@ func SetSessionInfo(campaignId, sessionId, filed, value string) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetField(hashKey, filed, value)
 	PublishEvent(campaignId, sessionId)
+}
+
+func ManageIntegrationData(integrationData string) {
+	defer func() {
+		if r := recover(); r != nil {
+			color.Red(fmt.Sprintf("Recovered in SendIntegrationData %+v", r))
+		}
+	}()
+
+	color.Magenta(integrationData)
+
+	//Send CampaignStatus to Campaign Manager
+	/* state := CampaignStart{}
+	camIdInt, _ := strconv.Atoi(campaignId)
+	state.CampaignId = camIdInt
+	state.DialerId = dialerId
+
+	jsonData, _ := json.Marshal(state)
+
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId)
+	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
+	DialerLog(fmt.Sprintf("request:%s", serviceurl))
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer resp.Body.Close()
+
+	DialerLog(fmt.Sprintf("response Status:%s", resp.Status))
+	DialerLog(fmt.Sprintf("response Headers:%s", resp.Header))
+	body, errb := ioutil.ReadAll(resp.Body)
+	if errb != nil {
+		color.Red(err.Error())
+	} else {
+		result := string(body)
+		DialerLog(fmt.Sprintf("response Body:%s", result))
+	} */
 }
 
 func UploadSessionInfo(campaignId, sessionId string) {

@@ -7,7 +7,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, uuid, fromNumber, trunkCode, phoneNumber, xGateway, tryCount, extention string) {
+func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, uuid, fromNumber, trunkCode, phoneNumber, xGateway, tryCount, extention string, integrationData *IntegrationConfig) {
 	DialerLog(fmt.Sprintf("Start DialNumber: %s:%s:%s:%s:%s:%s", uuid, fromNumber, trunkCode, phoneNumber, extention, xGateway))
 	customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
 
@@ -22,7 +22,7 @@ func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaign
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "BlastDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "BlastDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData)
 
 	redwhite := color.New(color.FgRed).Add(color.BgWhite)
 	redwhite.Println(fmt.Sprintf("DIALING OUT CALL - BLAST CAMPAIGN : %s | NUMBER : %s", campaignName, phoneNumber))

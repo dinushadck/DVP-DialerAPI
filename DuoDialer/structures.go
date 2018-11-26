@@ -182,7 +182,13 @@ type CampaignConfigInfo struct {
 	EndDate            time.Time
 	StartTimeZone      string
 	EndTimeZone        string
-	IntegrationData    string
+	IntegrationData    IntegrationConfig
+}
+
+type IntegrationConfig struct {
+	Url    string
+	Method string
+	Params string
 }
 
 type CampaignShedule struct {

@@ -539,7 +539,7 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 }
 
 //----------Run Campaign-----------------------
-func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int) {
+func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int, integrationData *IntegrationConfig) {
 	emtAppoinment := Appoinment{}
 	defResourceServerInfo := ResourceServerInfo{}
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
@@ -617,7 +617,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 									switch dialoutMec {
 									case "BLAST":
 										color.Cyan(fmt.Sprintf("======= STARTING BLAST DIALER : %s =======", campaignId))
-										go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, tryCount, extention)
+										go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, tryCount, extention, integrationData)
 										break
 									case "FIFO":
 										color.Cyan(fmt.Sprintf("======= STARTING FIFO DIALER : %s =======", campaignId))
@@ -667,7 +667,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							emailData["from"] = defaultAni
 							emailData["subject"] = campaignName
 
-							InitiateSessionInfo(company, tenant, 240, "Campaign", "Email", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, email, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId)
+							InitiateSessionInfo(company, tenant, 240, "Campaign", "Email", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, email, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil)
 
 							if len(templates) > 0 {
 								emailData["template"] = templates[0]
@@ -746,7 +746,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							smsData["from"] = defaultAni
 							smsData["subject"] = campaignName
 
-							InitiateSessionInfo(company, tenant, 240, "Campaign", "SMS", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, number, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId)
+							InitiateSessionInfo(company, tenant, 240, "Campaign", "SMS", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, number, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil)
 
 							if len(templates) > 0 {
 								smsData["template"] = templates[0]

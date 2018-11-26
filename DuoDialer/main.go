@@ -106,7 +106,7 @@ func main() {
 									camScheduleId := strconv.Itoa(schedule.CamScheduleId)
 									//Start Dialing the campaign
 									color.Green(fmt.Sprintf("====== CAMPAIGN %s READY TO START ======", campaign.CampaignName))
-									go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency)
+									go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency, &campaign.CampConfigurations.IntegrationData)
 								}
 							}
 						}

@@ -53,6 +53,17 @@ func OnEvent(eventInfo SubEvents) {
 				if session {
 					DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
 					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
+
+					hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
+					sessionInfo := RedisHashGetAll(hKey)
+
+					color.Magenta("=============DISCONNECT=============")
+					color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
+
+					if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
+						go ManageIntegrationData(sessionInfo["IntegrationData"])
+					}
+
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				}
