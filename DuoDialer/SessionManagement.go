@@ -70,21 +70,19 @@ func ManageIntegrationData(sessionInfo map[string]string) {
 
 	fmt.Println(intData)
 
-	//for _, element := range someSlice {
-	//	color.Red()
-	// index is the index where we are
-	// element is the element from someSlice for where we are
-	//}
+	body := map[string]interface{}{
+		"key": "value",
+	}
 
-	/* arr := []string{}
+	for _, element := range intData.Params {
+		body[element] = sessionInfo[element]
+	}
 
-	_ = json.Unmarshal([]byte(integrationData["Params"]), &arr)
+	color.Magenta("===========FFFFFF==========")
 
-	for _, element := range someSlice {
-		color.Red()
-		// index is the index where we are
-		// element is the element from someSlice for where we are
-	} */
+	jsonData, _ := json.Marshal(body)
+
+	fmt.Println(string(jsonData))
 
 	//fmt.Println(reflect.TypeOf(arr))
 
