@@ -63,7 +63,11 @@ func ManageIntegrationData(integrationData map[string]string) {
 		}
 	}()
 
-	fmt.Println(reflect.TypeOf(integrationData["Params"]))
+	arr := []string{}
+
+	_ = json.Unmarshal([]byte(integrationData["Params"]), &arr)
+
+	fmt.Println(reflect.TypeOf(arr))
 
 	//color.Magenta(integrationData)
 
