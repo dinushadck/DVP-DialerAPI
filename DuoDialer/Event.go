@@ -63,6 +63,9 @@ func OnEvent(eventInfo SubEvents) {
 					if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
 						go ManageIntegrationData(sessionInfo["IntegrationData"])
 					}
+					else{
+						color.Magenta("NO INTEGRATION DATA")
+					}
 
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
