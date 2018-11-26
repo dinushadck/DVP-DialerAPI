@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -56,18 +55,38 @@ func SetSessionInfo(campaignId, sessionId, filed, value string) {
 	PublishEvent(campaignId, sessionId)
 }
 
-func ManageIntegrationData(integrationData map[string]string) {
+func ManageIntegrationData(sessionInfo map[string]string) {
 	defer func() {
 		if r := recover(); r != nil {
 			color.Red(fmt.Sprintf("Recovered in SendIntegrationData %+v", r))
 		}
 	}()
 
-	arr := []string{}
+	fmt.Println(sessionInfo["IntegrationData"])
+
+	intData := IntegrationConfig{}
+
+	_ = json.Unmarshal([]byte(sessionInfo["IntegrationData"]), &intData)
+
+	fmt.Println(intData)
+
+	//for _, element := range someSlice {
+	//	color.Red()
+	// index is the index where we are
+	// element is the element from someSlice for where we are
+	//}
+
+	/* arr := []string{}
 
 	_ = json.Unmarshal([]byte(integrationData["Params"]), &arr)
 
-	fmt.Println(reflect.TypeOf(arr))
+	for _, element := range someSlice {
+		color.Red()
+		// index is the index where we are
+		// element is the element from someSlice for where we are
+	} */
+
+	//fmt.Println(reflect.TypeOf(arr))
 
 	//color.Magenta(integrationData)
 
