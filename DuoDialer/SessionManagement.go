@@ -39,7 +39,7 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["TryCount"] = tryCount
 	data["ExpireTime"] = sessionExprTimeStr
 
-	if integrationData != nil {
+	if integrationData != nil && integrationData.Url != "" {
 		intgrData, _ := json.Marshal(*integrationData)
 		data["IntegrationData"] = string(intgrData)
 	}
