@@ -62,8 +62,7 @@ func OnEvent(eventInfo SubEvents) {
 
 					if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
 						go ManageIntegrationData(sessionInfo["IntegrationData"])
-					}
-					else{
+					} else {
 						color.Magenta("NO INTEGRATION DATA")
 					}
 
