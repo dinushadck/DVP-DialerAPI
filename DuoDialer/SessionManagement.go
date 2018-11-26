@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -62,11 +63,7 @@ func ManageIntegrationData(integrationData map[string]string) {
 		}
 	}()
 
-	for _, element := range integrationData["Params"] {
-		color.Red(fmt.Sprintf("Recovered in SendIntegrationData %+v", element))
-		// index is the index where we are
-		// element is the element from someSlice for where we are
-	}
+	fmt.Println(reflect.TypeOf(integrationData["Params"]))
 
 	//color.Magenta(integrationData)
 
