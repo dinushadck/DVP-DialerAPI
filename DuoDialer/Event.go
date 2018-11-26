@@ -61,7 +61,7 @@ func OnEvent(eventInfo SubEvents) {
 					color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
 
 					if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
-						go ManageIntegrationData(sessionInfo["IntegrationData"])
+						go ManageIntegrationData(sessionInfo)
 					} else {
 						color.Magenta("NO INTEGRATION DATA")
 					}

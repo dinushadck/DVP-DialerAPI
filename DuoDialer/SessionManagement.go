@@ -55,14 +55,14 @@ func SetSessionInfo(campaignId, sessionId, filed, value string) {
 	PublishEvent(campaignId, sessionId)
 }
 
-func ManageIntegrationData(integrationData string) {
+func ManageIntegrationData(integrationData map[string]string) {
 	defer func() {
 		if r := recover(); r != nil {
 			color.Red(fmt.Sprintf("Recovered in SendIntegrationData %+v", r))
 		}
 	}()
 
-	color.Magenta(integrationData)
+	//color.Magenta(integrationData)
 
 	//Send CampaignStatus to Campaign Manager
 	/* state := CampaignStart{}

@@ -188,7 +188,7 @@ type CampaignConfigInfo struct {
 type IntegrationConfig struct {
 	Url    string
 	Method string
-	Params string
+	Params []string
 }
 
 type CampaignShedule struct {
