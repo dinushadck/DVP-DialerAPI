@@ -94,6 +94,13 @@ func main() {
 						color.Cyan(fmt.Sprintf("Integration Data : %s", campaign.CampConfigurations.IntegrationData))
 						color.Cyan(fmt.Sprintf("Integration Data URL: %s", campaign.CampConfigurations.IntegrationData.Url))
 
+						if campaign.CampConfigurations.IntegrationData.Url == "" {
+							color.Cyan("======FFFFF======")
+
+						} else {
+							color.Cyan("========YAY========")
+						}
+
 						DialerLog(fmt.Sprintf("Check Campaign: %s", campIdStr))
 						DialerLog(fmt.Sprintf("campaignStartDate: %s", campaign.CampConfigurations.StartDate.String()))
 						DialerLog(fmt.Sprintf("campaignEndDate: %s", campaign.CampConfigurations.EndDate.String()))
