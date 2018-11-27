@@ -135,7 +135,7 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			return false
 		}
 	} else {
-		color.FgRed("CAMPAIGN NOT FOUND API CALL")
+		color.Red("CAMPAIGN NOT FOUND API CALL")
 	}
 
 	return false
