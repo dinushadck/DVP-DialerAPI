@@ -70,40 +70,16 @@ func ManageIntegrationData(sessionInfo map[string]string) {
 
 	fmt.Println(intData)
 
-	body := map[string]interface{}{
-		"key": "value",
-	}
+	bodyData := map[string]interface{}{}
 
 	for _, element := range intData.Params {
-		body[element] = sessionInfo[element]
+		bodyData[element] = sessionInfo[element]
 	}
 
-	color.Magenta("===========FFFFFF==========")
+	jsonData, _ := json.Marshal(bodyData)
 
-	jsonData, _ := json.Marshal(body)
-
-	fmt.Println(string(jsonData))
-
-	//fmt.Println(reflect.TypeOf(arr))
-
-	//color.Magenta(integrationData)
-
-	//Send CampaignStatus to Campaign Manager
-	/* state := CampaignStart{}
-	camIdInt, _ := strconv.Atoi(campaignId)
-	state.CampaignId = camIdInt
-	state.DialerId = dialerId
-
-	jsonData, _ := json.Marshal(state)
-
-	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
-	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
-	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/%s/Operations/%s", CreateHost(campaignServiceHost, campaignServicePort), campaignId, dialerId)
-	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest(intData.Method, intData.Url, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("authorization", jwtToken)
-	req.Header.Set("companyinfo", internalAuthToken)
-	DialerLog(fmt.Sprintf("request:%s", serviceurl))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -119,7 +95,7 @@ func ManageIntegrationData(sessionInfo map[string]string) {
 	} else {
 		result := string(body)
 		DialerLog(fmt.Sprintf("response Body:%s", result))
-	} */
+	}
 }
 
 func UploadSessionInfo(campaignId, sessionId string) {
