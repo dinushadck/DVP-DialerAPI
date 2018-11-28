@@ -92,8 +92,12 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 
 			resourceServerInfos := GetResourceServerInfo(company, tenant, "*", campaigninfo.CampaignChannel)
 
+			fmt.Println(resourceServerInfos)
+
 			trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaigninfo.CampConfigurations.Caller, dialNumber)
 			uuid := GetUuid(resourceServerInfos.Url)
+
+			fmt.Println("UUID : " + uuid)
 
 			scheduleId := fmt.Sprintf("%d", campaigninfo.CampScheduleInfo[0].ScheduleId)
 
@@ -123,6 +127,8 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			if dial == true {
 				SetSessionInfo(campaignId, uuid, "Reason", "Dial Number")
 
+				fmt.Println("Dialing Call")
+
 				resp, err := Dial(resourceServerInfos.Url, param, furl, data)
 				HandleDialResponse(resp, err, resourceServerInfos, campaignId, uuid)
 				return true
@@ -132,6 +138,7 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			}
 
 		} else {
+			color.Red("CAMPAIGN IS NOT IN RUNNING STATE")
 			return false
 		}
 	} else {
