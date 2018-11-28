@@ -83,6 +83,8 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
+	fmt.Println(internalAuthToken)
+
 	campaigninfo, result := GetCampaign(company, tenant, campId)
 
 	if result {
@@ -109,7 +111,7 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			SetSessionInfo(campaignId, uuid, "Extention", campaigninfo.Extensions)
 			SetSessionInfo(campaignId, uuid, "XGateway", xGateway)
 
-			customCompanyStr := fmt.Sprintf("%s_%s", company, tenant)
+			customCompanyStr := fmt.Sprintf("%d_%d", company, tenant)
 
 			var param string
 			var furl string
@@ -117,7 +119,7 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			var dial bool
 			if agent != "" {
 				dial = true
-				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,DVP_CALL_DIRECTION=outbound,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", subChannelName, customCompanyStr, campaignId, campaigninfo.CampaignName, tenant, company, uuid, uuid, dnis)
+				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,DVP_CALL_DIRECTION=outbound,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName=%s,tenantid=%d,companyid=%d,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", subChannelName, customCompanyStr, campaignId, campaigninfo.CampaignName, tenant, company, uuid, uuid, dnis)
 				furl = fmt.Sprintf("user/%s@%s", agent, domain)
 			} else {
 				dial = false
