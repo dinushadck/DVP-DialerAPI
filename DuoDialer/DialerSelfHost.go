@@ -88,6 +88,8 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 	if result {
 		campStatus := GetCampaignStatus(campaignId, company, tenant)
 
+		fmt.Println(campStatus)
+
 		if campStatus == "Running" && campaigninfo.CampaignChannel == "CALL" {
 
 			resourceServerInfos := GetResourceServerInfo(company, tenant, "*", campaigninfo.CampaignChannel)
