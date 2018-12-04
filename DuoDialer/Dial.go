@@ -80,13 +80,15 @@ func Dial(server, params, furl, data string) (*http.Response, error) {
 	return resp, err
 }
 
-func HandleDialResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) {
+func HandleDialResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) string {
 	if err != nil {
 		DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 		go UploadSessionInfo(campaignId, sessionId)
 		fmt.Println(err.Error())
+
+		return err.Error()
 	}
 
 	if resp != nil {
@@ -116,5 +118,8 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 				SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_success")
 			}
 		}
+
+		return tmx
 	}
+	return "SUCCESS"
 }
