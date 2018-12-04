@@ -208,6 +208,11 @@ type CampaignContactInfo struct {
 	CampContactInfo ContactInfo
 }
 
+type DialResult struct {
+	IsSuccess bool
+	Message   string
+}
+
 type PhoneNumberResult struct {
 	CustomMessage string
 	IsSuccess     bool

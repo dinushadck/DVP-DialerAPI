@@ -20,7 +20,7 @@ type DVP struct {
 	previewCallBack        gorest.EndPoint `method:"POST" path:"/DialerAPI/PreviewCallBack/" postdata:"ReceiveData"`
 	resumeCallback         gorest.EndPoint `method:"POST" path:"/DialerAPI/ResumeCallback/" postdata:"CallbackInfo"`
 	getTotalDialCount      gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalDialCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
-	dialCall               gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCall/{CampaignId:string}/{DialNumber:string}/{Agent:string}/{Domain:string}" output:"bool"`
+	dialCall               gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCall/{CampaignId:string}/{DialNumber:string}/{Agent:string}/{Domain:string}" output:"string"`
 	getTotalConnectedCount gorest.EndPoint `method:"GET" path:"/DialerAPI/GetTotalConnectedCount/{CompanyId:int}/{TenantId:int}/{CampaignId:string}" output:"int"`
 	dial                   gorest.EndPoint `method:"GET" path:"/DialerAPI/Dial/{AniNumber:string}/{DnisNumber:string}/{Extention:string}/{CallserverId:string}" output:"bool"`
 	dialCampaign           gorest.EndPoint `method:"GET" path:"/DialerAPI/DialCampaign/{CampaignId:int}/{ScheduleId:int}/{ContactNumber:string}" output:"bool"`
@@ -75,7 +75,7 @@ func (dvp DVP) GetTotalDialCount(companyId, tenantId int, campaignId string) int
 	}
 }
 
-func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, domain string) bool {
+func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, domain string) string {
 	color.Green(fmt.Sprintf("Dial Number : %s, Campaign ID : %s, Agent: %s, Domain: %s", dialNumber, campaignId, agent, domain))
 	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 
@@ -119,7 +119,7 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			var dial bool
 			if agent != "" {
 				dial = true
-				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,DVP_CALL_DIRECTION=outbound,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName=%s,tenantid=%d,companyid=%d,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=true,ignore_early_media=true,origination_caller_id_number=%s}", subChannelName, customCompanyStr, campaignId, campaigninfo.CampaignName, tenant, company, uuid, uuid, dnis)
+				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,DVP_CALL_DIRECTION=outbound,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName=%s,tenantid=%d,companyid=%d,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", subChannelName, customCompanyStr, campaignId, campaigninfo.CampaignName, tenant, company, uuid, uuid, dnis)
 				furl = fmt.Sprintf("user/%s@%s", agent, domain)
 			} else {
 				dial = false
@@ -135,21 +135,31 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 
 				resp, err := Dial(resourceServerInfos.Url, param, furl, data)
 				HandleDialResponse(resp, err, resourceServerInfos, campaignId, uuid)
-				return true
+
+				if err != nil {
+					w, _ := json.Marshal(DialResult{IsSuccess: false, Message: err.Error()})
+					return string(w)
+				} else {
+					w, _ := json.Marshal(DialResult{IsSuccess: true, Message: "SUCCESS"})
+					return string(w)
+				}
 			} else {
 				SetSessionInfo(campaignId, uuid, "Reason", "Invalied Operation")
-				return false
+				w, _ := json.Marshal(DialResult{IsSuccess: false, Message: "AGENT NOT FOUND"})
+				return string(w)
+
 			}
 
 		} else {
 			color.Red("CAMPAIGN IS NOT IN RUNNING STATE")
-			return false
+			w, _ := json.Marshal(DialResult{IsSuccess: false, Message: "CAMPAIGN IS NOT IN RUNNING STATE"})
+			return string(w)
 		}
 	} else {
 		color.Red("CAMPAIGN NOT FOUND API CALL")
+		w, _ := json.Marshal(DialResult{IsSuccess: false, Message: "CAMPAIGN NOT FOUND"})
+		return string(w)
 	}
-
-	return false
 }
 
 func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string) int {
