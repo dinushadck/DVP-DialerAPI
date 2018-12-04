@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"strconv"
 	"strings"
@@ -134,13 +135,15 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 				fmt.Println("Dialing Call")
 
 				resp, err := Dial(resourceServerInfos.Url, param, furl, data)
+				response, _ := ioutil.ReadAll(resp.Body)
+				strResp := string(response)
 				HandleDialResponse(resp, err, resourceServerInfos, campaignId, uuid)
 
 				if err != nil {
 					w, _ := json.Marshal(DialResult{IsSuccess: false, Message: err.Error()})
 					return string(w)
 				} else {
-					w, _ := json.Marshal(DialResult{IsSuccess: true, Message: "SUCCESS"})
+					w, _ := json.Marshal(DialResult{IsSuccess: true, Message: strResp})
 					return string(w)
 				}
 			} else {
