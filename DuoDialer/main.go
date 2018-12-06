@@ -150,7 +150,7 @@ func InitiateService() {
 		Addr:           addr,
 		Handler:        handler,
 		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		WriteTimeout:   60 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 

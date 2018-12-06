@@ -76,7 +76,9 @@ func (dvp DVP) GetTotalDialCount(companyId, tenantId int, campaignId string) int
 }
 
 func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, domain string) string {
+
 	color.Green(fmt.Sprintf("Dial Number : %s, Campaign ID : %s, Agent: %s, Domain: %s", dialNumber, campaignId, agent, domain))
+
 	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 
 	campId, _ := strconv.Atoi(campaignId)
@@ -104,8 +106,8 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			fmt.Println("UUID : " + uuid)
 
 			scheduleId := fmt.Sprintf("%d", campaigninfo.CampScheduleInfo[0].ScheduleId)
-
 			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "API", "1", campaignId, scheduleId, campaigninfo.CampaignName, uuid, dnis, "api called", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, &campaigninfo.CampConfigurations.IntegrationData)
+
 			SetSessionInfo(campaignId, uuid, "FromNumber", ani)
 			SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 			SetSessionInfo(campaignId, uuid, "Extention", campaigninfo.Extensions)
@@ -119,11 +121,11 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			var dial bool
 			if agent != "" {
 				dial = true
-				param = fmt.Sprintf(" {leg_timeout=30,sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,DVP_CALL_DIRECTION=outbound,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName=%s,tenantid=%d,companyid=%d,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", subChannelName, customCompanyStr, campaignId, campaigninfo.CampaignName, tenant, company, uuid, uuid, dnis)
+				param = fmt.Sprintf(" {leg_timeout=10,sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,DVP_CALL_DIRECTION=outbound,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName=%s,tenantid=%d,companyid=%d,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=DIALER,ards_requesttype=CALL,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", subChannelName, customCompanyStr, campaignId, campaigninfo.CampaignName, tenant, company, uuid, uuid, dnis)
 				furl = fmt.Sprintf("user/%s@%s", agent, domain)
 			} else {
 				dial = false
-				fmt.Println("Invalied Operation")
+				fmt.Println("Invalid Operation")
 			}
 
 			data = fmt.Sprintf(" %s xml dialer", dialNumber)
@@ -131,13 +133,13 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			if dial == true {
 				SetSessionInfo(campaignId, uuid, "Reason", "Dial Number")
 
-				fmt.Println("Dialing Call")
+				redwhite := color.New(color.FgRed).Add(color.BgWhite)
+				redwhite.Println(fmt.Sprintf("DIALING OUT CALL - API CALL: %s | NUMBER : %s", campaigninfo.CampaignName, dialNumber))
 
 				resp, err := Dial(resourceServerInfos.Url, param, furl, data)
 				r := HandleDialResponse(resp, err, resourceServerInfos, campaignId, uuid)
 
-				redYellow := color.New(color.FgRed).Add(color.BgYellow)
-				redYellow.Println(fmt.Sprintf("DIAL OUT RESPONSE : %s", r))
+				r = strings.TrimSuffix(r, "\n")
 
 				if err != nil {
 					w, _ := json.Marshal(DialResult{IsSuccess: false, Message: r})
