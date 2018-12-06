@@ -136,6 +136,9 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 				resp, err := Dial(resourceServerInfos.Url, param, furl, data)
 				r := HandleDialResponse(resp, err, resourceServerInfos, campaignId, uuid)
 
+				redYellow := color.New(color.FgRed).Add(color.BgYellow)
+				redYellow.Println(fmt.Sprintf("DIAL OUT RESPONSE : %s", r))
+
 				if err != nil {
 					w, _ := json.Marshal(DialResult{IsSuccess: false, Message: r})
 					return string(w)
