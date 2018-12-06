@@ -174,15 +174,16 @@ type CampaignCallbackObj struct {
 type CallbackInfo map[string]interface{}
 
 type CampaignConfigInfo struct {
-	ConfigureId        int
-	ChannelConcurrency int
-	AllowCallBack      bool
-	Caller             string
-	StartDate          time.Time
-	EndDate            time.Time
-	StartTimeZone      string
-	EndTimeZone        string
-	IntegrationData    IntegrationConfig
+	ConfigureId         int
+	ChannelConcurrency  int
+	AllowCallBack       bool
+	Caller              string
+	StartDate           time.Time
+	EndDate             time.Time
+	StartTimeZone       string
+	EndTimeZone         string
+	IntegrationData     IntegrationConfig
+	NumberLoadingMethod string
 }
 
 type IntegrationConfig struct {
