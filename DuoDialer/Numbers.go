@@ -72,6 +72,53 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	return numbers
 }
 
+func GetContactsFromNumberBase(company, tenant, numberLimit int, campaignId, camScheduleId string) []ContactsDetails {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in GetNumbersFromNumberBase", r)
+		}
+	}()
+	numbers := make([]ContactsDetails, 0)
+	pageKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
+
+	numberOffsetToRequest := "0"
+
+	if numberLimit == 500 {
+		numberOffsetToRequest = RedisGet(pageKey)
+	}
+	DialerLog(fmt.Sprintf("numberOffsetToRequest: %s", numberOffsetToRequest))
+
+	// Get phone number from campign service and append
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	DialerLog(fmt.Sprintf("Start GetContacts Auth: %s  CampaignId: %s  camScheduleId: %s", internalAuthToken, campaignId, camScheduleId))
+	client := &http.Client{}
+
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/Campaign/%s/Contacts/%d/%s", CreateHost(contactServiceHost, contactServicePort), campaignId, numberLimit, numberOffsetToRequest)
+	DialerLog(fmt.Sprintf("Start GetContacts request: ", request))
+	req, _ := http.NewRequest("GET", request, nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+		return numbers
+	}
+	defer resp.Body.Close()
+
+	response, _ := ioutil.ReadAll(resp.Body)
+
+	var contactNumberResult ContactsResult
+	json.Unmarshal(response, &contactNumberResult)
+	if contactNumberResult.IsSuccess == true {
+		numbers = contactNumberResult.Result
+
+		RedisIncrBy(pageKey, len(contactNumberResult.Result))
+	}
+	return numbers
+}
+
 func SetDncNumbersFromNumberBase(company, tenant int) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -127,13 +174,41 @@ func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId str
 	}
 }
 
-func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string) {
+func LoadContacts(company, tenant, numberLimit int, campaignId, camScheduleId string) {
+	listId := fmt.Sprintf("CampaignContacts:%d:%d:%s", company, tenant, campaignId)
+	numbers := GetContactsFromNumberBase(company, tenant, numberLimit, campaignId, camScheduleId)
+
+	DialerLog(fmt.Sprintf("Number count = %d", len(numbers)))
+	if len(numbers) == 0 {
+		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
+		RedisSet(numLoadingStatusKey, "waiting")
+	} else {
+		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
+		dncNumberKey := fmt.Sprintf("DncNumber:%d:%d", tenant, company)
+		RedisSet(numLoadingStatusKey, "waiting")
+		for _, number := range numbers {
+			if !RedisSetIsMember(dncNumberKey, number.phone) {
+				fmt.Println("Adding number to campaign: ", number)
+				num_detail, _ := json.Marshal(number)
+				RedisListRpush(listId, string(num_detail))
+			}
+		}
+	}
+}
+
+func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string, numLoadingMethod string) {
 	numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
-	LoadNumbers(company, tenant, 1000, campaignId, camScheduleId)
+
+	if numLoadingMethod == "CONTACT" {
+		LoadContacts(company, tenant, 1000, campaignId, camScheduleId)
+	} else {
+		LoadNumbers(company, tenant, 1000, campaignId, camScheduleId)
+	}
+
 	RedisSet(numLoadingStatusKey, "waiting")
 }
 
-func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (string, string, string) {
+func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, []Contact) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	numberCount := RedisListLlen(listId)
@@ -141,24 +216,38 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId string) (str
 
 	if numLoadingStatus == "waiting" {
 		if numberCount < 500 {
-			LoadNumbers(company, tenant, 500, campaignId, camScheduleId)
+			if numLoadingMethod == "CONTACT" {
+				LoadContacts(company, tenant, 500, campaignId, camScheduleId)
+			} else {
+				LoadNumbers(company, tenant, 500, campaignId, camScheduleId)
+			}
 		}
 	} else if numLoadingStatus == "" {
-		LoadInitialNumberSet(company, tenant, campaignId, camScheduleId)
+		LoadInitialNumberSet(company, tenant, campaignId, camScheduleId, numLoadingMethod)
 	}
 
 	color.Red(fmt.Sprintf("======= NUMBER LOADING STATUS : %s", numLoadingStatus))
 	numberWithTryCount := RedisListLpop(listId)
-	numberInfos := strings.Split(numberWithTryCount, ":")
-	if len(numberInfos) > 3 {
-		return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":")
-	} else if len(numberInfos) == 3 {
-		return numberInfos[0], numberInfos[1], numberInfos[2]
-	} else if len(numberInfos) == 2 {
-		return numberInfos[0], numberInfos[1], ""
+	if numLoadingMethod == "CONTACT" {
+		//Add contacts to redis here
+		contactInf := ContactsDetails{}
+		_ = json.Unmarshal([]byte(numberWithTryCount), &contactInf)
+
+		return contactInf.phone, "0", "", contactInf.contacts
 	} else {
-		return "", "", ""
+		numberInfos := strings.Split(numberWithTryCount, ":")
+		if len(numberInfos) > 3 {
+			return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":"), make([]Contact, 0)
+		} else if len(numberInfos) == 3 {
+			return numberInfos[0], numberInfos[1], numberInfos[2], make([]Contact, 0)
+		} else if len(numberInfos) == 2 {
+			return numberInfos[0], numberInfos[1], "", make([]Contact, 0)
+		} else {
+			return "", "", "", make([]Contact, 0)
+		}
+
 	}
+
 }
 
 func GetNumberCount(company, tenant int, campaignId, camScheduleId string) int {

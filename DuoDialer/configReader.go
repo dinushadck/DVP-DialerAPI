@@ -28,6 +28,8 @@ var port string
 var campaignRequestFrequency time.Duration
 var campaignServiceHost string
 var campaignServicePort string
+var contactServiceHost string
+var contactServicePort string
 var callServerHost string
 var callServerPort string
 var callRuleServiceHost string
@@ -95,6 +97,8 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.CampaignRequestFrequency = 300
 		defconfiguration.CampaignServiceHost = "192.168.0.143"
 		defconfiguration.CampaignServicePort = "2222"
+		defconfiguration.ContactServiceHost = "127.0.0.1"
+		defconfiguration.ContactServicePort = "2626"
 		defconfiguration.CallServerPort = "8080"
 		defconfiguration.CallRuleServiceHost = "192.168.0.89"
 		defconfiguration.CallRuleServicePort = "2220"
@@ -148,6 +152,8 @@ func LoadDefaultConfig() {
 	campaignRequestFrequency = defconfiguration.CampaignRequestFrequency
 	campaignServiceHost = defconfiguration.CampaignServiceHost
 	campaignServicePort = defconfiguration.CampaignServicePort
+	contactServiceHost = defconfiguration.ContactServiceHost
+	contactServicePort = defconfiguration.ContactServicePort
 	callServerPort = defconfiguration.CallServerPort
 	callRuleServiceHost = defconfiguration.CallRuleServiceHost
 	callRuleServicePort = defconfiguration.CallRuleServicePort
@@ -214,6 +220,8 @@ func LoadConfiguration() {
 		campaignRequestFrequencytemp := os.Getenv(envconfiguration.CampaignRequestFrequency)
 		campaignServiceHost = os.Getenv(envconfiguration.CampaignServiceHost)
 		campaignServicePort = os.Getenv(envconfiguration.CampaignServicePort)
+		contactServiceHost = os.Getenv(envconfiguration.ContactServiceHost)
+		contactServicePort = os.Getenv(envconfiguration.ContactServicePort)
 		callServerPort = os.Getenv(envconfiguration.CallServerPort)
 		callRuleServiceHost = os.Getenv(envconfiguration.CallRuleServiceHost)
 		callRuleServicePort = os.Getenv(envconfiguration.CallRuleServicePort)
@@ -287,6 +295,13 @@ func LoadConfiguration() {
 		}
 		if campaignServicePort == "" {
 			campaignServicePort = defConfig.CampaignServicePort
+		}
+
+		if contactServiceHost == "" {
+			contactServiceHost = defConfig.ContactServiceHost
+		}
+		if contactServicePort == "" {
+			contactServicePort = defConfig.ContactServicePort
 		}
 		if callServerPort == "" {
 			callServerPort = defConfig.CallServerPort

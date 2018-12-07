@@ -106,7 +106,7 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			fmt.Println("UUID : " + uuid)
 
 			scheduleId := fmt.Sprintf("%d", campaigninfo.CampScheduleInfo[0].ScheduleId)
-			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "API", "1", campaignId, scheduleId, campaigninfo.CampaignName, uuid, dnis, "api called", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, &campaigninfo.CampConfigurations.IntegrationData)
+			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "API", "1", campaignId, scheduleId, campaigninfo.CampaignName, uuid, dnis, "api called", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, &campaigninfo.CampConfigurations.IntegrationData, nil)
 
 			SetSessionInfo(campaignId, uuid, "FromNumber", ani)
 			SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)

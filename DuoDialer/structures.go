@@ -24,6 +24,8 @@ type Configuration struct {
 	CampaignRequestFrequency time.Duration
 	CampaignServiceHost      string
 	CampaignServicePort      string
+	ContactServiceHost       string
+	ContactServicePort       string
 	CallServerPort           string
 	CallRuleServiceHost      string
 	CallRuleServicePort      string
@@ -70,6 +72,8 @@ type EnvConfiguration struct {
 	CampaignRequestFrequency string
 	CampaignServiceHost      string
 	CampaignServicePort      string
+	ContactServiceHost       string
+	ContactServicePort       string
 	CallServerPort           string
 	CallRuleServiceHost      string
 	CallRuleServicePort      string
@@ -218,6 +222,23 @@ type PhoneNumberResult struct {
 	CustomMessage string
 	IsSuccess     bool
 	Result        []CampaignContactInfo
+}
+
+type Contact struct {
+	contact  string
+	display  string
+	verified bool
+}
+
+type ContactsDetails struct {
+	phone    string
+	contacts []Contact
+}
+
+type ContactsResult struct {
+	CustomMessage string
+	IsSuccess     bool
+	Result        []ContactsDetails
 }
 
 type DncNumberResult struct {
