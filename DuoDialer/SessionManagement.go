@@ -43,6 +43,14 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 		intgrData, _ := json.Marshal(*integrationData)
 		data["IntegrationData"] = string(intgrData)
 	}
+
+	if contacts != nil {
+		data["NumberLoadingMethod"] = "CONTACT"
+		if len(*contacts) > 0 {
+			contactsByteArr, _ := json.Marshal(*contacts)
+			data["Contacts"] = string(contactsByteArr)
+		}
+	}
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetMultipleField(hashKey, data)
 	PublishEvent(campaignId, sessionId)
@@ -102,7 +110,13 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	sessionInfo := RedisHashGetAll(hashKey)
 	RedisRemove(hashKey)
-	AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"])
+	//Check Session Is Contact Based Dialing - IF Yes Do Other Operation
+	if sessionInfo["NumberLoadingMethod"] == "CONTACT" {
+		AddContactToCallback(sessionInfo)
+	} else {
+		AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"])
+	}
+
 	PublishEvent(campaignId, sessionId)
 	UploadSessionInfoToCampaignManager(sessionInfo)
 }

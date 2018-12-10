@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 //----------Campaign Manager Service-----------------------
@@ -175,6 +177,81 @@ func ValidateDisconnectReason(disconnectReason string) (keyExist bool, value str
 		keyExist = true
 	}
 	return
+}
+
+func AddContactToCallback(sessionInfo map[string]string) {
+	DialerLog("start AddPhoneNumberToCallback")
+
+	contactsList := []Contact{}
+
+	_ = json.Unmarshal([]byte(sessionInfo["Contacts"]), &contactsList)
+
+	if contactsList != nil && len(contactsList) > 0 {
+		company, _ := strconv.Atoi(sessionInfo["CompanyId"])
+		tenant, _ := strconv.Atoi(sessionInfo["TenantId"])
+		campId, _ := strconv.Atoi(sessionInfo["CampaignId"])
+		scheduleId, _ := strconv.Atoi(sessionInfo["ScheduleId"])
+		isdisconnectReasonAllowed, hangupGruop := ValidateDisconnectReason(sessionInfo["Reason"])
+		DialerLog(fmt.Sprintf("isdisconnectReasonAllowed:: %t", isdisconnectReasonAllowed))
+		DialerLog(fmt.Sprintf("hangupGruop:: %s", hangupGruop))
+		if isdisconnectReasonAllowed {
+
+			campaignInfo, isCamExists := GetCampaign(company, tenant, campId)
+			DialerLog(fmt.Sprintf("isCamExists:: %t", isCamExists))
+
+			if isCamExists {
+
+				scheduleInfo := CampaignShedule{}
+				defaultScheduleInfo := CampaignShedule{}
+				for _, schedule := range campaignInfo.CampScheduleInfo {
+					if schedule.ScheduleId == scheduleId {
+						scheduleInfo = schedule
+						break
+					}
+				}
+
+				if scheduleInfo != defaultScheduleInfo {
+
+					location, _ := time.LoadLocation(scheduleInfo.TimeZone)
+
+					tmNow := time.Now().In(location)
+					callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), tmNow.Second(), 0, location)
+					fmt.Println("callbackTime:: ", callbackTime)
+
+					//tempCampaignEndDate, _ := time.Parse(layout2, campaignInfo.CampConfigurations.EndDate)
+					//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
+
+					scheduleEndDate := scheduleInfo.EndDate
+
+					fmt.Println("Callback:scheduleEndDate:: ", scheduleEndDate)
+					if scheduleEndDate.After(callbackTime) {
+						fmt.Println("Start to build CallbackInfo")
+						//scheduleIdStr := strconv.Itoa(scheduleInfo.ScheduleId)
+						validateAppoinment := CheckAppoinmentForCallback(company, tenant, sessionInfo["ScheduleId"], callbackTime, scheduleInfo.TimeZone)
+						fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
+						if validateAppoinment {
+							//HERE YOU HAVE TO ADD CALLBACK NUMBER TO THE FRONT OF THE NUMBER QUEUE AND RE ADJUST THE CONTACTS ARRAY
+							nextContactNum := contactsList[0]
+							r := append(contactsList[:0], contactsList[1:]...)
+							fmt.Println(r)
+							contactDet := ContactsDetails{phone: nextContactNum.contact, contacts: contactsList}
+							AddContactToFront(company, tenant, sessionInfo["CampaignId"], contactDet)
+							//go UploadCallbackInfo(_company, _tenant, callbackTime, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+						}
+					}
+				} else {
+					fmt.Println("Add Callback Failed, No Valied Schedule Found")
+				}
+
+			} else {
+				fmt.Println("Add Callback Failed, No Existing Campaign Found")
+			}
+		}
+	} else {
+		color.Magenta("NO CONTACTS FOUND FOR RE DIALING")
+
+	}
+
 }
 
 func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId, phoneNumber, disConnectkReason string) {

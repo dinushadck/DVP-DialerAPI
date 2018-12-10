@@ -284,3 +284,10 @@ func AddNumberToFront(company, tenant int, campaignId, camScheduleId, number str
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	return RedisListLpush(listId, number)
 }
+
+func AddContactToFront(company, tenant int, campaignId string, contact ContactsDetails) bool {
+	listId := fmt.Sprintf("CampaignContacts:%d:%d:%s", company, tenant, campaignId)
+	num_detail, _ := json.Marshal(contact)
+	RedisListRpush(listId, string(num_detail))
+	return true
+}
