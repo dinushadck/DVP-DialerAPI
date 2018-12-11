@@ -232,9 +232,8 @@ func AddContactToCallback(sessionInfo map[string]string) {
 						if validateAppoinment {
 							//HERE YOU HAVE TO ADD CALLBACK NUMBER TO THE FRONT OF THE NUMBER QUEUE AND RE ADJUST THE CONTACTS ARRAY
 							nextContactNum := contactsList[0]
-							r := append(contactsList[:0], contactsList[1:]...)
-							fmt.Println(r)
-							contactDet := ContactsDetails{phone: nextContactNum.contact, contacts: contactsList}
+							r := contactsList[1:]
+							contactDet := ContactsDetails{Phone: nextContactNum.Contact, Contacts: r}
 							AddContactToFront(company, tenant, sessionInfo["CampaignId"], contactDet)
 							//go UploadCallbackInfo(_company, _tenant, callbackTime, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
 						}

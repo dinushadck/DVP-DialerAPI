@@ -178,8 +178,10 @@ func LoadContacts(company, tenant, numberLimit int, campaignId, camScheduleId st
 	listId := fmt.Sprintf("CampaignContacts:%d:%d:%s", company, tenant, campaignId)
 	numbers := GetContactsFromNumberBase(company, tenant, numberLimit, campaignId, camScheduleId)
 
+	color.Green("===========LOADING CONTACTS==========")
 	DialerLog(fmt.Sprintf("Number count = %d", len(numbers)))
 	if len(numbers) == 0 {
+		color.Green("===========NO CONTACTS FOUND==========")
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 		RedisSet(numLoadingStatusKey, "waiting")
 	} else {
@@ -187,9 +189,10 @@ func LoadContacts(company, tenant, numberLimit int, campaignId, camScheduleId st
 		dncNumberKey := fmt.Sprintf("DncNumber:%d:%d", tenant, company)
 		RedisSet(numLoadingStatusKey, "waiting")
 		for _, number := range numbers {
-			if !RedisSetIsMember(dncNumberKey, number.phone) {
+			if !RedisSetIsMember(dncNumberKey, number.Phone) {
 				fmt.Println("Adding number to campaign: ", number)
 				num_detail, _ := json.Marshal(number)
+				color.Green(string(num_detail))
 				RedisListRpush(listId, string(num_detail))
 			}
 		}
@@ -210,6 +213,10 @@ func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string,
 
 func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, []Contact) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
+
+	if numLoadingMethod == "CONTACT" {
+		listId = fmt.Sprintf("CampaignContacts:%d:%d:%s", company, tenant, campaignId)
+	}
 	numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 	numberCount := RedisListLlen(listId)
 	numLoadingStatus := RedisGet(numLoadingStatusKey)
@@ -233,7 +240,9 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 		contactInf := ContactsDetails{}
 		_ = json.Unmarshal([]byte(numberWithTryCount), &contactInf)
 
-		return contactInf.phone, "0", "", contactInf.contacts
+		color.Green("NUMBER POPPED OUT TO DIAL : " + numberWithTryCount)
+
+		return contactInf.Phone, "0", "", contactInf.Contacts
 	} else {
 		numberInfos := strings.Split(numberWithTryCount, ":")
 		if len(numberInfos) > 3 {

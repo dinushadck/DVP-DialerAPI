@@ -225,14 +225,14 @@ type PhoneNumberResult struct {
 }
 
 type Contact struct {
-	contact  string
-	display  string
-	verified bool
+	Contact  string
+	Display  string
+	Verified bool
 }
 
 type ContactsDetails struct {
-	phone    string
-	contacts []Contact
+	Phone    string
+	Contacts []Contact
 }
 
 type ContactsResult struct {
