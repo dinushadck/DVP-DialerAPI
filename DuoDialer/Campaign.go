@@ -622,15 +622,15 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 										break
 									case "FIFO":
 										color.Cyan(fmt.Sprintf("======= STARTING FIFO DIALER : %s =======", campaignId))
-										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, extention)
+										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, extention, integrationData, &contacts)
 										break
 									case "PREVIEW":
 										color.Cyan(fmt.Sprintf("======= STARTING PREVIEW DIALER : %s =======", campaignId))
-										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention)
+										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts)
 										break
 									case "AGENT":
 										color.Cyan(fmt.Sprintf("======= STARTING AGENT DIALER : %s =======", campaignId))
-										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention)
+										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts)
 										break
 									}
 								} else {
