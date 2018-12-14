@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func GetUuid(callServerHost string) string {
@@ -82,6 +84,7 @@ func Dial(server, params, furl, data string) (*http.Response, error) {
 
 func HandleDialResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) string {
 	if err != nil {
+		color.Red("=============HANDLE DIAL RESPONSE RETURNED ERROR=============")
 		DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
