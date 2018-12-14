@@ -51,6 +51,7 @@ func OnEvent(eventInfo SubEvents) {
 				hashKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				session := RedisCheckKeyExist(hashKey)
 				if session {
+					color.Magenta("==========Session Found============")
 					DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
 					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
 
@@ -68,6 +69,8 @@ func OnEvent(eventInfo SubEvents) {
 
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
+				} else {
+					color.Magenta("==========Session Not Found============")
 				}
 				break
 			default:
