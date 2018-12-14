@@ -70,7 +70,7 @@ func OnEvent(eventInfo SubEvents) {
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				} else {
-					color.Magenta("==========Session Not Found============")
+					color.Magenta("==========Session Not Found : " + hashKey)
 				}
 				break
 			default:
