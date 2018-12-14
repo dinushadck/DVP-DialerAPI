@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/pubsub"
 	"github.com/mediocregopher/radix.v2/redis"
@@ -395,11 +396,14 @@ func RedisCheckKeyExist(key string) bool {
 		if client != nil {
 			if redisMode == "sentinel" {
 				sentinelPool.PutMaster(redisClusterName, client)
+				color.Magenta("=============SENTINEL=============")
 			} else {
 				redisPool.Put(client)
+				color.Magenta("=============INSTANCE=============")
 			}
 		} else {
 			fmt.Println("Cannot Put invalid connection")
+			color.Magenta("=============Cannot Put invalid connection=============")
 		}
 	}()
 
@@ -416,6 +420,7 @@ func RedisCheckKeyExist(key string) bool {
 	tempResult, sErr := client.Cmd("exists", key).Int()
 	errHndlr(sErr)
 	DialerLog(fmt.Sprintf("%d", tempResult))
+	color.Magenta("=============REDIS HASH RESULT : " + tempResult)
 	if tempResult == 1 {
 		return true
 	} else {
