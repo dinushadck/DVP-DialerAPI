@@ -442,6 +442,7 @@ type ResourceDetails struct {
 	ContactType  string
 	ResourceId   string
 	ResourceName string
+	Extention    string
 }
 
 type ArdsCallbackInfo struct {

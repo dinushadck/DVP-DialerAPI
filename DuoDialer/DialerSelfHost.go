@@ -312,9 +312,9 @@ func (dvp DVP) ArdsCallback() string {
 		SendPreviewDataToAgent(ardsCallbackInfo, reqOData)
 		break
 	case "AGENT":
-		log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: Class: %s :: Type: %s :: Category: %s :: SessionId: %s", ardsCallbackInfo.ResourceInfo.ContactName, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
+		log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: Class: %s :: Type: %s :: Category: %s :: SessionId: %s", ardsCallbackInfo.ResourceInfo.Extention, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
 		fmt.Println(log3)
-		DialAgent(ardsCallbackInfo.ResourceInfo.ContactName, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
+		DialAgent(ardsCallbackInfo.ResourceInfo.Extention, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
 		break
 	}
 
