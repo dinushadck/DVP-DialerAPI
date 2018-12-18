@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 //Add preview dial request to dialer
@@ -130,6 +132,8 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 
 			if dial == true {
 				SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
+				redwhite := color.New(color.FgRed).Add(color.BgWhite)
+				redwhite.Println(fmt.Sprintf("DIALING OUT CALL - AGENT CAMPAIGN : %s | NUMBER : %s", campaignName, phoneNumber))
 
 				resp, err := Dial(resourceServer.Url, param, furl, data)
 				HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
