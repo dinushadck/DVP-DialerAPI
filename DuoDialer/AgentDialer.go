@@ -107,7 +107,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			var dial bool
 			if contactType == "PRIVATE" {
 				dial = true
-				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=true,ignore_early_media=true,origination_caller_id_number=%s}", ardsQueueName, subChannelName, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber)
+				param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=PRIVATE_USER,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,nolocal:DVP_CUSTOM_PUBID=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", ardsQueueName, subChannelName, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber)
 				furl = fmt.Sprintf("user/%s@%s", contactName, domain)
 			} else if contactType == "PUBLIC" {
 				dial = true
