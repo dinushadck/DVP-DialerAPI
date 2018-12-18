@@ -82,6 +82,26 @@ func Dial(server, params, furl, data string) (*http.Response, error) {
 	return resp, err
 }
 
+func DialNew(server, params, furl, data string) (*http.Response, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in Dial", r)
+		}
+	}()
+	request := fmt.Sprintf("http://%s", server)
+	path := fmt.Sprintf("api/originate?")
+	param := fmt.Sprintf(" %s %s%s", data, params, furl)
+
+	u, _ := url.Parse(request)
+	u.Path += path
+	u.Path += param
+
+	fmt.Println(u.String())
+	resp, err := http.Get(u.String())
+	//defer resp.Body.Close()
+	return resp, err
+}
+
 func HandleDialResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) string {
 	if err != nil {
 		color.Red("=============HANDLE DIAL RESPONSE RETURNED ERROR=============")

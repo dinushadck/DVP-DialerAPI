@@ -135,7 +135,8 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 				redwhite := color.New(color.FgRed).Add(color.BgWhite)
 				redwhite.Println(fmt.Sprintf("DIALING OUT CALL - AGENT CAMPAIGN : %s | NUMBER : %s", campaignName, phoneNumber))
 
-				resp, err := Dial(resourceServer.Url, param, furl, data)
+				resp, err := DialNew(resourceServer.Url, param, furl, data)
+				//resp, err := Dial(resourceServer.Url, param, furl, data)
 				HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
 			} else {
 				SetSessionInfo(campaignId, sessionId, "Reason", "Invalied ContactType")
