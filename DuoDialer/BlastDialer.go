@@ -13,9 +13,9 @@ func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaign
 
 	var param string
 	if xGateway != "" {
-		param = fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CampaignName='%s',tenantid=%d,companyid=%d,CustomCompanyStr=%s,OperationType=Dialer,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=CUSTOMER,DVP_ADVANCED_OP_ACTION=BLAST,DVP_CALL_DIRECTION=outbound,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30,sip_h_X-Gateway=%s}", subChannelName, campaignId, campaignName, tenant, company, customCompanyStr, uuid, fromNumber, xGateway)
+		param = fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CampaignName='%s',tenantid=%d,companyid=%d,CustomCompanyStr=%s,OperationType=Dialer,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=CUSTOMER,DVP_ADVANCED_OP_ACTION=BLAST,DVP_CALL_DIRECTION=outbound,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30,sip_h_X-Gateway=%s,dialer_from_number=%s,dialer_to_number=%s}", subChannelName, campaignId, campaignName, tenant, company, customCompanyStr, uuid, fromNumber, xGateway, fromNumber, phoneNumber)
 	} else {
-		param = fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CampaignName='%s',tenantid=%d,companyid=%d,CustomCompanyStr=%s,OperationType=Dialer,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=CUSTOMER,DVP_ADVANCED_OP_ACTION=BLAST,DVP_CALL_DIRECTION=outbound,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30}", subChannelName, campaignId, campaignName, tenant, company, customCompanyStr, uuid, fromNumber)
+		param = fmt.Sprintf(" {DVP_CUSTOM_PUBID=%s,CampaignId=%s,CampaignName='%s',tenantid=%d,companyid=%d,CustomCompanyStr=%s,OperationType=Dialer,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=CUSTOMER,DVP_ADVANCED_OP_ACTION=BLAST,DVP_CALL_DIRECTION=outbound,return_ring_ready=true,ignore_early_media=false,origination_uuid=%s,origination_caller_id_number=%s,originate_timeout=30,dialer_from_number=%s,dialer_to_number=%s}", subChannelName, campaignId, campaignName, tenant, company, customCompanyStr, uuid, fromNumber, fromNumber, phoneNumber)
 	}
 	furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
 	data := " xml dialer"
