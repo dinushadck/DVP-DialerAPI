@@ -290,15 +290,29 @@ func (dvp DVP) ArdsCallback() string {
 	}()
 	//company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	//if company != 0 && tenant != 0 {
-	fmt.Println("---------------Start ArdsCallback---------")
+	redyellow := color.New(color.FgRed).Add(color.BgCyan)
+	redyellow.Println("=========== ARDS CALL BACK RECEIVED ==========")
 	jResult, _ := url.QueryUnescape(dvp.Context.Request().URL.RawQuery)
 	log := fmt.Sprintf("Start ArdsCallback :%s ", jResult)
-	fmt.Println(log)
+	redyellow.Println(log)
 
 	var ardsCallbackInfo ArdsCallbackInfo
 	var reqOData RequestOtherData
 	json.Unmarshal([]byte(jResult), &ardsCallbackInfo)
 	json.Unmarshal([]byte(ardsCallbackInfo.OtherInfo), &reqOData)
+
+	//Send Agent Reserved Notification If Integration Data Exist
+	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "Agent", ardsCallbackInfo.ResourceInfo.ResourceName)
+	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "ResourceId", ardsCallbackInfo.ResourceInfo.ResourceId)
+
+	hKey := fmt.Sprintf("sessionInfo:%s:%s", reqOData.CampaignId, ardsCallbackInfo.SessionID)
+	sessionInfo := RedisHashGetAll(hKey)
+
+	if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
+		go ManageIntegrationData(sessionInfo, "AGENT")
+	} else {
+		color.Magenta("NO INTEGRATION DATA")
+	}
 
 	go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
 

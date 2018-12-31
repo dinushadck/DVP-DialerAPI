@@ -39,7 +39,7 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["TryCount"] = tryCount
 	data["ExpireTime"] = sessionExprTimeStr
 
-	if integrationData != nil && integrationData.Url != "" {
+	if integrationData != nil {
 		intgrData, _ := json.Marshal(*integrationData)
 		data["IntegrationData"] = string(intgrData)
 	}
@@ -63,47 +63,62 @@ func SetSessionInfo(campaignId, sessionId, filed, value string) {
 	PublishEvent(campaignId, sessionId)
 }
 
-func ManageIntegrationData(sessionInfo map[string]string) {
+func ManageIntegrationData(sessionInfo map[string]string, integrationType string) {
 	defer func() {
 		if r := recover(); r != nil {
 			color.Red(fmt.Sprintf("Recovered in SendIntegrationData %+v", r))
 		}
 	}()
 
-	fmt.Println(sessionInfo["IntegrationData"])
-
 	intData := IntegrationConfig{}
 
 	_ = json.Unmarshal([]byte(sessionInfo["IntegrationData"]), &intData)
 
 	fmt.Println(intData)
-
 	bodyData := map[string]interface{}{}
 
-	for _, element := range intData.Params {
-		bodyData[element] = sessionInfo[element]
+	integrationUrl := ""
+	if integrationType == "CUSTOMER" {
+		for _, element := range intData.Customer.Params {
+			bodyData[element] = sessionInfo[element]
+		}
+		integrationUrl = intData.Customer.Url
+
+	} else if integrationType == "AGENT" {
+		for _, element := range intData.Agent.Params {
+			bodyData[element] = sessionInfo[element]
+		}
+		bodyData["AgentState"] = "RESERVED"
+		integrationUrl = intData.Agent.Url
+
 	}
 
-	jsonData, _ := json.Marshal(bodyData)
+	if integrationUrl != "" {
 
-	req, err := http.NewRequest(intData.Method, intData.Url, bytes.NewBuffer(jsonData))
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	defer resp.Body.Close()
+		jsonData, _ := json.Marshal(bodyData)
 
-	DialerLog(fmt.Sprintf("response Status:%s", resp.Status))
-	DialerLog(fmt.Sprintf("response Headers:%s", resp.Header))
-	body, errb := ioutil.ReadAll(resp.Body)
-	if errb != nil {
-		color.Red(err.Error())
+		req, err := http.NewRequest("POST", integrationUrl, bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		defer resp.Body.Close()
+
+		DialerLog(fmt.Sprintf("response Status:%s", resp.Status))
+		DialerLog(fmt.Sprintf("response Headers:%s", resp.Header))
+		body, errb := ioutil.ReadAll(resp.Body)
+		if errb != nil {
+			color.Red(err.Error())
+		} else {
+			result := string(body)
+			DialerLog(fmt.Sprintf("response Body:%s", result))
+		}
 	} else {
-		result := string(body)
-		DialerLog(fmt.Sprintf("response Body:%s", result))
+		color.Red("========NO INTEGRATION DATA FOUND=======")
 	}
+
 }
 
 func UploadSessionInfo(campaignId, sessionId string) {

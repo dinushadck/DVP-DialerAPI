@@ -18,6 +18,7 @@ var securitylPool *sentinel.Client
 var redisPool *pool.Pool
 
 var subChannelName string
+var subChannelNameAgent string
 
 func InitiateRedis() {
 
@@ -933,6 +934,101 @@ func PubSub() {
 			}
 
 			psc.Unsubscribe(subChannelName)
+
+		}
+		time.Sleep(1 * time.Second)
+	}
+}
+
+func PubSubAgentChan() {
+	var c3 *redis.Client
+	var err1 error
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in PubSub", r)
+		}
+
+		if c3 != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, c3)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
+	}()
+
+	subChannelNameAgent = fmt.Sprintf("dialerAgent%s", dialerId)
+	for {
+		if redisMode == "sentinel" {
+
+			c3, err1 = sentinelPool.GetMaster(redisClusterName)
+			errHndlrNew("PubSub", "getConnFromPool", err1)
+			//defer sentinelPool.PutMaster(redisClusterName, c2)
+
+			psc := pubsub.NewSubClient(c3)
+			psr := psc.Subscribe(subChannelNameAgent)
+			//ppsr := psc.PSubscribe("*")
+
+			//if ppsr.Err == nil {
+
+			for {
+				psr = psc.Receive()
+				if psr.Timeout() {
+					fmt.Println("psc.Receive Timeout:: ", psr.Timeout())
+					break
+
+				}
+				if psr.Err != nil {
+
+					fmt.Println("psc.Receive Err:: ", psr.Err.Error())
+					break
+				}
+
+				var subEvent = SubEvents{}
+				json.Unmarshal([]byte(psr.Message), &subEvent)
+				go OnEventAgent(subEvent)
+			}
+			//s := strings.Split("127.0.0.1:5432", ":")
+			//}
+
+			psc.Unsubscribe(subChannelNameAgent)
+
+		} else {
+			c3, err1 = redis.Dial("tcp", redisIp)
+			errHndlr(err1)
+			defer c3.Close()
+
+			//authServer
+			authE := c3.Cmd("auth", redisPassword)
+			errHndlr(authE.Err)
+
+			psc := pubsub.NewSubClient(c3)
+			psr := psc.Subscribe(subChannelNameAgent)
+			//ppsr := psc.PSubscribe("*")
+
+			//if ppsr.Err == nil {
+
+			for {
+				psr = psc.Receive()
+				if psr.Timeout() {
+					fmt.Println("psc.Receive Timeout:: ", psr.Timeout())
+					break
+
+				}
+
+				if psr.Err != nil {
+
+					fmt.Println("psc.Receive Err:: ", psr.Err.Error())
+					break
+				}
+
+				var subEvent = SubEvents{}
+				json.Unmarshal([]byte(psr.Message), &subEvent)
+				go OnEventAgent(subEvent)
+			}
+
+			psc.Unsubscribe(subChannelNameAgent)
 
 		}
 		time.Sleep(1 * time.Second)

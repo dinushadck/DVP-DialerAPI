@@ -18,6 +18,7 @@ func InitiateDuoDialer() {
 	AddDialerInfoToRedis()
 	//Create new go routing to listen to eventmonitor events EG:- CHANNEL_CREATE, CHANNEL_ANSWER
 	go PubSub()
+	go PubSubAgentChan()
 }
 
 func AddDialerInfoToRedis() {

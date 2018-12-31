@@ -191,6 +191,11 @@ type CampaignConfigInfo struct {
 }
 
 type IntegrationConfig struct {
+	Agent    IntegrationInfo
+	Customer IntegrationInfo
+}
+
+type IntegrationInfo struct {
 	Url    string
 	Method string
 	Params []string
