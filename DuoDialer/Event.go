@@ -62,6 +62,7 @@ func OnEvent(eventInfo SubEvents) {
 					color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
 
 					if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
+						sessionInfo["EventType"] = "CUSTOMER_DISCONNECT"
 						go ManageIntegrationData(sessionInfo, "CUSTOMER")
 					} else {
 						color.Magenta("NO INTEGRATION DATA")
@@ -104,7 +105,7 @@ func OnEventAgent(eventInfo SubEvents) {
 			fmt.Println("company: ", company)
 			fmt.Println("tenant: ", tenant)
 
-			switch eventInfo.EventCategory {
+			switch eventInfo.EventName {
 			case "CHANNEL_BRIDGE":
 				fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				break

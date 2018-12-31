@@ -88,7 +88,6 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 		for _, element := range intData.Agent.Params {
 			bodyData[element] = sessionInfo[element]
 		}
-		bodyData["AgentState"] = "RESERVED"
 		integrationUrl = intData.Agent.Url
 
 	}
