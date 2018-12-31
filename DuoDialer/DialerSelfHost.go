@@ -290,7 +290,7 @@ func (dvp DVP) ArdsCallback() string {
 	}()
 	//company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	//if company != 0 && tenant != 0 {
-	redyellow := color.New(color.FgRed).Add(color.BgCyan)
+	redyellow := color.New(color.FgRed).Add(color.BgYellow)
 	redyellow.Println("=========== ARDS CALL BACK RECEIVED ==========")
 	jResult, _ := url.QueryUnescape(dvp.Context.Request().URL.RawQuery)
 	log := fmt.Sprintf("Start ArdsCallback :%s ", jResult)

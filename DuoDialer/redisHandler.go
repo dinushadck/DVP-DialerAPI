@@ -928,7 +928,7 @@ func PubSub() {
 					break
 				}
 
-				var subEvent = SubEvents{}
+				subEvent := SubEvents{}
 				json.Unmarshal([]byte(psr.Message), &subEvent)
 				go OnEvent(subEvent)
 			}
@@ -985,7 +985,7 @@ func PubSubAgentChan() {
 					break
 				}
 
-				var subEvent = SubEvents{}
+				subEvent := SubEvents{}
 				json.Unmarshal([]byte(psr.Message), &subEvent)
 				go OnEventAgent(subEvent)
 			}
