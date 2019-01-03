@@ -236,8 +236,9 @@ type Contact struct {
 }
 
 type ContactsDetails struct {
-	Phone    string
-	Contacts []Contact
+	Phone       string
+	PreviewData string
+	Contacts    []Contact
 }
 
 type ContactsResult struct {

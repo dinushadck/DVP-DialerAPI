@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/fatih/color"
 )
 
 func AddRequestServer() {
@@ -85,8 +87,9 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	req.Header.Set("companyinfo", internalAuthToken)
-	fmt.Println("request:", serviceurl)
-	fmt.Println(string(jsonData))
+
+	whiteblue := color.New(color.FgWhite).Add(color.BgBlue)
+	whiteblue.Println(fmt.Sprintf("ARDS REQUEST : %s | DATA : %s", serviceurl, string(jsonData)))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
