@@ -22,7 +22,7 @@ func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaign
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "BlastDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData, contacts)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "BlastDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData, contacts, "")
 
 	redwhite := color.New(color.FgRed).Add(color.BgWhite)
 	redwhite.Println(fmt.Sprintf("DIALING OUT CALL - BLAST CAMPAIGN : %s | NUMBER : %s", campaignName, phoneNumber))

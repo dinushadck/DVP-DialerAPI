@@ -13,7 +13,7 @@ import (
 )
 
 //Initiate dial session for a number
-func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string, integrationData *IntegrationConfig, contacts *[]Contact) {
+func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string, integrationData *IntegrationConfig, contacts *[]Contact, previewData string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
@@ -38,6 +38,10 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["DialerStatus"] = dialerStatus
 	data["TryCount"] = tryCount
 	data["ExpireTime"] = sessionExprTimeStr
+
+	if previewData != "" {
+		data["PreviewData"] = previewData
+	}
 
 	if integrationData != nil {
 		intgrData, _ := json.Marshal(*integrationData)

@@ -668,7 +668,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							emailData["from"] = defaultAni
 							emailData["subject"] = campaignName
 
-							InitiateSessionInfo(company, tenant, 240, "Campaign", "Email", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, email, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil)
+							InitiateSessionInfo(company, tenant, 240, "Campaign", "Email", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, email, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "")
 
 							if len(templates) > 0 {
 								emailData["template"] = templates[0]
@@ -747,7 +747,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							smsData["from"] = defaultAni
 							smsData["subject"] = campaignName
 
-							InitiateSessionInfo(company, tenant, 240, "Campaign", "SMS", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, number, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil)
+							InitiateSessionInfo(company, tenant, 240, "Campaign", "SMS", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, number, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "")
 
 							if len(templates) > 0 {
 								smsData["template"] = templates[0]
