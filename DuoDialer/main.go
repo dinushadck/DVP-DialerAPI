@@ -41,6 +41,7 @@ func main() {
 	for {
 		//Get current campaign count
 		onGoingCampaignCount := GetOnGoingCampaignCount()
+		color.Blue(fmt.Sprintf("Ongoing Campaign Count : %d - Campaign Limit : %d", onGoingCampaignCount, campaignLimit))
 		if onGoingCampaignCount < campaignLimit {
 			//Request for more campaigns
 			campaigns := RequestCampaign(campaignLimit - onGoingCampaignCount)

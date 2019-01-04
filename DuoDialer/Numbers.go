@@ -79,14 +79,14 @@ func GetContactsFromNumberBase(company, tenant, numberLimit int, campaignId, cam
 		}
 	}()
 	numbers := make([]ContactsDetails, 0)
-	pageKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
+	//pageKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 
 	numberOffsetToRequest := "0"
 
-	if numberLimit == 500 {
+	/* if numberLimit == 500 {
 		numberOffsetToRequest = RedisGet(pageKey)
-	}
-	DialerLog(fmt.Sprintf("numberOffsetToRequest: %s", numberOffsetToRequest))
+	} */
+	//DialerLog(fmt.Sprintf("numberOffsetToRequest: %s", numberOffsetToRequest))
 
 	// Get phone number from campign service and append
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
@@ -114,7 +114,7 @@ func GetContactsFromNumberBase(company, tenant, numberLimit int, campaignId, cam
 	if contactNumberResult.IsSuccess == true {
 		numbers = contactNumberResult.Result
 
-		RedisIncrBy(pageKey, len(contactNumberResult.Result))
+		//RedisIncrBy(pageKey, len(contactNumberResult.Result))
 	}
 	return numbers
 }

@@ -190,7 +190,7 @@ func AddCampaignToDialer(campaignD Campaign) {
 			}
 		}
 	} else {
-		color.Red("Add Campaign to Redis failed: Error: No shedule info found")
+		color.Red(fmt.Sprintf("Add Campaign : %s to Redis failed No schedule found", campaignD.CampaignName))
 	}
 }
 
@@ -578,7 +578,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
-			DialerLog(fmt.Sprintf("Campaign Current State:: %s", campStatus))
+			whitegreen := color.New(color.FgWhite).Add(color.BgGreen)
+			whitegreen.Println(fmt.Sprintf("Campaign Current State: %s", campStatus))
 			//color.Red(fmt.Sprintf("%s : %s", campaignName, campStatus))
 			if campStatus == "Running" {
 				tm := time.Now().In(location)
