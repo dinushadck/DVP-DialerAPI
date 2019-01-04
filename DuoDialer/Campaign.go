@@ -578,7 +578,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
-			if campStatus == "Running" {
+			if campStatus == "Running" || campStatus == "Resume" {
 				tm := time.Now().In(location)
 				DialerLog(fmt.Sprintf("endTime: %s", appmntEndTime.String()))
 				DialerLog(fmt.Sprintf("timeNW: %s", tm.String()))
