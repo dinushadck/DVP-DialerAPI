@@ -816,6 +816,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 					return
 				}
 			}
+			time.Sleep(500 * time.Millisecond)
 		}
 	} else {
 		color.Yellow(fmt.Sprintf("APPOINTMENT OR RESOURCE SERVER NOT FOUND - SETTING CAMPAIGN : %s STATUS TO WAITING FOR APPOINTMENT", campaignId))
