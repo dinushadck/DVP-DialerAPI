@@ -33,7 +33,8 @@ func CheckTimeouts() {
 			tThen, _ := strconv.ParseInt(cbVal, 10, 64)
 
 			timeDiff := tNow - tThen
-
+			color.Cyan("TIME NOW : %d", tNow)
+			color.Cyan("TIME THEN : %d", tThen)
 			color.Cyan("TIME DIFF : %d", timeDiff)
 
 			if timeDiff > 120 {
