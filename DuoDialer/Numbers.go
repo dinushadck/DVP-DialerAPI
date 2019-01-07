@@ -95,7 +95,7 @@ func GetContactsFromNumberBase(company, tenant, numberLimit int, campaignId, cam
 	client := &http.Client{}
 
 	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/Campaign/%s/Contacts/%d/%s", CreateHost(contactServiceHost, contactServicePort), campaignId, numberLimit, numberOffsetToRequest)
-	DialerLog(fmt.Sprintf("Start GetContacts request: ", request))
+	color.Cyan(fmt.Sprintf("Start GetContacts request: %s", request))
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
