@@ -540,6 +540,8 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 
 //----------Run Campaign-----------------------
 func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int, integrationData *IntegrationConfig, numLoadingMethod string) {
+	campStatus := GetCampaignStatus(campaignId, company, tenant)
+	SetCampaignStatus(campaignId, "Running", company, tenant)
 	emtAppoinment := Appoinment{}
 	defResourceServerInfo := ResourceServerInfo{}
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
@@ -552,9 +554,9 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 	if appment != emtAppoinment && resourceServerInfos != defResourceServerInfo {
 		color.Green(fmt.Sprintf("APPOINTMENT FOUND FOR CAMPAIGN : %s", campaignId))
-		campStatus := GetCampaignStatus(campaignId, company, tenant)
+		/* campStatus := GetCampaignStatus(campaignId, company, tenant)
 
-		SetCampaignStatus(campaignId, "Running", company, tenant)
+		SetCampaignStatus(campaignId, "Running", company, tenant) */
 		maxChannelLimitStr := strconv.Itoa(campaignMaxChannelCount)
 		SetCampChannelMaxLimitDirect(campaignId, maxChannelLimitStr)
 
@@ -578,7 +580,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
-			if campStatus == "Running" || campStatus == "Resume" {
+			if campStatus == "Running" {
 				tm := time.Now().In(location)
 				DialerLog(fmt.Sprintf("endTime: %s", appmntEndTime.String()))
 				DialerLog(fmt.Sprintf("timeNW: %s", tm.String()))
@@ -638,7 +640,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								time.Sleep(100 * time.Millisecond)
 							}
 						} else {
-							DialerLog("dialer waiting...")
+							color.Cyan("CHANNEL COUNT EXCEEDED : " + campaignName)
 							time.Sleep(500 * time.Millisecond)
 						}
 						break
