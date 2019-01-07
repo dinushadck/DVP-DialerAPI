@@ -625,7 +625,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, extention, integrationData, &contacts)
 										break
 									case "PREVIEW":
-										color.Cyan(fmt.Sprintf("======= STARTING PREVIEW DIALER : %s =======", campaignId))
+										color.Cyan(fmt.Sprintf("======= STARTING PREVIEW DIALER : %s ======= %v", campaignId, contacts))
 										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts)
 										break
 									case "AGENT":
