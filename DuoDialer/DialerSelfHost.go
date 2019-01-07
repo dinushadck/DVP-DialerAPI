@@ -309,6 +309,7 @@ func (dvp DVP) ArdsCallback() string {
 	sessionInfo := RedisHashGetAll(hKey)
 
 	if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
+		sessionInfo["EventType"] = "AGENT_RESERVED"
 		go ManageIntegrationData(sessionInfo, "AGENT")
 	} else {
 		color.Magenta("NO INTEGRATION DATA")
@@ -347,6 +348,7 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 	}()
 	//company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	//if company != 0 && tenant != 0 {
+
 	log := fmt.Sprintf("Start PreviewCallBack Ref:%s ", rdata.Ref)
 	log1 := fmt.Sprintf("Start PreviewCallBack TKey:%s ", rdata.Reply.Tkey)
 	log2 := fmt.Sprintf("Start PreviewCallBack Message:%s ", rdata.Reply.Message)
@@ -359,6 +361,8 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 
 	var reqOData RequestOtherData
 	json.Unmarshal([]byte(refData.OtherInfo), &reqOData)
+
+	RedisHashDelField("CALLBACK_TIMEOUTS", reqOData.CampaignId+":"+refData.SessionID)
 
 	if rdata.Reply.Message == "ACCEPTED" {
 		fmt.Println("Start Dial Priview Number")

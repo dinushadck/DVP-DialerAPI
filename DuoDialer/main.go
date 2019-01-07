@@ -24,6 +24,33 @@ func errHndlrNew(errorFrom, command string, err error) {
 	}
 }
 
+func CheckTimeouts() {
+	for {
+		cblist := RedisHashGetAll("CALLBACK_TIMEOUTS")
+
+		for cbKey, cbVal := range cblist {
+			tNow := time.Now().Unix()
+			tThen, _ := strconv.ParseInt(cbVal, 10, 64)
+
+			timeDiff := tNow - tThen
+
+			color.Cyan("TIME DIFF : %d", timeDiff)
+
+			if timeDiff > 120 {
+				//Decrement Campaign Count
+				hKey := fmt.Sprintf("sessionInfo:%s", cbKey)
+				sessionInfo := RedisHashGetAll(hKey)
+				DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
+				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
+				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
+				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+			}
+
+		}
+		time.Sleep(10 * time.Second)
+	}
+}
+
 func main() {
 
 	//Innitiate configuration
@@ -35,6 +62,8 @@ func main() {
 	go AddRequestServer()
 
 	go EnableConsoleInput()
+
+	go CheckTimeouts()
 
 	//AddPhoneNumberToCallback("1", "1", "1", "1", "0112546969", "USER_BUSY")
 	//MAIN THREAD

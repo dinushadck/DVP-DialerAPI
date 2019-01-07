@@ -541,6 +541,45 @@ func RedisHashSetField(hkey, field, value string) bool {
 	}
 }
 
+func RedisHashDelField(hkey, field string) bool {
+	var client *redis.Client
+	var err error
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisHashDelField", r)
+		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
+	}()
+
+	if redisMode == "sentinel" {
+		client, err = sentinelPool.GetMaster(redisClusterName)
+		errHndlrNew("OnEvent", "getConnFromSentinel", err)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
+	} else {
+		client, err = redisPool.Get()
+		errHndlrNew("OnEvent", "getConnFromPool", err)
+		//defer redisPool.Put(client)
+	}
+
+	tempResult, _ := client.Cmd("hdel", hkey, field).Int()
+
+	if tempResult == 1 {
+		return true
+	} else {
+		return false
+	}
+}
+
 func RedisHashSetMultipleField(hkey string, data map[string]string) bool {
 	var client *redis.Client
 	var err error

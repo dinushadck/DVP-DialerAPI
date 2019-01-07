@@ -19,6 +19,7 @@ func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInf
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, uuid, "Extention", extention)
 	SetSessionInfo(campaignId, uuid, "XGateway", xGateway)
+	SetSessionInfo(campaignId, uuid, "ResourceServerId", resourceServer.ResourceServerId)
 
 	//get attribute info from redis ** after put data stucture to cam service
 	attributeInfo := make([]string, 0)
@@ -84,6 +85,8 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo, reqOData RequestOther
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
+	} else {
+		RedisHashSetField("CALLBACK_TIMEOUTS", campaignId+":"+resourceInfo.SessionID, string(time.Now().Unix()))
 	}
 	defer resp.Body.Close()
 
