@@ -242,7 +242,7 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 
 		color.Green("NUMBER POPPED OUT TO DIAL : " + numberWithTryCount)
 
-		return contactInf.Phone, "0", contactInf.PreviewData, contactInf.Contacts
+		return contactInf.Phone, "0", contactInf.PreviewData, contactInf.Api_Contacts
 	} else {
 		numberInfos := strings.Split(numberWithTryCount, ":")
 		if len(numberInfos) > 3 {
