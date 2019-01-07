@@ -81,7 +81,7 @@ func main() {
 					color.Red(fmt.Sprintf("%s : %s", campaign.CampaignName, campStatus))
 					DialerLog(fmt.Sprintf("campStatus: %s", campStatus))
 
-					if campStatus == "Resume" || campStatus == "Start" || campStatus == "PauseByDialer" || campStatus == "Running" || campStatus == "Waiting for Appoinment" {
+					if campStatus == "Resume" || campStatus == "Start" || campStatus == "PauseByDialer" || campStatus == "Waiting for Appoinment" {
 						//tempCampaignStartDate, _ := time.Parse(layout2, campaign.CampConfigurations.StartDate)
 						//tempCampaignEndDate, _ := time.Parse(layout2, campaign.CampConfigurations.EndDate)
 

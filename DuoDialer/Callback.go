@@ -182,6 +182,8 @@ func ValidateDisconnectReason(disconnectReason string) (keyExist bool, value str
 func AddContactToCallback(sessionInfo map[string]string) {
 	DialerLog("start AddPhoneNumberToCallback")
 
+	color.Cyan(fmt.Sprintf("SESSION : %v", sessionInfo))
+
 	contactsList := []Contact{}
 
 	_ = json.Unmarshal([]byte(sessionInfo["Contacts"]), &contactsList)
