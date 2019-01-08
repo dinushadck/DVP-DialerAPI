@@ -122,7 +122,7 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 		resultInfo := strings.Split(tmx, " ")
 		if len(resultInfo) > 0 {
 			if resultInfo[0] == "-ERR" {
-				/* DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
+				DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
 
 				if len(resultInfo) > 1 {
 					reason := resultInfo[1]
@@ -135,7 +135,7 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 					SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
 				}
 				SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
-				go UploadSessionInfo(campaignId, sessionId) */
+				go UploadSessionInfo(campaignId, sessionId)
 			} else {
 				SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
 				SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_success")
