@@ -62,7 +62,7 @@ func OnEvent(eventInfo SubEvents) {
 					color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
 
 					if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
-						sessionInfo["EventType"] = "CUST	OMER_DISCONNECT"
+						sessionInfo["EventType"] = "CUSTOMER_DISCONNECT"
 						go ManageIntegrationData(sessionInfo, "CUSTOMER")
 					} else {
 						color.Magenta("NO INTEGRATION DATA")
@@ -93,7 +93,6 @@ func OnEventAgent(eventInfo SubEvents) {
 		if eventInfo.TenantId != "" && eventInfo.CompanyId != "" {
 			switch eventInfo.EventName {
 			case "CHANNEL_CREATE":
-				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelCreatetime", time.Now().Format(layout4))
 				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s", eventInfo.EventName, eventInfo.SessionId))
 				hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
@@ -104,8 +103,6 @@ func OnEventAgent(eventInfo SubEvents) {
 				}
 				break
 			case "CHANNEL_ANSWER":
-				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "DialerStatus", "channel_answered")
-				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelAnswertime", time.Now().Format(layout4))
 				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s", eventInfo.EventName, eventInfo.SessionId))
 				hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
@@ -115,9 +112,9 @@ func OnEventAgent(eventInfo SubEvents) {
 					go ManageIntegrationData(sessionInfo, "AGENT")
 				}
 				break
-			case "CHANNEL_HANGUP":
-				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
-				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s", eventInfo.EventName, eventInfo.SessionId))
+			case "CHANNEL_DESTROY":
+				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", eventInfo.DisconnectReason)
+				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s, DisconnectReason : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.DisconnectReason))
 				hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
 
