@@ -47,7 +47,7 @@ func OnEvent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_DESTROY":
 				//LogEvent(eventInfo)
-				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory))
+				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s, DisconnectReason : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory, eventInfo.DisconnectReason))
 				hashKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				session := RedisCheckKeyExist(hashKey)
 				if session {
@@ -62,7 +62,7 @@ func OnEvent(eventInfo SubEvents) {
 					color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
 
 					if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
-						sessionInfo["EventType"] = "CUSTOMER_DISCONNECT"
+						sessionInfo["EventType"] = "CUST	OMER_DISCONNECT"
 						go ManageIntegrationData(sessionInfo, "CUSTOMER")
 					} else {
 						color.Magenta("NO INTEGRATION DATA")

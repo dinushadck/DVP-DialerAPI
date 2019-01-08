@@ -90,7 +90,12 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 	} else if integrationType == "AGENT" {
 		for _, element := range intData.Agent.Params {
-			bodyData[element] = sessionInfo[element]
+			if element == "Reason" {
+				bodyData[element] = sessionInfo["AgentReason"]
+			} else {
+				bodyData[element] = sessionInfo[element]
+			}
+
 		}
 		integrationUrl = intData.Agent.Url
 
