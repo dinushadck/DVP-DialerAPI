@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -86,7 +87,8 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo, reqOData RequestOther
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {
-		RedisHashSetField("CALLBACK_TIMEOUTS", campaignId+":"+resourceInfo.SessionID, string(time.Now().Unix()))
+		t := strconv.FormatInt(time.Now().Unix(), 10)
+		RedisHashSetField("CALLBACK_TIMEOUTS", campaignId+":"+resourceInfo.SessionID, t)
 	}
 	defer resp.Body.Close()
 

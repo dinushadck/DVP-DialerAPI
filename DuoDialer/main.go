@@ -42,6 +42,7 @@ func CheckTimeouts() {
 				hKey := fmt.Sprintf("sessionInfo:%s", cbKey)
 				sessionInfo := RedisHashGetAll(hKey)
 				DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
+				RedisHashDelField("CALLBACK_TIMEOUTS", sessionInfo["CampaignId"]+":"+sessionInfo["SessionId"])
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
 				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
