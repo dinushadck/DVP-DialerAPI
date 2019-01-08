@@ -53,7 +53,13 @@ func OnEvent(eventInfo SubEvents) {
 				if session {
 					color.Magenta("==========Session Found============")
 					DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
-					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
+					isdisconnectReasonAllowed, hangupGruop := ValidateDisconnectReason(eventInfo.DisconnectReason)
+
+					if isdisconnectReasonAllowed {
+						SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", hangupGruop)
+					} else {
+						SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
+					}
 
 					hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 					sessionInfo := RedisHashGetAll(hKey)
@@ -113,7 +119,14 @@ func OnEventAgent(eventInfo SubEvents) {
 				}
 				break
 			case "CHANNEL_DESTROY":
-				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", eventInfo.DisconnectReason)
+				isdisconnectReasonAllowed, hangupGruop := ValidateDisconnectReason(eventInfo.DisconnectReason)
+
+				if isdisconnectReasonAllowed {
+					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", hangupGruop)
+				} else {
+					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", eventInfo.DisconnectReason)
+				}
+
 				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s, DisconnectReason : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.DisconnectReason))
 				hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
