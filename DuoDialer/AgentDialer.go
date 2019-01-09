@@ -133,7 +133,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			//			}
 
 			//call recording enable
-			data = fmt.Sprintf(" %s xml dialer", extention)
+			data = fmt.Sprintf(" %s xml dialer", contactName)
 			//data = fmt.Sprintf(" %s xml dialer", phoneNumber)
 
 			if dial == true {
