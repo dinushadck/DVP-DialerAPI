@@ -108,7 +108,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 
 			dial = true
 			param = fmt.Sprintf(" {sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s}", ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber)
-			furl = fmt.Sprintf("sofia/gateway/%s@%s", trunkCode, phoneNumber)
+			furl = fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, phoneNumber)
 
 			/* if contactType == "PRIVATE" {
 				dial = true
