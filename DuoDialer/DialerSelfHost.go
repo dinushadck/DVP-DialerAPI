@@ -304,8 +304,10 @@ func (dvp DVP) ArdsCallback() string {
 	//Send Agent Reserved Notification If Integration Data Exist
 	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "Agent", ardsCallbackInfo.ResourceInfo.ResourceName)
 	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "ResourceId", ardsCallbackInfo.ResourceInfo.ResourceId)
+	SetAgentSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "Agent", ardsCallbackInfo.ResourceInfo.ResourceName)
+	SetAgentSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "ResourceId", ardsCallbackInfo.ResourceInfo.ResourceId)
 
-	hKey := fmt.Sprintf("sessionInfo:%s:%s", reqOData.CampaignId, ardsCallbackInfo.SessionID)
+	hKey := fmt.Sprintf("agentSessionInfo:%s:%s", reqOData.CampaignId, ardsCallbackInfo.SessionID)
 	sessionInfo := RedisHashGetAll(hKey)
 
 	if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {

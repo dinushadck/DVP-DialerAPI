@@ -18,6 +18,7 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
 	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "AgentDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData, contacts, "")
+	InitiateAgentSessionInfo(company, tenant, 240, campaignId, campaignName, uuid, phoneNumber, integrationData)
 	SetSessionInfo(campaignId, uuid, "FromNumber", fromNumber)
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, uuid, "Extention", extention)
@@ -107,7 +108,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			var dial bool
 
 			dial = true
-			param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s,CALL_LEG_TYPE=CUSTOMER}", ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber)
+			param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,CALL_LEG_TYPE=CUSTOMER}", ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, phoneNumber, phoneNumber, sessionInfo["Agent"])
 			furl = fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, phoneNumber)
 
 			/* if contactType == "PRIVATE" {

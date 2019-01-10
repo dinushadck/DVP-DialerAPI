@@ -94,7 +94,7 @@ func OnEventAgent(eventInfo SubEvents) {
 			switch eventInfo.EventName {
 			case "CHANNEL_CREATE":
 				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s", eventInfo.EventName, eventInfo.SessionId))
-				hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
+				hKey := fmt.Sprintf("agentSessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
 
 				if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
@@ -104,7 +104,7 @@ func OnEventAgent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_ANSWER":
 				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s", eventInfo.EventName, eventInfo.SessionId))
-				hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
+				hKey := fmt.Sprintf("agentSessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
 
 				if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
@@ -113,9 +113,9 @@ func OnEventAgent(eventInfo SubEvents) {
 				}
 				break
 			case "CHANNEL_DESTROY":
-				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", eventInfo.DisconnectReason)
+				SetAgentSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", eventInfo.DisconnectReason)
 				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s, DisconnectReason : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.DisconnectReason))
-				hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
+				hKey := fmt.Sprintf("agentSessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
 
 				if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {

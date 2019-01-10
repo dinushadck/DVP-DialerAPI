@@ -12,6 +12,29 @@ import (
 	"github.com/fatih/color"
 )
 
+func InitiateAgentSessionInfo(company, tenant, sessionExprTime int, campaignId, campaignName, sessionId, number string, integrationData *IntegrationConfig) {
+	companyStr := strconv.Itoa(company)
+	tenantStr := strconv.Itoa(tenant)
+	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
+
+	data := make(map[string]string)
+	data["CompanyId"] = companyStr
+	data["TenantId"] = tenantStr
+	data["SessionId"] = sessionId
+	data["Number"] = number
+	data["CampaignId"] = campaignId
+	data["CampaignName"] = campaignName
+	data["ExpireTime"] = sessionExprTimeStr
+
+	if integrationData != nil {
+		intgrData, _ := json.Marshal(*integrationData)
+		data["IntegrationData"] = string(intgrData)
+	}
+
+	hashKey := fmt.Sprintf("agentSessionInfo:%s:%s", campaignId, sessionId)
+	RedisHashSetMultipleField(hashKey, data)
+}
+
 //Initiate dial session for a number
 func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string, integrationData *IntegrationConfig, contacts *[]Contact, previewData string) {
 	companyStr := strconv.Itoa(company)
@@ -55,6 +78,7 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 			data["Contacts"] = string(contactsByteArr)
 		}
 	}
+
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetMultipleField(hashKey, data)
 	PublishEvent(campaignId, sessionId)
@@ -65,6 +89,11 @@ func SetSessionInfo(campaignId, sessionId, filed, value string) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	RedisHashSetField(hashKey, filed, value)
 	PublishEvent(campaignId, sessionId)
+}
+
+func SetAgentSessionInfo(campaignId, sessionId, filed, value string) {
+	hashKey := fmt.Sprintf("agentSessionInfo:%s:%s", campaignId, sessionId)
+	RedisHashSetField(hashKey, filed, value)
 }
 
 func ManageIntegrationData(sessionInfo map[string]string, integrationType string) {
@@ -131,8 +160,10 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 func UploadSessionInfo(campaignId, sessionId string) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+	hashAgentKey := fmt.Sprintf("agentSessionInfo:%s:%s", campaignId, sessionId)
 	sessionInfo := RedisHashGetAll(hashKey)
 	RedisRemove(hashKey)
+	RedisRemove(hashAgentKey)
 	//Check Session Is Contact Based Dialing - IF Yes Do Other Operation
 	if sessionInfo["NumberLoadingMethod"] == "CONTACT" {
 		AddContactToCallback(sessionInfo)
