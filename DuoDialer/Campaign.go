@@ -630,6 +630,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 										break
 									case "AGENT":
 										color.Cyan(fmt.Sprintf("======= STARTING AGENT DIALER : %s =======", campaignId))
+										color.Yellow(fmt.Sprintf("======= %v =======", *integrationData))
 										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts)
 										break
 									}
