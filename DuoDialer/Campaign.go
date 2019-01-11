@@ -540,6 +540,7 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 
 //----------Run Campaign-----------------------
 func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int, integrationData *IntegrationConfig, numLoadingMethod string) {
+	color.Yellow(fmt.Sprintf("======= %v =======", *integrationData))
 	campStatus := GetCampaignStatus(campaignId, company, tenant)
 	SetCampaignStatus(campaignId, "Running", company, tenant)
 	emtAppoinment := Appoinment{}
@@ -630,7 +631,6 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 										break
 									case "AGENT":
 										color.Cyan(fmt.Sprintf("======= STARTING AGENT DIALER : %s =======", campaignId))
-										color.Yellow(fmt.Sprintf("======= %v =======", *integrationData))
 										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts)
 										break
 									}
