@@ -214,7 +214,7 @@ func SetAgentStatusArds(company, tenant, reqCategory, resId, sessionId, state st
 
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
-	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/resource/%s/concurrencyslot/session/%s", CreateHost(ardsServiceHost, ardsServicePort), resId, sessionId)
+	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/resource/%s/concurrencyslot/session/%s?direction=outbound", CreateHost(ardsServiceHost, ardsServicePort), resId, sessionId)
 	req, err := http.NewRequest("PUT", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
