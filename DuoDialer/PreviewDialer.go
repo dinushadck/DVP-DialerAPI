@@ -96,6 +96,6 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo, reqOData RequestOther
 	fmt.Println("response Headers:", resp.Header)
 
 	//if done update Session ExpireTime
-	SetSessionInfo(campaignId, resourceInfo.SessionID, "Resource", resourceInfo.ResourceInfo.ResourceId)
+	SetSessionInfo(campaignId, resourceInfo.SessionID, "ResourceId", resourceInfo.ResourceInfo.ResourceId)
 	SetSessionInfo(campaignId, resourceInfo.SessionID, "ArdsCategory", resourceInfo.RequestType)
 }

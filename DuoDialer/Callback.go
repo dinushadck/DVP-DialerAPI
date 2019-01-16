@@ -377,31 +377,31 @@ func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
 					} else {
 						//RELEASING AGENT
 						magentawhite.Println("(23) Release Agent")
-						SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+						SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 					}
 				} else {
 					//RELEASING AGENT
 					magentawhite.Println("(24) Release Agent")
-					SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+					SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 				}
 			} else {
 				fmt.Println("Add Callback Failed, No Valied Schedule Found")
 				magentawhite.Println("(25) Add Callback Failed, No Valied Schedule Found")
 				//RELEASING AGENT
-				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 			}
 
 		} else {
 			fmt.Println("Add Callback Failed, No Existing Campaign Found")
 			magentawhite.Println("(26) Add Callback Failed, No Existing Campaign Found")
 			//RELEASING AGENT
-			SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+			SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 		}
 	} else {
 		color.Magenta("NO CONTACTS FOUND FOR RE DIALING")
 		magentawhite.Println("(27) NO CONTACTS FOUND FOR RE DIALING")
 		//RELEASING AGENT
-		SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+		SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 
 	}
 }
@@ -514,7 +514,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 				}
 				//RELEASING AGENT
 				magentawhite.Println("(13) Releasing Agent")
-				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 			} else {
 				//SET NEXT CONTACT AND DIAL
 				magentawhite.Println("(14) Set Next Contact")

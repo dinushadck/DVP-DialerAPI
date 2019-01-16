@@ -168,7 +168,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	if sessionInfo["NumberLoadingMethod"] == "CONTACT" {
 		AddContactToCallback(sessionInfo)
 	} else {
-		AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+		AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 	}
 
 	PublishEvent(campaignId, sessionId)
@@ -191,7 +191,7 @@ func ClearTimeoutChannels(campaignId string) {
 		cid := sessionInfo["CampaignId"]
 		sessionid := sessionInfo["SessionId"]
 		category := sessionInfo["Category"]
-		resourceId := sessionInfo["Resource"]
+		resourceId := sessionInfo["ResourceId"]
 		ardsCategory := sessionInfo["ArdsCategory"]
 		expierTimeStr := sessionInfo["ExpireTime"]
 
