@@ -623,7 +623,7 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 		}
 	}
 
-	SetAgentStatusArds(company, tenant, ardsCategory, resourceId, sessionId, "Completed", ardsServerType, ardsReqType)
+	//SetAgentStatusArds(company, tenant, ardsCategory, resourceId, sessionId, "Completed", ardsServerType, ardsReqType)
 }
 
 func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string) {
