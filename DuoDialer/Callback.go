@@ -535,7 +535,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 
 }
 
-func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId, phoneNumber, disConnectkReason string) {
+func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId, phoneNumber, disConnectkReason, ardsCategory, resourceId, sessionId string) {
 	fmt.Println("start AddPhoneNumberToCallback")
 	_company, _ := strconv.Atoi(company)
 	_tenant, _ := strconv.Atoi(tenant)
@@ -622,6 +622,8 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 			}
 		}
 	}
+
+	SetAgentStatusArds(company, tenant, ardsCategory, resourceId, sessionId, "Completed")
 }
 
 func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string) {
