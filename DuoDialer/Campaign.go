@@ -540,7 +540,7 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 
 //----------Run Campaign-----------------------
 func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int, integrationData *IntegrationConfig, numLoadingMethod string) {
-	color.Yellow(fmt.Sprintf("======= %v =======", *integrationData))
+	color.Yellow(fmt.Sprintf("=======CampaignName : %s - %v =======", campaignName, *integrationData))
 	campStatus := GetCampaignStatus(campaignId, company, tenant)
 	SetCampaignStatus(campaignId, "Running", company, tenant)
 	emtAppoinment := Appoinment{}

@@ -62,6 +62,9 @@ func UploadCallbackInfo(company, tenant int, callbackTime time.Time, campaignId,
 		}
 	}()
 
+	magentawhite := color.New(color.FgMagenta).Add(color.BgWhite)
+	magentawhite.Println("(17) Start UploadCallbackInfo")
+
 	fmt.Println("Start UploadCallbackInfo")
 	callback := CampaignCallback{}
 
@@ -179,7 +182,7 @@ func ValidateDisconnectReason(disconnectReason string) (keyExist bool, value str
 	return
 }
 
-func AddContactToCallback(sessionInfo map[string]string) {
+/* func AddContactToCallback(sessionInfo map[string]string) {
 	DialerLog("start AddPhoneNumberToCallback")
 
 	color.Cyan(fmt.Sprintf("SESSION : %v", sessionInfo))
@@ -253,89 +256,284 @@ func AddContactToCallback(sessionInfo map[string]string) {
 
 	}
 
+} */
+
+func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]string, customerNumber string) {
+	magentawhite := color.New(color.FgMagenta).Add(color.BgWhite)
+	magentawhite.Println("(28) Redial Contact to Same Agent")
+	resourceServerInfos := GetResourceServerInfo(campaignInfo.CompanyId, campaignInfo.TenantId, "*", campaignInfo.CampaignChannel)
+
+	uuid := GetUuid(resourceServerInfos.Url)
+	internalAuthToken := fmt.Sprintf("%d:%d", campaignInfo.TenantId, campaignInfo.CompanyId)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaignInfo.CampConfigurations.Caller, customerNumber)
+
+	sessionInfo["SessionId"] = uuid
+	sessionInfo["Number"] = dnis
+
+	hashKey := fmt.Sprintf("sessionInfo:%s:%s", sessionInfo["CampaignId"], uuid)
+	RedisHashSetMultipleField(hashKey, sessionInfo)
+
+	companyInt := campaignInfo.CompanyId
+	tenantInt := campaignInfo.TenantId
+	resourceServer := GetResourceServerInfo(companyInt, tenantInt, resourceServerInfos.ResourceServerId, campaignInfo.CampaignChannel)
+
+	customCompanyStr := fmt.Sprintf("%d_%d", companyInt, tenantInt)
+
+	if trunkCode != "" && dnis != "" && sessionInfo["Extension"] != "" {
+
+		magentawhite.Println("(29) Rule Found")
+
+		var param string
+		var furl string
+		var data string
+		var dial bool
+
+		dial = true
+
+		ardsQueueName := sessionInfo["ArdsQueueName"]
+		param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,sip_h_X-Gateway=%s,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,CALL_LEG_TYPE=CUSTOMER}", xGateway, ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, sessionInfo["CampaignId"], sessionInfo["CampaignName"], sessionInfo["TenantId"], sessionInfo["CompanyId"], sessionInfo["ResourceId"], uuid, uuid, sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], ani, dnis, sessionInfo["Agent"])
+		furl = fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, dnis)
+
+		//call recording enable
+		data = fmt.Sprintf(" %s xml dialer", sessionInfo["AgentExtension"])
+		//data = fmt.Sprintf(" %s xml dialer", phoneNumber)
+
+		if dial == true {
+			SetSessionInfo(sessionInfo["CampaignId"], uuid, "Reason", "Dial Number")
+			redwhite := color.New(color.FgRed).Add(color.BgWhite)
+			redwhite.Println(fmt.Sprintf("DIALING OUT CALL - AGENT CAMPAIGN : %s | NUMBER : %s", sessionInfo["CampaignName"], dnis))
+
+			//resp, err := DialNew(resourceServer.Url, param, furl, data)
+			resp, err := Dial(resourceServer.Url, param, furl, data)
+			HandleDialResponse(resp, err, resourceServer, sessionInfo["CampaignId"], uuid)
+		} else {
+			SetSessionInfo(sessionInfo["CampaignId"], uuid, "Reason", "Invalied ContactType")
+			AgentReject(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"], uuid, sessionInfo["ARDSRequestType"], sessionInfo["ResourceId"], "Invalied ContactType")
+		}
+	} else {
+		RemoveRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], uuid)
+	}
 }
 
-/* func AddContactToCallback(sessionInfo map[string]string) {
-	DialerLog("start AddContactToCallback")
+func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
+	magentawhite := color.New(color.FgMagenta).Add(color.BgWhite)
+
+	if contactsList != nil && len(contactsList) > 0 {
+		magentawhite.Println("(18) Contacts found")
+		company, _ := strconv.Atoi(sessionInfo["CompanyId"])
+		tenant, _ := strconv.Atoi(sessionInfo["TenantId"])
+		campId, _ := strconv.Atoi(sessionInfo["CampaignId"])
+		scheduleId, _ := strconv.Atoi(sessionInfo["ScheduleId"])
+
+		campaignInfo, isCamExists := GetCampaign(company, tenant, campId)
+		DialerLog(fmt.Sprintf("isCamExists:: %t", isCamExists))
+
+		if isCamExists {
+
+			magentawhite.Println("(19) Campaign Exists")
+
+			scheduleInfo := CampaignShedule{}
+			defaultScheduleInfo := CampaignShedule{}
+			for _, schedule := range campaignInfo.CampScheduleInfo {
+				if schedule.ScheduleId == scheduleId {
+					scheduleInfo = schedule
+					break
+				}
+			}
+
+			if scheduleInfo != defaultScheduleInfo {
+
+				magentawhite.Println("(20) Schedule Exists")
+
+				location, _ := time.LoadLocation(scheduleInfo.TimeZone)
+
+				tmNow := time.Now().In(location)
+				callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), tmNow.Second(), 0, location)
+				fmt.Println("callbackTime:: ", callbackTime)
+
+				//tempCampaignEndDate, _ := time.Parse(layout2, campaignInfo.CampConfigurations.EndDate)
+				//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
+
+				scheduleEndDate := scheduleInfo.EndDate
+
+				fmt.Println("Callback:scheduleEndDate:: ", scheduleEndDate)
+				if scheduleEndDate.After(callbackTime) {
+					magentawhite.Println("(21) Schedule Is Ok to Start")
+					fmt.Println("Start to build CallbackInfo")
+					//scheduleIdStr := strconv.Itoa(scheduleInfo.ScheduleId)
+					validateAppoinment := CheckAppoinmentForCallback(company, tenant, sessionInfo["ScheduleId"], callbackTime, scheduleInfo.TimeZone)
+					fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
+					if validateAppoinment {
+						magentawhite.Println("(22) Valid Appointment")
+						//HERE YOU HAVE TO ADD CALLBACK NUMBER TO THE FRONT OF THE NUMBER QUEUE AND RE ADJUST THE CONTACTS ARRAY
+						nextContactNum := contactsList[0]
+						r := contactsList[1:]
+						contactsByteArr, _ := json.Marshal(r)
+						sessionInfo["Contacts"] = string(contactsByteArr)
+						//contactDet := ContactsDetails{Phone: nextContactNum.Contact, Api_Contacts: r, PreviewData: sessionInfo["PreviewData"]}
+						RedialContactToSameAgent(campaignInfo, sessionInfo, nextContactNum.Contact)
+						//AddContactToFront(company, tenant, sessionInfo["CampaignId"], contactDet)
+						//go UploadCallbackInfo(_company, _tenant, callbackTime, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+					} else {
+						//RELEASING AGENT
+						magentawhite.Println("(23) Release Agent")
+						SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed")
+					}
+				} else {
+					//RELEASING AGENT
+					magentawhite.Println("(24) Release Agent")
+					SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed")
+				}
+			} else {
+				fmt.Println("Add Callback Failed, No Valied Schedule Found")
+				magentawhite.Println("(25) Add Callback Failed, No Valied Schedule Found")
+				//RELEASING AGENT
+				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed")
+			}
+
+		} else {
+			fmt.Println("Add Callback Failed, No Existing Campaign Found")
+			magentawhite.Println("(26) Add Callback Failed, No Existing Campaign Found")
+			//RELEASING AGENT
+			SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed")
+		}
+	} else {
+		color.Magenta("NO CONTACTS FOUND FOR RE DIALING")
+		magentawhite.Println("(27) NO CONTACTS FOUND FOR RE DIALING")
+		//RELEASING AGENT
+		SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed")
+
+	}
+}
+
+func AddContactToCallback(sessionInfo map[string]string) {
+
+	magentawhite := color.New(color.FgMagenta).Add(color.BgWhite)
+	magentawhite.Println("(1) Start Add Callback")
+
+	//color.Cyan(fmt.Sprintf("SESSION : %v", sessionInfo))
 
 	_company, _ := strconv.Atoi(sessionInfo["CompanyId"])
 	_tenant, _ := strconv.Atoi(sessionInfo["TenantId"])
 	_tryCount, _ := strconv.Atoi(sessionInfo["TryCount"])
 
-	isAllowCallback := GetAllowCallback(_company, _tenant, campaignId)
-
-	color.Cyan(fmt.Sprintf("SESSION : %v", sessionInfo))
-
 	contactsList := []Contact{}
-
 	_ = json.Unmarshal([]byte(sessionInfo["Contacts"]), &contactsList)
 
-	if contactsList != nil && len(contactsList) > 0 {
-		company, _ := strconv.Atoi(sessionInfo["CompanyId"])
-		tenant, _ := strconv.Atoi(sessionInfo["TenantId"])
-		campId, _ := strconv.Atoi(sessionInfo["CampaignId"])
-		scheduleId, _ := strconv.Atoi(sessionInfo["ScheduleId"])
-		isdisconnectReasonAllowed, hangupGruop := ValidateDisconnectReason(sessionInfo["Reason"])
-		DialerLog(fmt.Sprintf("isdisconnectReasonAllowed:: %t", isdisconnectReasonAllowed))
-		DialerLog(fmt.Sprintf("hangupGruop:: %s", hangupGruop))
-		if isdisconnectReasonAllowed {
+	isAllowCallback := GetAllowCallback(_company, _tenant, sessionInfo["CampaignId"])
 
-			campaignInfo, isCamExists := GetCampaign(company, tenant, campId)
-			DialerLog(fmt.Sprintf("isCamExists:: %t", isCamExists))
+	isdisconnectReasonAllowed, hangupGruop := ValidateDisconnectReason(sessionInfo["Reason"])
 
-			if isCamExists {
+	magentawhite.Println(fmt.Sprintf("(2) Allow Callbacks : %t , Disconnect Reason Allowed : %t , Hangup Group : %s", isAllowCallback, isdisconnectReasonAllowed, hangupGruop))
 
-				scheduleInfo := CampaignShedule{}
-				defaultScheduleInfo := CampaignShedule{}
-				for _, schedule := range campaignInfo.CampScheduleInfo {
-					if schedule.ScheduleId == scheduleId {
-						scheduleInfo = schedule
-						break
-					}
-				}
+	if isAllowCallback && isdisconnectReasonAllowed {
+		magentawhite.Println("(3) CB Allowed")
+		maxCallbackCount, callbackInterval, isReasonExists := GetCallbackDetails(_company, _tenant, sessionInfo["CampaignId"], hangupGruop)
 
-				if scheduleInfo != defaultScheduleInfo {
+		if isReasonExists {
+			magentawhite.Println("(4) Reason Exists")
+			if maxCallbackCount > 0 && sessionInfo["Number"] != "" && _tryCount > 0 && _tryCount <= maxCallbackCount {
+				magentawhite.Println("(5) Try count expired")
+				camIdInt, _ := strconv.Atoi(sessionInfo["CampaignId"])
+				scheduleIdInt, _ := strconv.Atoi(sessionInfo["ScheduleId"])
 
-					location, _ := time.LoadLocation(scheduleInfo.TimeZone)
+				campaignInfo, isCamExists := GetCampaign(_company, _tenant, camIdInt)
+				fmt.Println("isCamExists:: ", isCamExists)
 
-					tmNow := time.Now().In(location)
-					callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), tmNow.Second(), 0, location)
-					fmt.Println("callbackTime:: ", callbackTime)
+				if isCamExists {
 
-					//tempCampaignEndDate, _ := time.Parse(layout2, campaignInfo.CampConfigurations.EndDate)
-					//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
+					magentawhite.Println("(6) Campaign Exist")
 
-					scheduleEndDate := scheduleInfo.EndDate
-
-					fmt.Println("Callback:scheduleEndDate:: ", scheduleEndDate)
-					if scheduleEndDate.After(callbackTime) {
-						fmt.Println("Start to build CallbackInfo")
-						//scheduleIdStr := strconv.Itoa(scheduleInfo.ScheduleId)
-						validateAppoinment := CheckAppoinmentForCallback(company, tenant, sessionInfo["ScheduleId"], callbackTime, scheduleInfo.TimeZone)
-						fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
-						if validateAppoinment {
-							//HERE YOU HAVE TO ADD CALLBACK NUMBER TO THE FRONT OF THE NUMBER QUEUE AND RE ADJUST THE CONTACTS ARRAY
-							nextContactNum := contactsList[0]
-							r := contactsList[1:]
-							contactDet := ContactsDetails{Phone: nextContactNum.Contact, Api_Contacts: r, PreviewData: sessionInfo["PreviewData"]}
-							AddContactToFront(company, tenant, sessionInfo["CampaignId"], contactDet)
-							//go UploadCallbackInfo(_company, _tenant, callbackTime, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+					scheduleInfo := CampaignShedule{}
+					defaultScheduleInfo := CampaignShedule{}
+					for _, schedule := range campaignInfo.CampScheduleInfo {
+						if schedule.ScheduleId == scheduleIdInt {
+							scheduleInfo = schedule
+							break
 						}
 					}
-				} else {
-					fmt.Println("Add Callback Failed, No Valied Schedule Found")
-				}
 
+					if scheduleInfo != defaultScheduleInfo {
+
+						magentawhite.Println("(7) Schedule Exist")
+
+						location, _ := time.LoadLocation(scheduleInfo.TimeZone)
+
+						tmNow := time.Now().In(location)
+						secCount := tmNow.Second() + callbackInterval
+						callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), secCount, 0, location)
+						fmt.Println("callbackTime:: ", callbackTime)
+
+						//tempCampaignEndDate, _ := time.Parse(layout2, campaignInfo.CampConfigurations.EndDate)
+						//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
+
+						scheduleEndDate := scheduleInfo.EndDate
+
+						fmt.Println("Callback:scheduleEndDate:: ", scheduleEndDate)
+						if scheduleEndDate.After(callbackTime) {
+							magentawhite.Println("(8) Callback ready to start")
+							fmt.Println("Start to build CallbackInfo")
+							//scheduleIdStr := strconv.Itoa(scheduleInfo.ScheduleId)
+							validateAppoinment := CheckAppoinmentForCallback(_company, _tenant, sessionInfo["ScheduleId"], callbackTime, scheduleInfo.TimeZone)
+							fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
+							if validateAppoinment {
+								magentawhite.Println("(9) Appointment valid")
+								callbackObj := CampaignCallbackObj{}
+								callbackObj.CampaignId = sessionInfo["CampaignId"]
+								callbackObj.CallbackClass = "DIALER"
+								callbackObj.CallbackType = "CALLBACK"
+								callbackObj.CallbackCategory = "INTERNAL"
+								callbackObj.CallBackCount = sessionInfo["TryCount"]
+								callbackObj.ContactId = sessionInfo["Number"]
+								callbackObj.DialoutTime = callbackTime
+
+								callbackObj.OtherContacts = contactsList
+
+								dialerAPIUrl := fmt.Sprintf("http://%s", CreateHost(lbIpAddress, lbPort))
+								path := fmt.Sprintf("DVP/DialerAPI/ResumeCallback")
+
+								u, _ := url.Parse(dialerAPIUrl)
+								u.Path += path
+
+								fmt.Println(u.String())
+								cbUrl := u.String()
+
+								jsonData, _ := json.Marshal(callbackObj)
+								magentawhite.Println("(10) Uploading callback")
+								go UploadCallbackInfo(_company, _tenant, callbackTime, sessionInfo["CampaignId"], "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+							}
+						}
+					} else {
+						magentawhite.Println("(11) Add Callback Failed, No Valied Schedule Found")
+						fmt.Println("Add Callback Failed, No Valied Schedule Found")
+					}
+
+				} else {
+					magentawhite.Println("(12) Add Callback Failed, No Existing Campaign Found")
+					fmt.Println("Add Callback Failed, No Existing Campaign Found")
+				}
+				//RELEASING AGENT
+				magentawhite.Println("(13) Releasing Agent")
+				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["Resource"], sessionInfo["SessionId"], "Completed")
 			} else {
-				fmt.Println("Add Callback Failed, No Existing Campaign Found")
+				//SET NEXT CONTACT AND DIAL
+				magentawhite.Println("(14) Set Next Contact")
+				SetNextContact(contactsList, sessionInfo)
 			}
+		} else {
+			//SET NEXT CONTACT AND DIAL
+			magentawhite.Println("(15) Set Next Contact")
+			SetNextContact(contactsList, sessionInfo)
 		}
+
 	} else {
-		color.Magenta("NO CONTACTS FOUND FOR RE DIALING")
+		//SET NEXT CONTACT AND DIAL
+		magentawhite.Println("(16) Set Next Contact")
+		SetNextContact(contactsList, sessionInfo)
 
 	}
 
-} */
+}
 
 func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId, phoneNumber, disConnectkReason string) {
 	fmt.Println("start AddPhoneNumberToCallback")
