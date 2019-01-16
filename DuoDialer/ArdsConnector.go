@@ -213,7 +213,7 @@ func SetAgentStatusArds(company, tenant, reqCategory, resId, sessionId, state, a
 	ardsResSlot.Reason = ""
 	ardsResSlot.Company = company
 	ardsResSlot.Tenant = tenant
-	ardsResSlot.BusinessUnit = ""
+	ardsResSlot.BusinessUnit = "default"
 
 	jsonData, _ := json.Marshal(ardsResSlot)
 
