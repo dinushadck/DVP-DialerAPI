@@ -198,17 +198,22 @@ func ClearResourceSlotWhenReject(company, tenant, reqCategory, resId, sessionId 
 	defer resp.Body.Close()
 }
 
-func SetAgentStatusArds(company, tenant, reqCategory, resId, sessionId, state string) {
+func SetAgentStatusArds(company, tenant, reqCategory, resId, sessionId, state, ardsServerType, ardsRequestType string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in ClearResourceSlotWhenReject", r)
 		}
 	}()
 
-	var ardsResSlot = ArdsResSlot{}
-	ardsResSlot.ReqCategory = reqCategory
+	ardsResSlot := ArdsResource{}
+	ardsResSlot.ServerType = ardsServerType
+	ardsResSlot.RequestType = ardsRequestType
 	ardsResSlot.State = state
 	ardsResSlot.OtherInfo = ""
+	ardsResSlot.Reason = ""
+	ardsResSlot.Company = company
+	ardsResSlot.Tenant = tenant
+	ardsResSlot.BusinessUnit = ""
 
 	jsonData, _ := json.Marshal(ardsResSlot)
 

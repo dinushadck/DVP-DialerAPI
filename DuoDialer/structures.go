@@ -471,6 +471,17 @@ type ArdsResSlot struct {
 	OtherInfo   string
 }
 
+type ArdsResource struct {
+	ServerType   string
+	RequestType  string
+	State        string
+	OtherInfo    string
+	Reason       string
+	Company      string
+	Tenant       string
+	BusinessUnit string
+}
+
 //--------------------Notification--------------------
 type PushData struct {
 	From        string
