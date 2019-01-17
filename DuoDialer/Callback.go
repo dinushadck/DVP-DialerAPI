@@ -316,7 +316,104 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 }
 
 func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
+
 	magentawhite := color.New(color.FgMagenta).Add(color.BgWhite)
+
+	isdisconnectReasonAllowed, _ := ValidateDisconnectReason(sessionInfo["Reason"])
+
+	if isdisconnectReasonAllowed {
+		if contactsList != nil && len(contactsList) > 0 {
+			magentawhite.Println("(18) Contacts found")
+			company, _ := strconv.Atoi(sessionInfo["CompanyId"])
+			tenant, _ := strconv.Atoi(sessionInfo["TenantId"])
+			campId, _ := strconv.Atoi(sessionInfo["CampaignId"])
+			scheduleId, _ := strconv.Atoi(sessionInfo["ScheduleId"])
+
+			campaignInfo, isCamExists := GetCampaign(company, tenant, campId)
+			DialerLog(fmt.Sprintf("isCamExists:: %t", isCamExists))
+
+			if isCamExists {
+
+				magentawhite.Println("(19) Campaign Exists")
+
+				scheduleInfo := CampaignShedule{}
+				defaultScheduleInfo := CampaignShedule{}
+				for _, schedule := range campaignInfo.CampScheduleInfo {
+					if schedule.ScheduleId == scheduleId {
+						scheduleInfo = schedule
+						break
+					}
+				}
+
+				if scheduleInfo != defaultScheduleInfo {
+
+					magentawhite.Println("(20) Schedule Exists")
+
+					location, _ := time.LoadLocation(scheduleInfo.TimeZone)
+
+					tmNow := time.Now().In(location)
+					callbackTime := time.Date(tmNow.Year(), tmNow.Month(), tmNow.Day(), tmNow.Hour(), tmNow.Minute(), tmNow.Second(), 0, location)
+					fmt.Println("callbackTime:: ", callbackTime)
+
+					//tempCampaignEndDate, _ := time.Parse(layout2, campaignInfo.CampConfigurations.EndDate)
+					//campaignEndDate := time.Date(tempCampaignEndDate.Year(), tempCampaignEndDate.Month(), tempCampaignEndDate.Day(), tempCampaignEndDate.Hour(), tempCampaignEndDate.Minute(), tempCampaignEndDate.Second(), 0, location)
+
+					scheduleEndDate := scheduleInfo.EndDate
+
+					fmt.Println("Callback:scheduleEndDate:: ", scheduleEndDate)
+					if scheduleEndDate.After(callbackTime) {
+						magentawhite.Println("(21) Schedule Is Ok to Start")
+						fmt.Println("Start to build CallbackInfo")
+						//scheduleIdStr := strconv.Itoa(scheduleInfo.ScheduleId)
+						validateAppoinment := CheckAppoinmentForCallback(company, tenant, sessionInfo["ScheduleId"], callbackTime, scheduleInfo.TimeZone)
+						fmt.Println("validateAppoinmentFor Callback:: ", validateAppoinment)
+						if validateAppoinment {
+							magentawhite.Println("(22) Valid Appointment")
+							//HERE YOU HAVE TO ADD CALLBACK NUMBER TO THE FRONT OF THE NUMBER QUEUE AND RE ADJUST THE CONTACTS ARRAY
+							nextContactNum := contactsList[0]
+							r := contactsList[1:]
+							contactsByteArr, _ := json.Marshal(r)
+							sessionInfo["Contacts"] = string(contactsByteArr)
+							//contactDet := ContactsDetails{Phone: nextContactNum.Contact, Api_Contacts: r, PreviewData: sessionInfo["PreviewData"]}
+							RedialContactToSameAgent(campaignInfo, sessionInfo, nextContactNum.Contact)
+							//AddContactToFront(company, tenant, sessionInfo["CampaignId"], contactDet)
+							//go UploadCallbackInfo(_company, _tenant, callbackTime, campaignId, "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
+						} else {
+							//RELEASING AGENT
+							magentawhite.Println("(23) Release Agent")
+							SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+						}
+					} else {
+						//RELEASING AGENT
+						magentawhite.Println("(24) Release Agent")
+						SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+					}
+				} else {
+					fmt.Println("Add Callback Failed, No Valied Schedule Found")
+					magentawhite.Println("(25) Add Callback Failed, No Valied Schedule Found")
+					//RELEASING AGENT
+					SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+				}
+
+			} else {
+				fmt.Println("Add Callback Failed, No Existing Campaign Found")
+				magentawhite.Println("(26) Add Callback Failed, No Existing Campaign Found")
+				//RELEASING AGENT
+				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+			}
+		} else {
+			color.Magenta("NO CONTACTS FOUND FOR RE DIALING")
+			magentawhite.Println("(27) NO CONTACTS FOUND FOR RE DIALING")
+			//RELEASING AGENT
+			SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+
+		}
+
+	} else {
+		magentawhite.Println("(28) DISCONNECT REASON NOT SET")
+		//RELEASING AGENT
+		SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+	}
 
 	if contactsList != nil && len(contactsList) > 0 {
 		magentawhite.Println("(18) Contacts found")
