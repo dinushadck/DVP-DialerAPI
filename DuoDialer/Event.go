@@ -52,7 +52,6 @@ func OnEvent(eventInfo SubEvents) {
 				session := RedisCheckKeyExist(hashKey)
 				if session {
 					color.Magenta("==========Session Found============")
-					DecrConcurrentChannelCount(eventInfo.SwitchName, eventInfo.CampaignId)
 					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
 
 					hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
