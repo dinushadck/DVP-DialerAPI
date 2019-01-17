@@ -175,7 +175,7 @@ func ClearResourceSlotWhenReject(company, tenant, reqCategory, resId, sessionId 
 	jsonData, _ := json.Marshal(ardsResSlot)
 
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
-	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	internalAuthToken := fmt.Sprintf("%s:%s", tenant, company)
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/resource/%s/concurrencyslot/session/%s", CreateHost(ardsServiceHost, ardsServicePort), resId, sessionId)
 	req, err := http.NewRequest("PUT", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
@@ -218,7 +218,7 @@ func SetAgentStatusArds(company, tenant, reqCategory, resId, sessionId, state, a
 	jsonData, _ := json.Marshal(ardsResSlot)
 
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
-	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
+	internalAuthToken := fmt.Sprintf("%s:%s", tenant, company)
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/resource/%s/concurrencyslot/session/%s?direction=inbound", CreateHost(ardsServiceHost, ardsServicePort), resId, sessionId)
 	req, err := http.NewRequest("PUT", serviceurl, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
