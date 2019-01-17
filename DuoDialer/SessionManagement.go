@@ -48,6 +48,7 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["CompanyId"] = companyStr
 	data["TenantId"] = tenantStr
 	data["SessionId"] = sessionId
+	data["OriginalUuidARDS"] = sessionId
 	data["Number"] = number
 	data["DialerId"] = dialerId
 	data["CampaignId"] = campaignId
@@ -168,7 +169,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	if sessionInfo["NumberLoadingMethod"] == "CONTACT" {
 		AddContactToCallback(sessionInfo)
 	} else {
-		AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+		AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], sessionInfo["ServerId"])
 	}
 
 	PublishEvent(campaignId, sessionId)

@@ -105,7 +105,6 @@ func DialNew(server, params, furl, data string) (*http.Response, error) {
 func HandleDialResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) string {
 	if err != nil {
 		color.Red("=============HANDLE DIAL RESPONSE RETURNED ERROR=============")
-		DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 		go UploadSessionInfo(campaignId, sessionId)
@@ -122,7 +121,6 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 		resultInfo := strings.Split(tmx, " ")
 		if len(resultInfo) > 0 {
 			if resultInfo[0] == "-ERR" {
-				DecrConcurrentChannelCount(server.ResourceServerId, campaignId)
 
 				if len(resultInfo) > 1 {
 					reason := resultInfo[1]

@@ -267,6 +267,9 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 	internalAuthToken := fmt.Sprintf("%d:%d", campaignInfo.TenantId, campaignInfo.CompanyId)
 	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaignInfo.CampConfigurations.Caller, customerNumber)
 
+	if sessionInfo["OriginalUuidARDS"] != "" {
+		sessionInfo["OriginalUuidARDS"] = sessionInfo["SessionId"]
+	}
 	sessionInfo["SessionId"] = uuid
 	sessionInfo["Number"] = dnis
 
@@ -291,7 +294,7 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 		dial = true
 
 		ardsQueueName := sessionInfo["ArdsQueueName"]
-		param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,sip_h_X-Gateway=%s,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,CALL_LEG_TYPE=CUSTOMER}", xGateway, ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, sessionInfo["CampaignId"], sessionInfo["CampaignName"], sessionInfo["TenantId"], sessionInfo["CompanyId"], sessionInfo["ResourceId"], uuid, uuid, sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], ani, dnis, sessionInfo["Agent"])
+		param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,sip_h_X-Gateway=%s,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,CALL_LEG_TYPE=CUSTOMER,OriginalUuidARDS=%s}", xGateway, ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, sessionInfo["CampaignId"], sessionInfo["CampaignName"], sessionInfo["TenantId"], sessionInfo["CompanyId"], sessionInfo["ResourceId"], uuid, uuid, sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], ani, dnis, sessionInfo["Agent"], sessionInfo["OriginalUuidARDS"])
 		furl = fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, dnis)
 
 		//call recording enable
@@ -308,10 +311,16 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 			HandleDialResponse(resp, err, resourceServer, sessionInfo["CampaignId"], uuid)
 		} else {
 			SetSessionInfo(sessionInfo["CampaignId"], uuid, "Reason", "Invalied ContactType")
-			AgentReject(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"], uuid, sessionInfo["ARDSRequestType"], sessionInfo["ResourceId"], "Invalied ContactType")
+			SetSessionInfo(sessionInfo["CampaignId"], uuid, "DialerStatus", "dial_failed")
+			go UploadSessionInfo(sessionInfo["CampaignId"], uuid)
+			//AgentReject(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"], uuid, sessionInfo["ARDSRequestType"], sessionInfo["ResourceId"], "Invalied ContactType")
 		}
 	} else {
-		RemoveRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], uuid)
+		magentawhite.Println("(30) Rule Not Found - Releasing agent")
+		SetSessionInfo(sessionInfo["CampaignId"], uuid, "Reason", "dial_failed")
+		SetSessionInfo(sessionInfo["CampaignId"], uuid, "DialerStatus", "dial_failed")
+		go UploadSessionInfo(sessionInfo["CampaignId"], uuid)
+		//RemoveRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["OriginalUuidARDS"])
 	}
 }
 
@@ -381,38 +390,44 @@ func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
 						} else {
 							//RELEASING AGENT
 							magentawhite.Println("(23) Release Agent")
-							SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+							SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+							DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 						}
 					} else {
 						//RELEASING AGENT
 						magentawhite.Println("(24) Release Agent")
-						SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+						SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+						DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 					}
 				} else {
 					fmt.Println("Add Callback Failed, No Valied Schedule Found")
 					magentawhite.Println("(25) Add Callback Failed, No Valied Schedule Found")
 					//RELEASING AGENT
-					SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+					SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+					DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 				}
 
 			} else {
 				fmt.Println("Add Callback Failed, No Existing Campaign Found")
 				magentawhite.Println("(26) Add Callback Failed, No Existing Campaign Found")
 				//RELEASING AGENT
-				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+				DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 			}
 		} else {
 			color.Magenta("NO CONTACTS FOUND FOR RE DIALING")
 			magentawhite.Println("(27) NO CONTACTS FOUND FOR RE DIALING")
 			//RELEASING AGENT
-			SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+			SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+			DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 
 		}
 
 	} else {
 		magentawhite.Println("(28) DISCONNECT REASON NOT SET")
 		//RELEASING AGENT
-		SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+		SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+		DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 	}
 
 }
@@ -525,7 +540,8 @@ func AddContactToCallback(sessionInfo map[string]string) {
 				}
 				//RELEASING AGENT
 				magentawhite.Println("(13) Releasing Agent")
-				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
+				DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 			} else {
 				//SET NEXT CONTACT AND DIAL
 				magentawhite.Println("(14) Set Next Contact")
@@ -546,7 +562,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 
 }
 
-func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId, phoneNumber, disConnectkReason, ardsCategory, resourceId, sessionId, ardsServerType, ardsReqType string) {
+func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId, phoneNumber, disConnectkReason, ardsCategory, resourceId, sessionId, ardsServerType, ardsReqType, switchName string) {
 	fmt.Println("start AddPhoneNumberToCallback")
 	_company, _ := strconv.Atoi(company)
 	_tenant, _ := strconv.Atoi(tenant)
@@ -635,6 +651,7 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 	}
 
 	SetAgentStatusArds(company, tenant, ardsCategory, resourceId, sessionId, "Completed", ardsServerType, ardsReqType)
+	DecrConcurrentChannelCount(switchName, campaignId)
 }
 
 func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string) {

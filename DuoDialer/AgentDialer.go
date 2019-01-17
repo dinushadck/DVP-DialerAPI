@@ -159,11 +159,6 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 func AgentReject(company, tenant, campaignId, sessionId, requestType, resourceId, rejectReason string) {
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	if RedisCheckKeyExist(sessionInfoKey) {
-		callServerId := RedisHashGetField(sessionInfoKey, "ServerId")
-		companyInt, _ := strconv.Atoi(company)
-		tenantInt, _ := strconv.Atoi(tenant)
-		resourceServer := GetResourceServerInfo(companyInt, tenantInt, callServerId, requestType)
-		DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")
 		ClearResourceSlotWhenReject(company, tenant, requestType, resourceId, sessionId)
