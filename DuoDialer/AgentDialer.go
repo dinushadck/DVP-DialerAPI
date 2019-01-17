@@ -37,7 +37,6 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 
 	resp, err := AddRequest(company, tenant, uuid, string(tmpReqOtherData), attributeInfo)
 	if err != nil {
-		DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		SetSessionInfo(campaignId, uuid, "Reason", "ards_failed")
 		SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
 		go UploadSessionInfo(campaignId, uuid)
@@ -48,7 +47,6 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 		var ardsRes = ArdsResult{}
 		json.Unmarshal([]byte(resp), &ardsRes)
 		if ardsRes.IsSuccess == false {
-			DecrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 			SetSessionInfo(campaignId, uuid, "Reason", ardsRes.CustomMessage)
 			SetSessionInfo(campaignId, uuid, "DialerStatus", "failed")
 			go UploadSessionInfo(campaignId, uuid)
