@@ -282,7 +282,7 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 
 	customCompanyStr := fmt.Sprintf("%d_%d", companyInt, tenantInt)
 
-	if trunkCode != "" && dnis != "" && sessionInfo["Extension"] != "" {
+	if trunkCode != "" && dnis != "" && sessionInfo["Extention"] != "" {
 
 		magentawhite.Println("(29) Rule Found")
 
