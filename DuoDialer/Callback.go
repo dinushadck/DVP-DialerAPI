@@ -294,7 +294,7 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 		dial = true
 
 		ardsQueueName := sessionInfo["ArdsQueueName"]
-		param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,sip_h_X-Gateway=%s,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,CALL_LEG_TYPE=CUSTOMER,OriginalUuidARDS=%s}", xGateway, ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, sessionInfo["CampaignId"], sessionInfo["CampaignName"], sessionInfo["TenantId"], sessionInfo["CompanyId"], sessionInfo["ResourceId"], uuid, uuid, sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], ani, dnis, sessionInfo["Agent"], sessionInfo["OriginalUuidARDS"])
+		param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,sip_h_X-Gateway=%s,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_number=%s,origination_caller_id_name=%s,DialerCustomerNumber=%s,DialerAgentName=%s,CALL_LEG_TYPE=CUSTOMER,OriginalUuidARDS=%s}", xGateway, ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, sessionInfo["CampaignId"], sessionInfo["CampaignName"], sessionInfo["TenantId"], sessionInfo["CompanyId"], sessionInfo["ResourceId"], uuid, uuid, sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], ani, ani, dnis, sessionInfo["Agent"], sessionInfo["OriginalUuidARDS"])
 		furl = fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, dnis)
 
 		//call recording enable
@@ -457,7 +457,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 		maxCallbackCount, callbackInterval, isReasonExists := GetCallbackDetails(_company, _tenant, sessionInfo["CampaignId"], hangupGruop)
 
 		if isReasonExists {
-			magentawhite.Println("(4) Reason Exists")
+			magentawhite.Println(fmt.Sprintf("(4) Reason Exists | maxCallbackCount : %d | Number : %s | TryCount : %d", maxCallbackCount, sessionInfo["Number"], _tryCount))
 			if maxCallbackCount > 0 && sessionInfo["Number"] != "" && _tryCount > 0 && _tryCount <= maxCallbackCount {
 				magentawhite.Println("(5) Try count expired")
 				camIdInt, _ := strconv.Atoi(sessionInfo["CampaignId"])
