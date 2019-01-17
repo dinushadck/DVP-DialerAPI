@@ -129,6 +129,8 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 					if reason == "" {
 						SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
 					} else {
+						reason = strings.TrimSuffix(reason, "\n")
+						color.Red(reason)
 						SetSessionInfo(campaignId, sessionId, "Reason", reason)
 					}
 				} else {
