@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
@@ -242,7 +243,9 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 
 		color.Green("NUMBER POPPED OUT TO DIAL : " + numberWithTryCount)
 
-		return contactInf.Phone, "1", contactInf.PreviewData, contactInf.Api_Contacts
+		strTryCount := strconv.Itoa(contactInf.TryCount)
+
+		return contactInf.Phone, strTryCount, contactInf.PreviewData, contactInf.Api_Contacts
 	} else {
 		numberInfos := strings.Split(numberWithTryCount, ":")
 		if len(numberInfos) > 3 {

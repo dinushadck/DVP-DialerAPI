@@ -459,7 +459,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 		if isReasonExists {
 			magentawhite.Println(fmt.Sprintf("(4) Reason Exists | maxCallbackCount : %d | Number : %s | TryCount : %d", maxCallbackCount, sessionInfo["Number"], _tryCount))
 			if maxCallbackCount > 0 && sessionInfo["Number"] != "" && _tryCount > 0 && _tryCount <= maxCallbackCount {
-				magentawhite.Println("(5) Try count expired")
+				magentawhite.Println("(5) Try count valid")
 				camIdInt, _ := strconv.Atoi(sessionInfo["CampaignId"])
 				scheduleIdInt, _ := strconv.Atoi(sessionInfo["ScheduleId"])
 
@@ -665,7 +665,7 @@ func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, numb
 		camScheduleStr := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
 		numberWithTryCount := fmt.Sprintf("%s:%d", number, _tryCount)
 		if campaign.CampConfigurations.NumberLoadingMethod == "CONTACT" {
-			contactDet := ContactsDetails{Phone: number, Api_Contacts: otherContacts, PreviewData: previewData}
+			contactDet := ContactsDetails{Phone: number, Api_Contacts: otherContacts, PreviewData: previewData, TryCount: _tryCount}
 			blackgreen.Println(fmt.Sprintf("Adding contacts to front : %v", contactDet))
 			AddContactToFront(company, tenant, campaignIdStr, contactDet)
 		} else {

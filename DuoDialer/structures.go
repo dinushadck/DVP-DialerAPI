@@ -241,6 +241,7 @@ type ContactsDetails struct {
 	Phone        string
 	PreviewData  string
 	Api_Contacts []Contact
+	TryCount     int
 }
 
 type ContactsResult struct {
