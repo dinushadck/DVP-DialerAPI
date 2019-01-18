@@ -182,19 +182,20 @@ func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string
 }
 
 func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
+	yellowgreen := color.New(color.FgYellow).Add(color.BgGreen)
+	yellowgreen.Println("======== CALLBACK RECEIVED ========")
 	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 
-		fmt.Println("Company: ", company)
-		fmt.Println("Tenant: ", tenant)
-
 		callbackData, _ := json.Marshal(callbackInfo)
-		fmt.Println("Start ResumeCallback :: ", string(callbackData))
+		yellowgreen.Println(fmt.Sprintf("Start ResumeCallback :: %s", string(callbackData)))
 
 		if strings.ToLower(callbackInfo["CallbackType"].(string)) == "callback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "internal" {
 
 			callbackCount, _ := strconv.Atoi(callbackInfo["CallBackCount"].(string))
 			campaignId, _ := strconv.Atoi(callbackInfo["CampaignId"].(string))
+
+			yellowgreen.Println(fmt.Sprintf("Callback Count : %d, CampaignId : %d", callbackCount, campaignId))
 
 			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string))
 
@@ -232,6 +233,7 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 		}
 
 	} else {
+		yellowgreen.Println("CALLBACK : INVALID COMPANY | TENANT")
 		dvp.RB().SetResponseCode(403)
 	}
 }

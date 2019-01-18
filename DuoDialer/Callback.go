@@ -655,13 +655,21 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 }
 
 func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string) {
-	fmt.Println("Start ResumeCampaignCallback")
+	yellowgreen := color.New(color.FgYellow).Add(color.BgGreen)
 	campaignIdStr := strconv.Itoa(campaignId)
 	_tryCount := callbackCount + 1
 	campaign, isCampaignExists := GetCampaign(company, tenant, campaignId)
 	if isCampaignExists {
+		yellowgreen.Println(fmt.Sprintf("CALLBACK CAMPAIGN %d EXIST", campaignId))
 		camScheduleStr := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
 		numberWithTryCount := fmt.Sprintf("%s:%d", number, _tryCount)
-		AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
+		if campaign.CampConfigurations.NumberLoadingMethod == "CONTACT" {
+			//AddContactToFront(company, tenant, campaignIdStr)
+		} else {
+			AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
+		}
+
+	} else {
+		yellowgreen.Println(fmt.Sprintf("CALLBACK CAMPAIGN %d DOES NOT EXIST", campaignId))
 	}
 }
