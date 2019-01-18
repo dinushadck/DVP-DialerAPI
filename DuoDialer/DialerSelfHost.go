@@ -11,6 +11,7 @@ import (
 
 	"github.com/DuoSoftware/gorest"
 	"github.com/fatih/color"
+	"github.com/mitchellh/mapstructure"
 )
 
 type DVP struct {
@@ -200,9 +201,10 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 
 			var callbackContactList []Contact
 			fmt.Println(reflect.TypeOf(callbackInfo["OtherContacts"]))
-			strCallbackContacts := fmt.Sprintf("%v", callbackInfo["OtherContacts"])
-			blackgreen.Println(strCallbackContacts)
-			json.Unmarshal([]byte(strCallbackContacts), &callbackContactList)
+			//strCallbackContacts := fmt.Sprintf("%v", callbackInfo["OtherContacts"])
+			//blackgreen.Println(strCallbackContacts)
+			mapstructure.Decode(callbackInfo["OtherContacts"], &callbackContactList)
+			//json.Unmarshal([]byte(strCallbackContacts), &callbackContactList)
 
 			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string))
 
