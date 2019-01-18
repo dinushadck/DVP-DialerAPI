@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -198,6 +199,7 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 			blackgreen.Println(fmt.Sprintf("Callback Count : %d, CampaignId : %d", callbackCount, campaignId))
 
 			var callbackContactList []Contact
+			fmt.Println(reflect.TypeOf(callbackInfo["OtherContacts"]))
 			strCallbackContacts := fmt.Sprintf("%v", callbackInfo["OtherContacts"])
 			blackgreen.Println(strCallbackContacts)
 			json.Unmarshal([]byte(strCallbackContacts), &callbackContactList)
