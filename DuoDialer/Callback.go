@@ -383,6 +383,7 @@ func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
 							r := contactsList[1:]
 							contactsByteArr, _ := json.Marshal(r)
 							sessionInfo["Contacts"] = string(contactsByteArr)
+							sessionInfo["TryCount"] = "1"
 							//contactDet := ContactsDetails{Phone: nextContactNum.Contact, Api_Contacts: r, PreviewData: sessionInfo["PreviewData"]}
 							RedialContactToSameAgent(campaignInfo, sessionInfo, nextContactNum.Contact)
 							//AddContactToFront(company, tenant, sessionInfo["CampaignId"], contactDet)
