@@ -199,6 +199,7 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 
 			var callbackContactList []Contact
 			strCallbackContacts := fmt.Sprintf("%v", callbackInfo["OtherContacts"])
+			blackgreen.Println(strCallbackContacts)
 			json.Unmarshal([]byte(strCallbackContacts), &callbackContactList)
 
 			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string))
