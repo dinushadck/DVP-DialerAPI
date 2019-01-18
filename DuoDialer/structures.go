@@ -174,6 +174,7 @@ type CampaignCallbackObj struct {
 	CallBackCount    string
 	DialoutTime      time.Time
 	OtherContacts    []Contact
+	PreviewData      string
 }
 
 type CallbackInfo map[string]interface{}

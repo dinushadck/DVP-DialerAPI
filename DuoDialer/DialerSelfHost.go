@@ -182,22 +182,26 @@ func (dvp DVP) GetTotalConnectedCount(companyId, tenantId int, campaignId string
 }
 
 func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
-	yellowgreen := color.New(color.FgYellow).Add(color.BgGreen)
-	yellowgreen.Println("======== CALLBACK RECEIVED ========")
+	blackgreen := color.New(color.FgBlack).Add(color.BgGreen)
+	blackgreen.Println("======== CALLBACK RECEIVED ========")
 	company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	if company != 0 && tenant != 0 {
 
 		callbackData, _ := json.Marshal(callbackInfo)
-		yellowgreen.Println(fmt.Sprintf("Start ResumeCallback :: %s", string(callbackData)))
+		blackgreen.Println(fmt.Sprintf("Start ResumeCallback :: %s", string(callbackData)))
 
 		if strings.ToLower(callbackInfo["CallbackType"].(string)) == "callback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "internal" {
 
 			callbackCount, _ := strconv.Atoi(callbackInfo["CallBackCount"].(string))
 			campaignId, _ := strconv.Atoi(callbackInfo["CampaignId"].(string))
 
-			yellowgreen.Println(fmt.Sprintf("Callback Count : %d, CampaignId : %d", callbackCount, campaignId))
+			blackgreen.Println(fmt.Sprintf("Callback Count : %d, CampaignId : %d", callbackCount, campaignId))
 
-			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string))
+			var callbackContactList []Contact
+			strCallbackContacts := callbackInfo["OtherContacts"].(string)
+			json.Unmarshal([]byte(strCallbackContacts), &callbackContactList)
+
+			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string))
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "agent" {
 
@@ -233,7 +237,7 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 		}
 
 	} else {
-		yellowgreen.Println("CALLBACK : INVALID COMPANY | TENANT")
+		blackgreen.Println("CALLBACK : INVALID COMPANY | TENANT")
 		dvp.RB().SetResponseCode(403)
 	}
 }

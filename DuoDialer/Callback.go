@@ -512,6 +512,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 								callbackObj.CallBackCount = sessionInfo["TryCount"]
 								callbackObj.ContactId = sessionInfo["Number"]
 								callbackObj.DialoutTime = callbackTime
+								callbackObj.PreviewData = sessionInfo["PreviewData"]
 
 								callbackObj.OtherContacts = contactsList
 
@@ -654,22 +655,25 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 	DecrConcurrentChannelCount(switchName, campaignId)
 }
 
-func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string) {
-	yellowgreen := color.New(color.FgYellow).Add(color.BgGreen)
+func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string, otherContacts []Contact, previewData string) {
+	blackgreen := color.New(color.FgBlack).Add(color.BgGreen)
 	campaignIdStr := strconv.Itoa(campaignId)
 	_tryCount := callbackCount + 1
 	campaign, isCampaignExists := GetCampaign(company, tenant, campaignId)
 	if isCampaignExists {
-		yellowgreen.Println(fmt.Sprintf("CALLBACK CAMPAIGN %d EXIST", campaignId))
+		blackgreen.Println(fmt.Sprintf("CALLBACK CAMPAIGN %d EXIST", campaignId))
 		camScheduleStr := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
 		numberWithTryCount := fmt.Sprintf("%s:%d", number, _tryCount)
 		if campaign.CampConfigurations.NumberLoadingMethod == "CONTACT" {
-			//AddContactToFront(company, tenant, campaignIdStr)
+			contactDet := ContactsDetails{Phone: number, Api_Contacts: otherContacts, PreviewData: previewData}
+			blackgreen.Println(fmt.Sprintf("Adding contacts to front : %v", contactDet))
+			AddContactToFront(company, tenant, campaignIdStr, contactDet)
 		} else {
+			blackgreen.Println(fmt.Sprintf("Adding number to front - NumberWithTryCount | %s", numberWithTryCount))
 			AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
 		}
 
 	} else {
-		yellowgreen.Println(fmt.Sprintf("CALLBACK CAMPAIGN %d DOES NOT EXIST", campaignId))
+		blackgreen.Println(fmt.Sprintf("CALLBACK CAMPAIGN %d DOES NOT EXIST", campaignId))
 	}
 }
