@@ -315,6 +315,7 @@ func (dvp DVP) ArdsCallback() string {
 	//Send Agent Reserved Notification If Integration Data Exist
 	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "Agent", ardsCallbackInfo.ResourceInfo.ResourceName)
 	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "AgentExtension", ardsCallbackInfo.ResourceInfo.Extention)
+	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "AgentSipName", ardsCallbackInfo.ResourceInfo.ContactName)
 	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "ResourceId", ardsCallbackInfo.ResourceInfo.ResourceId)
 	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "ARDSServerType", ardsCallbackInfo.ServerType)
 	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "ARDSRequestType", ardsCallbackInfo.RequestType)
