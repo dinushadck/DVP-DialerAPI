@@ -43,6 +43,6 @@
 	"SentinelHosts": "138.197.90.92,45.55.205.92,138.197.90.92",
 	"SentinelPort": "16389",
 	"DvpEventType": "redis",
-	"UseAmqpAdapter": "true",
+	"UseAmqpAdapter": "false",
 	"AmqpAdapterPort": "3653"
 }
