@@ -745,7 +745,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							smsData["company"] = company
 							smsData["tenant"] = tenant
 							smsData["to"] = number
-							smsData["from"] = defaultAni
+							smsData["from"] = "facetone"
 							smsData["subject"] = campaignName
 
 							InitiateSessionInfo(company, tenant, 240, "Campaign", "SMS", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, number, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "")

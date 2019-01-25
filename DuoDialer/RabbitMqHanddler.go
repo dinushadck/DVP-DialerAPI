@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/streadway/amqp"
 )
 
@@ -95,6 +96,8 @@ func RabbitMQPublish(queueName string, publishData []byte) {
 			fmt.Println("basic.publish: ", err)
 		} else {
 			fmt.Println("basic.publish: ", queueName)
+			whitemagenta := color.New(color.FgWhite).Add(color.BgMagenta)
+			whitemagenta.Println("SMS OUT : " + queueName + " | BODY : " + string(publishData))
 		}
 	}
 }
