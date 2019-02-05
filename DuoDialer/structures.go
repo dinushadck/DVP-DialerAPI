@@ -55,6 +55,7 @@ type Configuration struct {
 	DvpEventType             string
 	UseAmqpAdapter           string
 	AmqpAdapterPort          string
+	PreviewTimeout			 string
 }
 
 type EnvConfiguration struct {
@@ -103,6 +104,7 @@ type EnvConfiguration struct {
 	DvpEventType             string
 	UseAmqpAdapter           string
 	AmqpAdapterPort          string
+	PreviewTimeout			 string
 }
 
 //--------------------Campaign--------------------

@@ -32,12 +32,14 @@ func CheckTimeouts() {
 			tNow := time.Now().Unix()
 			tThen, _ := strconv.ParseInt(cbVal, 10, 64)
 
+			prevTimeInt, _ := strconv.ParseInt(previewTimeout, 10, 64)
+
 			timeDiff := tNow - tThen
 			color.Cyan("TIME NOW : %d", tNow)
 			color.Cyan("TIME THEN : %s", cbVal)
 			color.Cyan("TIME DIFF : %d", timeDiff)
 
-			if timeDiff > 120 {
+			if timeDiff > prevTimeInt {
 				//Decrement Campaign Count
 				hKey := fmt.Sprintf("sessionInfo:%s", cbKey)
 				sessionInfo := RedisHashGetAll(hKey)

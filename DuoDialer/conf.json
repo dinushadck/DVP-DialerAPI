@@ -44,5 +44,6 @@
 	"SentinelPort": "16389",
 	"DvpEventType": "redis",
 	"UseAmqpAdapter": "false",
-	"AmqpAdapterPort": "3653"
+	"AmqpAdapterPort": "3653",
+	"PreviewTimeout": "120"
 }
