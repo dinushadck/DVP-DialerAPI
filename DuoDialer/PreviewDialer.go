@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"github.com/fatih/color"
 )
 
 //Add preview dial request to dialer
@@ -82,8 +83,11 @@ func SendPreviewDataToAgent(resourceInfo ArdsCallbackInfo, reqOData RequestOther
 	fmt.Println(string(jsonData))
 
 	client := &http.Client{}
+	redGreen := color.New(color.FgRed).Add(color.BgGreen)
+	redGreen.Println("=========== Preview Data Set To UI ==========")
 	resp, err := client.Do(req)
 	if err != nil {
+		redGreen.Println("=========== ERROR SENDING Preview Data Set To UI ==========")
 		fmt.Println(err.Error())
 	} else {
 		t := strconv.FormatInt(time.Now().Unix(), 10)

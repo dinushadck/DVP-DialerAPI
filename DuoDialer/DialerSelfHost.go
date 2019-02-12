@@ -333,7 +333,7 @@ func (dvp DVP) ArdsCallback() string {
 		color.Magenta("NO INTEGRATION DATA")
 	}
 
-	go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
+	//go RemoveRequest(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
 
 	SetSessionInfo(reqOData.CampaignId, ardsCallbackInfo.SessionID, "ArdsQueueName", ardsCallbackInfo.Skills)
 
@@ -349,6 +349,10 @@ func (dvp DVP) ArdsCallback() string {
 		fmt.Println(log3)
 		DialAgent(ardsCallbackInfo.ResourceInfo.Extention, ardsCallbackInfo.ResourceInfo.Domain, ardsCallbackInfo.ResourceInfo.ContactType, ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType, ardsCallbackInfo.SessionID)
 		break
+	default:
+		go RemoveRequestNoSession(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, ardsCallbackInfo.SessionID)
+		SetAgentStatusArds(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, "", ardsCallbackInfo.ResourceInfo.ResourceId, ardsCallbackInfo.SessionID, "Completed", ardsCallbackInfo.ServerType, ardsCallbackInfo.RequestType)
+		AbortDialing(ardsCallbackInfo.Company, ardsCallbackInfo.Tenant, reqOData.CampaignId, ardsCallbackInfo.SessionID, "InvalidCampaignType")
 	}
 
 	//} else {
@@ -366,6 +370,8 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 	}()
 	//company, tenant, _, _ := decodeJwtDialer(dvp, "dialer", "write")
 	//if company != 0 && tenant != 0 {
+	redGreen := color.New(color.FgRed).Add(color.BgGreen)
+	redGreen.Println("=========== Preview CB RECIEVED ==========")
 
 	log := fmt.Sprintf("Start PreviewCallBack Ref:%s ", rdata.Ref)
 	log1 := fmt.Sprintf("Start PreviewCallBack TKey:%s ", rdata.Reply.Tkey)
@@ -382,15 +388,29 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 
 	RedisHashDelField("CALLBACK_TIMEOUTS", reqOData.CampaignId+":"+refData.SessionID)
 
-	if rdata.Reply.Message == "ACCEPTED" {
-		fmt.Println("Start Dial Priview Number")
-		log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: ServerType: %s :: RequestType: %s :: SessionId: %s", refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.ServerType, refData.RequestType, refData.SessionID)
-		fmt.Println(log3)
-		DialAgent(refData.ResourceInfo.Extention, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.ServerType, refData.RequestType, refData.SessionID)
-	} else {
-		fmt.Println("Start Reject Priview Number")
-		AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
+	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", reqOData.CampaignId, refData.SessionID)
+	if RedisCheckKeyExist(sessionInfoKey) {
+		if rdata.Reply.Message == "ACCEPTED" {
+			fmt.Println("Start Dial Priview Number")
+			log3 := fmt.Sprintf("Data:: ContactName: %s :: Domain: %s :: ContactType: %s ::ResourceId: %s  :: Company: %s :: Tenant: %s :: CampaignId: %s :: ServerType: %s :: RequestType: %s :: SessionId: %s", refData.ResourceInfo.ContactName, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.ServerType, refData.RequestType, refData.SessionID)
+			fmt.Println(log3)
+			DialAgent(refData.ResourceInfo.Extention, refData.ResourceInfo.Domain, refData.ResourceInfo.ContactType, refData.ResourceInfo.ResourceId, refData.Company, refData.Tenant, reqOData.CampaignId, refData.ServerType, refData.RequestType, refData.SessionID)
+		} else {
+			redGreen.Println("=========== PREVIEW REJECTED DUE TO AGENT REJECT ==========")
+			fmt.Println("Start Reject Priview Number")
+			go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
+			AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
+		}
+
+	}else{
+		redGreen.Println("=========== PREVIEW REJECTED DUE TO NO SESSION FOUND ==========")
+		go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
+		SetAgentStatusArds(refData.Company, refData.Tenant, "", refData.ResourceInfo.ResourceId, refData.SessionID, "Completed", refData.ServerType, refData.RequestType)
+		AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
+
 	}
+
+	
 
 	return
 	//} else {

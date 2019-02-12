@@ -68,6 +68,8 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		campaignName := sessionInfo["CampaignName"]
 		ardsQueueName := sessionInfo["ArdsQueueName"]
 
+		color.Yellow(fmt.Sprintf("SESSION DATA : %v", sessionInfo))
+
 		companyInt, _ := strconv.Atoi(company)
 		tenantInt, _ := strconv.Atoi(tenant)
 		resourceServer := GetResourceServerInfo(companyInt, tenantInt, callServerId, ardsReqType)
@@ -103,9 +105,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			var param string
 			var furl string
 			var data string
-			var dial bool
-
-			dial = true
+			
 			param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_name=%s,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,DialerAgentSipName=%s,CALL_LEG_TYPE=CUSTOMER}", ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, fromNumber, fromNumber, phoneNumber, sessionInfo["Agent"], sessionInfo["AgentSipName"])
 			furl = fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, phoneNumber)
 
@@ -135,22 +135,26 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			data = fmt.Sprintf(" %s xml dialer", contactName)
 			//data = fmt.Sprintf(" %s xml dialer", phoneNumber)
 
-			if dial == true {
-				SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
-				redwhite := color.New(color.FgRed).Add(color.BgWhite)
-				redwhite.Println(fmt.Sprintf("DIALING OUT CALL - AGENT CAMPAIGN : %s | NUMBER : %s", campaignName, phoneNumber))
+			SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
+			redwhite := color.New(color.FgRed).Add(color.BgWhite)
+			redwhite.Println(fmt.Sprintf("DIALING OUT CALL - AGENT CAMPAIGN : %s | NUMBER : %s", campaignName, phoneNumber))
 
-				//resp, err := DialNew(resourceServer.Url, param, furl, data)
-				resp, err := Dial(resourceServer.Url, param, furl, data)
-				HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
-			} else {
-				SetSessionInfo(campaignId, sessionId, "Reason", "Invalied ContactType")
-				AgentReject(company, tenant, campaignId, sessionId, ardsReqType, resourceId, "Invalied ContactType")
-			}
-		} else {
+			//resp, err := DialNew(resourceServer.Url, param, furl, data)
 			RemoveRequest(company, tenant, sessionId)
+			resp, err := Dial(resourceServer.Url, param, furl, data)
+			HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
+		} else {
+			color.Red(fmt.Sprintf("=====Redis Hash From Numbers Not Found - Dial Failed : %s", sessionInfoKey))
+			RemoveRequestNoSession(company, tenant, sessionId)
+			SetAgentStatusArds(company, tenant, "", resourceId, sessionId, "Completed", ardsServerType, ardsReqType)
+			AbortDialing(company, tenant, campaignId, sessionId, "NoSession")
 		}
 
+	}else{
+		color.Red(fmt.Sprintf("=====Redis Hash Not Found For Key - Dial Failed : %s", sessionInfoKey))
+		RemoveRequestNoSession(company, tenant, sessionId)
+		SetAgentStatusArds(company, tenant, "", resourceId, sessionId, "Completed", ardsServerType, ardsReqType)
+		AbortDialing(company, tenant, campaignId, sessionId, "NoSession")
 	}
 }
 
@@ -160,6 +164,16 @@ func AgentReject(company, tenant, campaignId, sessionId, requestType, resourceId
 		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")
 		ClearResourceSlotWhenReject(company, tenant, requestType, resourceId, sessionId)
+		//RejectRequest(company, tenant, sessionId)
+		go UploadSessionInfo(campaignId, sessionId)
+	}
+}
+
+func AbortDialing(company, tenant, campaignId, sessionId, rejectReason string) {
+	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)	
+	if RedisCheckKeyExist(sessionInfoKey) {
+		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
+		SetSessionInfo(campaignId, sessionId, "DialerStatus", "abort_dialing")		
 		//RejectRequest(company, tenant, sessionId)
 		go UploadSessionInfo(campaignId, sessionId)
 	}

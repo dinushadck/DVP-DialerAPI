@@ -134,6 +134,32 @@ func RemoveRequest(company, tenant, sessionId string) {
 	fmt.Println(string(response))
 }
 
+func RemoveRequestNoSession(company, tenant, sessionId string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in AddRequest", r)
+		}
+	}()
+	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
+	internalAuthToken := fmt.Sprintf("%s:%s", tenant, company)
+	client := &http.Client{}
+
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/request/%s/NoSession", CreateHost(ardsServiceHost, ardsServicePort), sessionId)
+	fmt.Println("Start RemoveRequest: ", request)
+	req, _ := http.NewRequest("DELETE", request, nil)
+	req.Header.Set("authorization", jwtToken)
+	req.Header.Set("companyinfo", internalAuthToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer resp.Body.Close()
+
+	response, _ := ioutil.ReadAll(resp.Body)
+
+	fmt.Println(string(response))
+}
+
 func RejectRequest(company, tenant, sessionId string) {
 	defer func() {
 		if r := recover(); r != nil {
