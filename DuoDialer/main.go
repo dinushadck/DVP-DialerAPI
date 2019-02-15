@@ -35,8 +35,6 @@ func CheckTimeouts() {
 			prevTimeInt, _ := strconv.ParseInt(previewTimeout, 10, 64)
 
 			timeDiff := tNow - tThen
-			color.Cyan("TIME NOW : %d", tNow)
-			color.Cyan("TIME THEN : %s", cbVal)
 			color.Cyan("TIME DIFF : %d", timeDiff)
 
 			if timeDiff > prevTimeInt {

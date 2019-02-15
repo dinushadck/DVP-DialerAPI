@@ -728,6 +728,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 					case "SMS":
 
+						color.Yellow(fmt.Sprintf("=============== SMS DIALING - Campaign : %s ====================", campaignId))
+
 						templates := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "SMS", "TEMPLATE")
 
 						number, _, numExtraData, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
@@ -738,6 +740,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								return
 							}
 						} else {
+							color.Yellow(fmt.Sprintf("=============== SMS DIALING - Number Found : %s ====================", number))
 							uuidV4, _ := uuid.NewV4()
 							sessionId := uuidV4.String()
 							smsData := make(map[string]interface{})
@@ -764,6 +767,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								fmt.Println("SMS Pub data: ", string(publishData))
 								if pubDataConvErr == nil {
 									fmt.Println("Start Publish to rabbitMQ")
+									color.Yellow(fmt.Sprintf("=============== SMS DIALING - Publishing : %s ====================", campaignId))
 									RabbitMQPublish("SMSOUT", publishData)
 									SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
 									SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_success")
@@ -773,8 +777,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								}
 
 							} else {
-								fmt.Println("No Tamplate Found")
-								SetSessionInfo(campaignId, sessionId, "Reason", "No Tamplate Found")
+								color.Yellow(fmt.Sprintf("=============== SMS DIALING - Template Not Found : %s ====================", campaignId))
+								SetSessionInfo(campaignId, sessionId, "Reason", "No Template Found")
 								SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 							}
 
