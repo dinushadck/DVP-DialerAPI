@@ -166,11 +166,14 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	RedisRemove(hashKey)
 	RedisRemove(hashAgentKey)
 	//Check Session Is Contact Based Dialing - IF Yes Do Other Operation
-	if sessionInfo["NumberLoadingMethod"] == "CONTACT" {
-		AddContactToCallback(sessionInfo)
-	} else {
-		AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], sessionInfo["ServerId"])
+	if sessionInfo["Type"] != "SMS"{
+		if sessionInfo["NumberLoadingMethod"] == "CONTACT" {
+			AddContactToCallback(sessionInfo)
+		} else {
+			AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], sessionInfo["ServerId"])
+		}
 	}
+	
 
 	PublishEvent(campaignId, sessionId)
 	UploadSessionInfoToCampaignManager(sessionInfo)

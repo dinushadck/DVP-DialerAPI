@@ -405,7 +405,7 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 	}else{
 		redGreen.Println("=========== PREVIEW REJECTED DUE TO NO SESSION FOUND ==========")
 		go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
-		SetAgentStatusArds(refData.Company, refData.Tenant, "", refData.ResourceInfo.ResourceId, refData.SessionID, "Completed", refData.ServerType, refData.RequestType)
+		//SetAgentStatusArds(refData.Company, refData.Tenant, "", refData.ResourceInfo.ResourceId, refData.SessionID, "Completed", refData.ServerType, refData.RequestType)
 		AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
 
 	}
