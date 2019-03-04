@@ -146,6 +146,7 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 		req, err := http.NewRequest("POST", integrationUrl, bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
+		color.Magenta("=========== SENDING INTEGRATION DATA ===========")
 		resp, err := client.Do(req)
 		if err != nil {
 			fmt.Println(err.Error())
