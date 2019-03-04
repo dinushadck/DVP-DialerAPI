@@ -177,6 +177,7 @@ type CampaignCallbackObj struct {
 	DialoutTime      time.Time
 	OtherContacts    []Contact
 	PreviewData      string
+	ThirdPartyReference string
 }
 
 type CallbackInfo map[string]interface{}
@@ -244,6 +245,7 @@ type ContactsDetails struct {
 	PreviewData  string
 	Api_Contacts []Contact
 	TryCount     int
+	Thirdpartyreference string
 }
 
 type ContactsResult struct {

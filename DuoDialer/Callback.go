@@ -514,6 +514,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 								callbackObj.ContactId = sessionInfo["Number"]
 								callbackObj.DialoutTime = callbackTime
 								callbackObj.PreviewData = sessionInfo["PreviewData"]
+								callbackObj.ThirdPartyReference = sessionInfo["ThirdPartyReference"]
 
 								callbackObj.OtherContacts = contactsList
 

@@ -212,7 +212,7 @@ func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string,
 	RedisSet(numLoadingStatusKey, "waiting")
 }
 
-func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, []Contact) {
+func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, string, []Contact) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 
 	if numLoadingMethod == "CONTACT" {
@@ -245,17 +245,17 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 
 		strTryCount := strconv.Itoa(contactInf.TryCount)
 
-		return contactInf.Phone, strTryCount, contactInf.PreviewData, contactInf.Api_Contacts
+		return contactInf.Phone, strTryCount, contactInf.PreviewData, contactInf.Thirdpartyreference, contactInf.Api_Contacts
 	} else {
 		numberInfos := strings.Split(numberWithTryCount, ":")
 		if len(numberInfos) > 3 {
-			return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":"), make([]Contact, 0)
+			return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":"), "", make([]Contact, 0)
 		} else if len(numberInfos) == 3 {
-			return numberInfos[0], numberInfos[1], numberInfos[2], make([]Contact, 0)
+			return numberInfos[0], numberInfos[1], numberInfos[2], "", make([]Contact, 0)
 		} else if len(numberInfos) == 2 {
-			return numberInfos[0], numberInfos[1], "", make([]Contact, 0)
+			return numberInfos[0], numberInfos[1], "", "", make([]Contact, 0)
 		} else {
-			return "", "", "", make([]Contact, 0)
+			return "", "", "", "", make([]Contact, 0)
 		}
 
 	}

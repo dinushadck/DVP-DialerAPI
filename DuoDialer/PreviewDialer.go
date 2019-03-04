@@ -11,12 +11,12 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string, integrationData *IntegrationConfig, contacts *[]Contact) {
+func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string, integrationData *IntegrationConfig, contacts *[]Contact, thirdpartyreference string) {
 	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention, ": ", xGateway)
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, -1, "Campaign", "Dialer", "PreviewDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData, contacts, numExtraData)
+	InitiateSessionInfo(company, tenant, -1, "Campaign", "Dialer", "PreviewDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData, contacts, numExtraData, thirdpartyreference)
 	InitiateAgentSessionInfo(company, tenant, -1, campaignId, campaignName, uuid, phoneNumber, integrationData)
 	SetSessionInfo(campaignId, uuid, "FromNumber", fromNumber)
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)

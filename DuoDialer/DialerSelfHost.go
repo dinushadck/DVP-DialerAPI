@@ -108,7 +108,7 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 			fmt.Println("UUID : " + uuid)
 
 			scheduleId := fmt.Sprintf("%d", campaigninfo.CampScheduleInfo[0].ScheduleId)
-			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "API", "1", campaignId, scheduleId, campaigninfo.CampaignName, uuid, dnis, "api called", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, &campaigninfo.CampConfigurations.IntegrationData, nil, "")
+			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "API", "1", campaignId, scheduleId, campaigninfo.CampaignName, uuid, dnis, "api called", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, &campaigninfo.CampConfigurations.IntegrationData, nil, "", "")
 
 			SetSessionInfo(campaignId, uuid, "FromNumber", ani)
 			SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
@@ -229,11 +229,11 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 
 			fmt.Println("attributeDetails ::", attributeDetails)
 
-			SchedulePreviewCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["PriviewData"].(string), "", attributeDetails)
+			SchedulePreviewCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["PriviewData"].(string), "", attributeDetails, callbackInfo["ThirdPartyReference"].(string))
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "ivr" {
 
-			ScheduleIvrCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["Extention"].(string))
+			ScheduleIvrCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["Extention"].(string), callbackInfo["ThirdPartyReference"].(string))
 
 		} else {
 

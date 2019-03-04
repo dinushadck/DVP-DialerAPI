@@ -36,7 +36,7 @@ func InitiateAgentSessionInfo(company, tenant, sessionExprTime int, campaignId, 
 }
 
 //Initiate dial session for a number
-func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string, integrationData *IntegrationConfig, contacts *[]Contact, previewData string) {
+func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string, integrationData *IntegrationConfig, contacts *[]Contact, previewData, thirdpartyreference string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
@@ -65,6 +65,10 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 
 	if previewData != "" {
 		data["PreviewData"] = previewData
+	}
+
+	if thirdpartyreference != ""{
+		data["ThirdPartyReference"] = thirdpartyreference
 	}
 
 	if integrationData != nil {
