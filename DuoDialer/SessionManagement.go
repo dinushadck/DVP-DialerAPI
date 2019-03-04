@@ -12,7 +12,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func InitiateAgentSessionInfo(company, tenant, sessionExprTime int, campaignId, campaignName, sessionId, number string, integrationData *IntegrationConfig) {
+func InitiateAgentSessionInfo(company, tenant, sessionExprTime int, campaignId, campaignName, sessionId, number string, integrationData *IntegrationConfig, thirdpartyreference string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
@@ -29,6 +29,10 @@ func InitiateAgentSessionInfo(company, tenant, sessionExprTime int, campaignId, 
 	if integrationData != nil {
 		intgrData, _ := json.Marshal(*integrationData)
 		data["IntegrationData"] = string(intgrData)
+	}
+
+	if thirdpartyreference != ""{
+		data["ThirdPartyReference"] = thirdpartyreference
 	}
 
 	hashKey := fmt.Sprintf("agentSessionInfo:%s:%s", campaignId, sessionId)
