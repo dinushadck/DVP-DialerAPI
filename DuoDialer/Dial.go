@@ -102,11 +102,27 @@ func DialNew(server, params, furl, data string) (*http.Response, error) {
 	return resp, err
 }
 
+func SendCustomerIntegrationData(campaignId, sessionId string){
+	hKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+	sessionInfo := RedisHashGetAll(hKey)
+	color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
+
+	if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
+		sessionInfo["EventType"] = "CUSTOMER_DISCONNECT"
+		go ManageIntegrationData(sessionInfo, "CUSTOMER")
+	} else {
+		color.Magenta("NO INTEGRATION DATA")
+	}
+}
+
 func HandleDialResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) string {
 	if err != nil {
 		color.Red("=============HANDLE DIAL RESPONSE RETURNED ERROR=============")
 		SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
+
+		SendCustomerIntegrationData(campaignId, sessionId)
+
 		go UploadSessionInfo(campaignId, sessionId)
 		fmt.Println(err.Error())
 
@@ -135,6 +151,7 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 					SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
 				}
 				SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
+				SendCustomerIntegrationData(campaignId, sessionId)
 				go UploadSessionInfo(campaignId, sessionId)
 			} else {
 				SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
