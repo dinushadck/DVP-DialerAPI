@@ -602,19 +602,23 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 						if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
 
 							number, tryCount, numExtraData, thirdpartyref, contacts := GetNumberToDial(company, tenant, campaignId, camScheduleId, numLoadingMethod)
-							duplicatesNotFound := CheckDuplicates(company, tenant, campaignId, camScheduleId, number, duplicateNumTimeout)
 
-							if duplicatesNotFound{
-								if number == "" {
-									numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
-									if numberCount == 0 {
-										//SetCampaignStatus(campaignId, "End", company, tenant)
-										//RemoveCampaignFromDialer(campaignId, company, tenant)
-										SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
-										//SetCampChannelMaxLimitDirect(campaignId, "0")
-										return
-									}
-								} else {
+							
+							if number == "" {
+								numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
+								if numberCount == 0 {
+									//SetCampaignStatus(campaignId, "End", company, tenant)
+									//RemoveCampaignFromDialer(campaignId, company, tenant)
+									SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+									//SetCampChannelMaxLimitDirect(campaignId, "0")
+									return
+								}
+							} else {
+
+								duplicatesNotFound := CheckDuplicates(company, tenant, campaignId, camScheduleId, number, duplicateNumTimeout)
+								
+								if duplicatesNotFound{
+								
 									uuid := GetUuid(resourceServerInfos.Url)
 									trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number)
 	
@@ -638,16 +642,14 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 											break
 										}
 									} else {
-										color.Yellow("======= TRUNK OR UUID NOT FOUND =======")
-									}	
-									
+											color.Yellow("======= TRUNK OR UUID NOT FOUND =======")
+										}
 								}
 
-							}
-
-							time.Sleep(100 * time.Millisecond)
-							
-							
+								time.Sleep(100 * time.Millisecond)										
+									
+							}									
+													
 						} else {
 							color.Cyan("CHANNEL COUNT EXCEEDED : " + campaignName)
 							time.Sleep(500 * time.Millisecond)
