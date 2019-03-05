@@ -213,12 +213,15 @@ func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string,
 }
 
 func CheckDuplicates(company, tenant int, campaignId, camScheduleId, number string, timeout int) bool {
+	color.Green(fmt.Sprintf("========= Checking For Duplicates - Number : %s - Timeout : %d", number, timeout))
 
 	if timeout > 0{
 		duplicateNumKey := fmt.Sprintf("NumberDuplicateCheck:%d:%d:%s:%s:%s", company, tenant, campaignId, camScheduleId, number)
 
 		incrVal := RedisIncr(duplicateNumKey)
 		RedisExpire(duplicateNumKey, timeout)
+
+		color.Green(fmt.Sprintf("========= Number Dial Duplicate Count - Key : %s - Count : %s", duplicateNumKey, incrVal))
 
 		if incrVal > 1{
 			color.Red(fmt.Sprintf("========= DUPLICATE NUMBER DETECTED - Key : %s - Timeout : %d", duplicateNumKey, timeout))			
