@@ -212,6 +212,26 @@ func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string,
 	RedisSet(numLoadingStatusKey, "waiting")
 }
 
+func CheckDuplicates(company, tenant int, campaignId, camScheduleId, number string, timeout int) bool {
+
+	if timeout > 0{
+		duplicateNumKey := fmt.Sprintf("NumberDuplicateCheck:%d:%d:%s:%s:%s", company, tenant, campaignId, camScheduleId, number)
+
+		incrVal := RedisIncr(duplicateNumKey)
+		RedisExpire(duplicateNumKey, timeout)
+
+		if incrVal > 1{
+			color.Red(fmt.Sprintf("========= DUPLICATE NUMBER DETECTED - Key : %s - Timeout : %d", duplicateNumKey, timeout))			
+			return false;
+		}else{
+			return true;
+		}
+
+	}else{
+		return true;
+	}
+}
+
 func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, string, []Contact) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 

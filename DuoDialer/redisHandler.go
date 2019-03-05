@@ -147,6 +147,42 @@ func RedisSet(key, value string) string {
 	return result
 }
 
+func RedisExpire(key string, timeout int) string {
+	var client *redis.Client
+	var err error
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in RedisSet", r)
+		}
+
+		if client != nil {
+			if redisMode == "sentinel" {
+				sentinelPool.PutMaster(redisClusterName, client)
+			} else {
+				redisPool.Put(client)
+			}
+		} else {
+			fmt.Println("Cannot Put invalid connection")
+		}
+	}()
+
+	if redisMode == "sentinel" {
+		client, err = sentinelPool.GetMaster(redisClusterName)
+		errHndlrNew("OnEvent", "getConnFromSentinel", err)
+		//defer sentinelPool.PutMaster(redisClusterName, client)
+	} else {
+		client, err = redisPool.Get()
+		errHndlrNew("OnEvent", "getConnFromPool", err)
+		//defer redisPool.Put(client)
+	}
+
+	result, sErr := client.Cmd("expire", key, timeout).Str()
+	errHndlr(sErr)
+	DialerLog(result)
+	return result
+}
+
 func RedisSetNx(key, value string) int {
 	var client *redis.Client
 	var err error

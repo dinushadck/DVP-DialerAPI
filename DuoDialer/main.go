@@ -53,7 +53,7 @@ func CheckTimeouts() {
 	}
 }
 
-func main() {
+func main() {	
 
 	//Innitiate configuration
 	InitiateDuoDialer()
@@ -140,7 +140,7 @@ func main() {
 									color.Green(fmt.Sprintf("====== CAMPAIGN %s READY TO START ======", campaign.CampaignName))
 									color.Cyan(fmt.Sprintf("CAMPAIGN : %v", campaign))
 									tempCamp := campaign
-									go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency, &tempCamp.CampConfigurations.IntegrationData, campaign.CampConfigurations.NumberLoadingMethod)
+									go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency, &tempCamp.CampConfigurations.IntegrationData, campaign.CampConfigurations.NumberLoadingMethod, campaign.CampConfigurations.DuplicateNumTimeout)
 								}
 							}
 						}

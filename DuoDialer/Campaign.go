@@ -539,7 +539,7 @@ func RemoveCampaignConnectedCount(company, tenant int, campaignId string) {
 }
 
 //----------Run Campaign-----------------------
-func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int, integrationData *IntegrationConfig, numLoadingMethod string) {
+func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camClass, camType, camCategory, scheduleId, camScheduleId, resourceServerId, extention, defaultAni string, company, tenant, campaignMaxChannelCount int, integrationData *IntegrationConfig, numLoadingMethod string, duplicateNumTimeout int) {
 	color.Yellow(fmt.Sprintf("=======CampaignName : %s - %v =======", campaignName, *integrationData))
 	campStatus := GetCampaignStatus(campaignId, company, tenant)
 	SetCampaignStatus(campaignId, "Running", company, tenant)
@@ -602,44 +602,52 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 						if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
 
 							number, tryCount, numExtraData, thirdpartyref, contacts := GetNumberToDial(company, tenant, campaignId, camScheduleId, numLoadingMethod)
-							if number == "" {
-								numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
-								if numberCount == 0 {
-									//SetCampaignStatus(campaignId, "End", company, tenant)
-									//RemoveCampaignFromDialer(campaignId, company, tenant)
-									SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
-									//SetCampChannelMaxLimitDirect(campaignId, "0")
-									return
-								}
-							} else {
-								uuid := GetUuid(resourceServerInfos.Url)
-								trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number)
+							duplicatesNotFound := CheckDuplicates(company, tenant, campaignId, camScheduleId, number, duplicateNumTimeout)
 
-								if trunkCode != "" && uuid != "" {
-									switch dialoutMec {
-									case "BLAST":
-										color.Cyan(fmt.Sprintf("======= STARTING BLAST DIALER : %s =======", campaignId))
-										go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, tryCount, extention, integrationData, &contacts, thirdpartyref)
-										break
-									case "FIFO":
-										color.Cyan(fmt.Sprintf("======= STARTING FIFO DIALER : %s =======", campaignId))
-										go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, extention, integrationData, &contacts)
-										break
-									case "PREVIEW":
-										color.Cyan(fmt.Sprintf("======= STARTING PREVIEW DIALER : %s ======= %v", campaignId, contacts))
-										go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref)
-										break
-									case "AGENT":
-										color.Cyan(fmt.Sprintf("======= STARTING AGENT DIALER : %s =======", campaignId))
-										go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref)
-										break
+							if duplicatesNotFound{
+								if number == "" {
+									numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
+									if numberCount == 0 {
+										//SetCampaignStatus(campaignId, "End", company, tenant)
+										//RemoveCampaignFromDialer(campaignId, company, tenant)
+										SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+										//SetCampChannelMaxLimitDirect(campaignId, "0")
+										return
 									}
 								} else {
-									color.Yellow("======= TRUNK OR UUID NOT FOUND =======")
+									uuid := GetUuid(resourceServerInfos.Url)
+									trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number)
+	
+									if trunkCode != "" && uuid != "" {
+										switch dialoutMec {
+										case "BLAST":
+											color.Cyan(fmt.Sprintf("======= STARTING BLAST DIALER : %s =======", campaignId))
+											go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, tryCount, extention, integrationData, &contacts, thirdpartyref)
+											break
+										case "FIFO":
+											color.Cyan(fmt.Sprintf("======= STARTING FIFO DIALER : %s =======", campaignId))
+											go DialNumberFIFO(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, extention, integrationData, &contacts)
+											break
+										case "PREVIEW":
+											color.Cyan(fmt.Sprintf("======= STARTING PREVIEW DIALER : %s ======= %v", campaignId, contacts))
+											go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref)
+											break
+										case "AGENT":
+											color.Cyan(fmt.Sprintf("======= STARTING AGENT DIALER : %s =======", campaignId))
+											go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref)
+											break
+										}
+									} else {
+										color.Yellow("======= TRUNK OR UUID NOT FOUND =======")
+									}	
+									
 								}
 
-								time.Sleep(100 * time.Millisecond)
 							}
+
+							time.Sleep(100 * time.Millisecond)
+							
+							
 						} else {
 							color.Cyan("CHANNEL COUNT EXCEEDED : " + campaignName)
 							time.Sleep(500 * time.Millisecond)

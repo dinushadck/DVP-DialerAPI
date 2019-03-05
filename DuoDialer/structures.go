@@ -193,6 +193,7 @@ type CampaignConfigInfo struct {
 	EndTimeZone         string
 	IntegrationData     IntegrationConfig
 	NumberLoadingMethod string
+	DuplicateNumTimeout int
 }
 
 type IntegrationConfig struct {
