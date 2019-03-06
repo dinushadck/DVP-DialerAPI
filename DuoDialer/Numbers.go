@@ -216,7 +216,7 @@ func CheckDuplicates(company, tenant int, campaignId, camScheduleId, number stri
 	color.Green(fmt.Sprintf("========= Checking For Duplicates - Number : %s - Timeout : %d", number, timeout))
 
 	if timeout > 0{
-		duplicateNumKey := fmt.Sprintf("NumberDuplicateCheck:%d:%d:%s:%s:%s", company, tenant, campaignId, camScheduleId, number)
+		duplicateNumKey := fmt.Sprintf("NumberDuplicateCheck:%d:%d:%s:%s", company, tenant, campaignId, number)
 
 		incrVal := RedisIncr(duplicateNumKey)
 		RedisExpire(duplicateNumKey, timeout)
