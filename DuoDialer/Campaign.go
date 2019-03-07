@@ -615,7 +615,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								}
 							} else {
 
-								duplicatesNotFound := CheckDuplicates(company, tenant, campaignId, camScheduleId, number, duplicateNumTimeout)
+								duplicatesNotFound := CheckDuplicates(company, tenant, campaignId, camScheduleId, number, duplicateNumTimeout, tryCount)
 								
 								if duplicatesNotFound{
 								
