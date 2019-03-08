@@ -8,7 +8,7 @@ import (
 
 
 func AddCampaignDataRealtime(campaignData Campaign) {
-	color.Cyan(fmt.Sprintf("Adding Campaign"))
+	/* color.Cyan(fmt.Sprintf("Adding Campaign"))
 	var campInfoRealTime map[string]string
 
 	campInfoRealTime["CampaignId"] = strconv.Itoa(campaignData.CampaignId)
@@ -22,6 +22,6 @@ func AddCampaignDataRealtime(campaignData Campaign) {
 
 	color.Cyan("==============START=============");
 	color.Cyan(fmt.Sprintf("%v", campInfoRealTime));
-	color.Cyan("==============DONE=============");
+	color.Cyan("==============DONE============="); */
 	
 }
