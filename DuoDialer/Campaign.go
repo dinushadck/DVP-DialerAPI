@@ -189,6 +189,8 @@ func AddCampaignToDialer(campaignD Campaign) {
 				UpdateCampaignStartStatus(campaignD.CompanyId, campaignD.TenantId, campIdStr)
 			}
 		}
+		//Add Campaign Record
+		AddCampaignDataRealtime(campaignD)
 	} else {
 		color.Red(fmt.Sprintf("Add Campaign : %s to Redis failed No schedule found", campaignD.CampaignName))
 	}
