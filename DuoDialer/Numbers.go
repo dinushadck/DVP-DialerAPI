@@ -215,7 +215,7 @@ func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string,
 func CheckDuplicates(company, tenant int, campaignId, camScheduleId, number string, timeout, tryCount int) bool {
 	color.Green(fmt.Sprintf("========= Checking For Duplicates - Number : %s - Timeout : %d", number, timeout))
 
-	if timeout > 0 || tryCount >= 2{
+	if timeout > 0 || tryCount > 2{
 		duplicateNumKey := fmt.Sprintf("NumberDuplicateCheck:%d:%d:%s:%s", company, tenant, campaignId, number)
 
 		incrVal := RedisIncr(duplicateNumKey)
