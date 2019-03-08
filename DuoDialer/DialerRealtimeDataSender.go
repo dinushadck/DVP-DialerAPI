@@ -1,10 +1,10 @@
 package main
 
-import (
+/* import (
 	"strconv"
 	"fmt"
 	"github.com/fatih/color"
-)
+) */
 
 
 func AddCampaignDataRealtime(campaignData Campaign) {
