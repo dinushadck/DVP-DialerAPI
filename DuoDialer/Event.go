@@ -43,6 +43,7 @@ func OnEvent(eventInfo SubEvents) {
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "DialerStatus", "channel_answered")
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelAnswertime", time.Now().Format(layout4))
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
+				UpdateCampaignCallRealtimeField("DialStatus", "CONNECTED", eventInfo.TenantId, eventInfo.CompanyId, eventInfo.CampaignId, eventInfo.SessionId)
 				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory))
 				break
 			case "CHANNEL_DESTROY":
@@ -66,6 +67,8 @@ func OnEvent(eventInfo SubEvents) {
 					} else {
 						color.Magenta("NO INTEGRATION DATA")
 					}
+
+					RemoveCampaignCallRealtime(eventInfo.TenantId, eventInfo.CompanyId, eventInfo.CampaignId, eventInfo.SessionId)
 
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)

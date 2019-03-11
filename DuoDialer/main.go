@@ -104,6 +104,7 @@ func main() {
 					color.Yellow("ENDING CAMPAIGN DUE TO TIME EXPIRING - SET STATUS TO END")
 					SetCampaignStatus(campIdStr, "End", campaign.CompanyId, campaign.TenantId)
 					RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
+					RemoveCampaignRealtime(campaign.TenantId, campaign.CompanyId, campaign.CampaignId)
 				} else {
 
 					//campStatus := GetCampaignStatus(campIdStr, campaign.CompanyId, campaign.TenantId)
@@ -140,7 +141,9 @@ func main() {
 									color.Green(fmt.Sprintf("====== CAMPAIGN %s READY TO START ======", campaign.CampaignName))
 									color.Cyan(fmt.Sprintf("CAMPAIGN : %v", campaign))
 									tempCamp := campaign
+
 									go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency, &tempCamp.CampConfigurations.IntegrationData, campaign.CampConfigurations.NumberLoadingMethod, campaign.CampConfigurations.DuplicateNumTimeout)
+									UpdateCampaignRealtimeField("OperationalStatus", "DIALING", campaign.TenantId, campaign.CompanyId, campaign.CampaignId)
 								}
 							}
 						}
@@ -149,10 +152,15 @@ func main() {
 						case "Stop":
 							SetCampaignStatus(campIdStr, "Stop", campaign.CompanyId, campaign.TenantId)
 							RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
+							UpdateCampaignRealtimeField("OperationalStatus", "STOP", campaign.TenantId, campaign.CompanyId, campaign.CampaignId)
 							break
 						case "End":
 							SetCampaignStatus(campIdStr, "End", campaign.CompanyId, campaign.TenantId)
 							RemoveCampaignFromDialer(campIdStr, campaign.CompanyId, campaign.TenantId)
+							RemoveCampaignRealtime(campaign.TenantId, campaign.CompanyId, campaign.CampaignId)
+							break
+						case "Pause":
+							UpdateCampaignRealtimeField("OperationalStatus", "PAUSE", campaign.TenantId, campaign.CompanyId, campaign.CampaignId)							
 							break
 						default:
 							break

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"time"
+	"strconv"
 
 	"github.com/fatih/color"
 )
@@ -20,7 +21,11 @@ func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaign
 	furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
 	data := " xml dialer"
 
+	strTenant := strconv.Itoa(tenant)
+	strCompany := strconv.Itoa(company)
+
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
+	AddCampaignCallsRealtime(phoneNumber, tryCount, "DIALING", strTenant, strCompany, campaignId, uuid)
 	IncrCampaignDialCount(company, tenant, campaignId)
 	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "BlastDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData, contacts, "", thirdpartyreference)
 
