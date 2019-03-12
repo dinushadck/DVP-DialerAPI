@@ -53,6 +53,15 @@ func CheckTimeouts() {
 	}
 }
 
+func AddInitialCampaignsToRealtimeList(){
+
+	runningCampaigns := GetAllRunningCampaign()
+	
+	for _, campaign := range runningCampaigns {
+		AddCampaignDataRealtime(campaign)
+	}		
+}
+
 func main() {	
 
 	//Innitiate configuration
@@ -66,6 +75,8 @@ func main() {
 	go EnableConsoleInput()
 
 	go CheckTimeouts()
+
+	AddInitialCampaignsToRealtimeList()
 
 	//AddPhoneNumberToCallback("1", "1", "1", "1", "0112546969", "USER_BUSY")
 	//MAIN THREAD
@@ -115,7 +126,7 @@ func main() {
 
 					if campStatus == "Resume" || campStatus == "Start" || campStatus == "PauseByDialer" || campStatus == "Waiting for Appoinment" {
 						//tempCampaignStartDate, _ := time.Parse(layout2, campaign.CampConfigurations.StartDate)
-						//tempCampaignEndDate, _ := time.Parse(layout2, campaign.CampConfigurations.EndDate)
+						//tempCampaignEndDate, _ := time.Parse(layout2, campaign.CampConfigurations.EndDate)						
 
 						if campStatus == "Resume" {
 							UpdateCampaignStartStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
