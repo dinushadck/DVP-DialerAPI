@@ -33,7 +33,7 @@ func SendNotificationToRoom(roomName, from, direction, message, ref string, comp
 	req.Header.Set("companyinfo", internalAuthToken)
 	req.Header.Set("eventname", ref)
 	//DialerLog(fmt.Sprintf("request:%s", serviceurl))
-	color.Cyan(fmt.Sprintf("NOTIFICATION SENT - URL : %s, DATA : %v", serviceurl, pushD))
+	color.Yellow(fmt.Sprintf("NOTIFICATION SENT - URL : %s, DATA : %v", serviceurl, pushD))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
