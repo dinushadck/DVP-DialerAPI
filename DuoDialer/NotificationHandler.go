@@ -10,13 +10,13 @@ import (
 	"github.com/fatih/color"
 )
 
-func SendNotificationToRoom(roomName, from, direction, message, ref string, company, tenant int) {
+func SendNotificationToRoom(roomName, from, direction string, message map[string]string, ref string, company, tenant int) {
 	defer func() {
 		if r := recover(); r != nil {
 			color.Red(fmt.Sprintf("Recovered in UpdateCampaignStartStatus %+v", r))
 		}
 	}()
-	pushD := PushData{}
+	pushD := PushDataRoom{}
 	pushD.From = from
 	pushD.Direction = direction
 	pushD.Message = message
