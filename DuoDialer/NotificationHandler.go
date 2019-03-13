@@ -16,10 +16,10 @@ func SendNotificationToRoom(roomName, from, direction, message, ref string, comp
 			color.Red(fmt.Sprintf("Recovered in UpdateCampaignStartStatus %+v", r))
 		}
 	}()
-	pushD := PushDataRoom{}
+	pushD := PushData{}
 	pushD.From = from
 	pushD.Direction = direction
-	pushD.message = message
+	pushD.Message = message
 	pushD.Ref = ref
 
 	jsonData, _ := json.Marshal(pushD)

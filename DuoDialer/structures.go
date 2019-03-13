@@ -499,15 +499,6 @@ type PushData struct {
 	Ref         string
 }
 
-type PushDataRoom struct {
-	From        string
-	To          string
-	Direction   string
-	message     string
-	CallbackURL string
-	Ref         string
-}
-
 type ReplyData struct {
 	Tkey    string
 	Message string
