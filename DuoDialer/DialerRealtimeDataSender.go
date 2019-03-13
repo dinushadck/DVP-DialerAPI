@@ -57,14 +57,24 @@ func UpdateCampaignRealtimeField(fieldName, val string, tenantId, companyId, cam
 
 	key := fmt.Sprintf("RealTimeCampaign:%d:%d:%d", tenantId, companyId, campaignId)
 
-	RedisHashSetField(key, fieldName, val)
+	if(fieldName == "OperationalStatus" && val == "DIALING"){
+		//check current value and update
+		existingField = RedisHashGetField(key, fieldName)
 
-	campInfoRealTime := make(map[string]string)
+		if(existingField != "DIALING"){
+			RedisHashSetField(key, fieldName, val)
 
-	campInfoRealTime[fieldName] = val
-	campInfoRealTime["CampaignId"] = strconv.Itoa(campaignId)
+			campInfoRealTime := make(map[string]string)
 
-	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campInfoRealTime, "UPDATE_CAMPAIGN", companyId, tenantId)
+			campInfoRealTime[fieldName] = val
+			campInfoRealTime["CampaignId"] = strconv.Itoa(campaignId)
+
+			go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campInfoRealTime, "UPDATE_CAMPAIGN", companyId, tenantId)
+
+		}
+	}
+
+	
 }
 
 func UpdateCampaignCallRealtimeField(fieldName, val, tenantId, companyId, campaignId, sessionId string) {
