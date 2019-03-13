@@ -69,6 +69,7 @@ func UpdateCampaignRealtimeField(fieldName, val string, tenantId, companyId, cam
 	campInfoRealTime := make(map[string]string)
 
 	campInfoRealTime[fieldName] = val
+	campInfoRealTime["CampaignId"] = strconv.Itoa(campaignId)
 
 	campData, _ := json.Marshal(campInfoRealTime)
 	campDataStr := string(campData)
@@ -86,6 +87,7 @@ func UpdateCampaignCallRealtimeField(fieldName, val, tenantId, companyId, campai
 	campCallInfoRealTime := make(map[string]string)
 
 	campCallInfoRealTime[fieldName] = val
+	campCallInfoRealTime["SessionId"] = sessionId
 
 	campData, _ := json.Marshal(campCallInfoRealTime)
 	campDataStr := string(campData)
