@@ -154,7 +154,6 @@ func main() {
 									tempCamp := campaign
 
 									go StartCampaign(campIdStr, campaign.CampaignName, campaign.DialoutMechanism, campaign.CampaignChannel, campaign.Class, campaign.Type, campaign.Category, scheduleId, camScheduleId, "*", campaign.Extensions, campaign.CampConfigurations.Caller, campaign.CompanyId, campaign.TenantId, campaign.CampConfigurations.ChannelConcurrency, &tempCamp.CampConfigurations.IntegrationData, campaign.CampConfigurations.NumberLoadingMethod, campaign.CampConfigurations.DuplicateNumTimeout)
-									UpdateCampaignRealtimeField("OperationalStatus", "DIALING", campaign.TenantId, campaign.CompanyId, campaign.CampaignId)
 								}
 							}
 						}

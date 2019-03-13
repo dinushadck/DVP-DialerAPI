@@ -581,6 +581,10 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 			maxCampaignChannelLimit = 10
 		}
 
+		campIdInt, _ := strconv.Atoi(campaignId)
+
+		UpdateCampaignRealtimeField("OperationalStatus", "DIALING", tenant, company, campIdInt)
+
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
 			if campStatus == "Running" {				
