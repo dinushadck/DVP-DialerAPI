@@ -29,7 +29,7 @@ func AddCampaignDataRealtime(campaignData Campaign) {
 	campData, _ := json.Marshal(campInfoRealTime)
 	campDataStr := string(campData)
 
-	go SendNotificationToRoom("RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "NEW_CAMPAIGN", campaignData.CompanyId, campaignData.TenantId)
+	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "NEW_CAMPAIGN", campaignData.CompanyId, campaignData.TenantId)
 	
 }
 
@@ -55,7 +55,7 @@ func AddCampaignCallsRealtime(PhoneNumber, TryCount, DialState, TenantId, Compan
 	companyIdInt, _ := strconv.Atoi(CompanyId)
 	tenantIdInt, _ := strconv.Atoi(TenantId)
 
-	go SendNotificationToRoom("RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "NEW_CAMPAIGN_CALL", companyIdInt, tenantIdInt)
+	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "NEW_CAMPAIGN_CALL", companyIdInt, tenantIdInt)
 	
 }
 
@@ -73,7 +73,7 @@ func UpdateCampaignRealtimeField(fieldName, val string, tenantId, companyId, cam
 	campData, _ := json.Marshal(campInfoRealTime)
 	campDataStr := string(campData)
 
-	go SendNotificationToRoom("RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "UPDATE_CAMPAIGN", companyId, tenantId)
+	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "UPDATE_CAMPAIGN", companyId, tenantId)
 }
 
 func UpdateCampaignCallRealtimeField(fieldName, val, tenantId, companyId, campaignId, sessionId string) {
@@ -93,7 +93,7 @@ func UpdateCampaignCallRealtimeField(fieldName, val, tenantId, companyId, campai
 	companyIdInt, _ := strconv.Atoi(companyId)
 	tenantIdInt, _ := strconv.Atoi(tenantId)
 
-	go SendNotificationToRoom("RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "UPDATE_CAMPAIGN_CALL", companyIdInt, tenantIdInt)
+	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "UPDATE_CAMPAIGN_CALL", companyIdInt, tenantIdInt)
 
 	
 }
@@ -112,7 +112,7 @@ func RemoveCampaignRealtime(tenantId, companyId, campaignId int) {
 	campData, _ := json.Marshal(campInfoRealTime)
 	campDataStr := string(campData)
 
-	go SendNotificationToRoom("RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "REMOVE_CAMPAIGN", companyId, tenantId)
+	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "REMOVE_CAMPAIGN", companyId, tenantId)
 	
 }
 
@@ -133,6 +133,6 @@ func RemoveCampaignCallRealtime(tenantId, companyId, campaignId, sessionId strin
 	companyIdInt, _ := strconv.Atoi(companyId)
 	tenantIdInt, _ := strconv.Atoi(tenantId)
 
-	go SendNotificationToRoom("RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "REMOVE_CAMPAIGN", companyIdInt, tenantIdInt)
+	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campDataStr, "REMOVE_CAMPAIGN", companyIdInt, tenantIdInt)
 	
 }

@@ -16,10 +16,10 @@ func SendNotificationToRoom(roomName, from, direction, message, ref string, comp
 			color.Red(fmt.Sprintf("Recovered in UpdateCampaignStartStatus %+v", r))
 		}
 	}()
-	pushD := PushData{}
+	pushD := PushDataRoom{}
 	pushD.From = from
 	pushD.Direction = direction
-	pushD.Message = message
+	pushD.message = message
 	pushD.Ref = ref
 
 	jsonData, _ := json.Marshal(pushD)
@@ -31,6 +31,7 @@ func SendNotificationToRoom(roomName, from, direction, message, ref string, comp
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	req.Header.Set("companyinfo", internalAuthToken)
+	req.Header.Set("eventname", ref)
 	DialerLog(fmt.Sprintf("request:%s", serviceurl))
 	client := &http.Client{}
 	resp, err := client.Do(req)
