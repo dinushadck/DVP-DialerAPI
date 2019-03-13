@@ -59,7 +59,7 @@ func UpdateCampaignRealtimeField(fieldName, val string, tenantId, companyId, cam
 
 	if(fieldName == "OperationalStatus" && val == "DIALING"){
 		//check current value and update
-		existingField = RedisHashGetField(key, fieldName)
+		existingField := RedisHashGetField(key, fieldName)
 
 		if(existingField != "DIALING"){
 			RedisHashSetField(key, fieldName, val)
