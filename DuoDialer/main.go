@@ -45,6 +45,7 @@ func CheckTimeouts() {
 				RedisHashDelField("CALLBACK_TIMEOUTS", sessionInfo["CampaignId"]+":"+sessionInfo["SessionId"])
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
+				SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 			}
 

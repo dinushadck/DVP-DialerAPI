@@ -119,13 +119,13 @@ func OnEventAgent(eventInfo SubEvents) {
 			case "CHANNEL_DESTROY":
 				SetAgentSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", eventInfo.DisconnectReason)
 				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s, DisconnectReason : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.DisconnectReason))
-				hKey := fmt.Sprintf("agentSessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
+				/* hKey := fmt.Sprintf("agentSessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
 
 				if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
 					sessionInfo["EventType"] = "AGENT_DISCONNECTED"
 					go ManageIntegrationData(sessionInfo, "AGENT")
-				}
+				} */
 
 				break
 			default:

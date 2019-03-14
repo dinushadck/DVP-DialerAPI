@@ -393,12 +393,14 @@ func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
 						} else {
 							//RELEASING AGENT
 							magentawhite.Println("(23) Release Agent")
+							SendAgentIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 							SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 							DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 						}
 					} else {
 						//RELEASING AGENT
 						magentawhite.Println("(24) Release Agent")
+						SendAgentIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 						SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 						DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 					}
@@ -406,6 +408,7 @@ func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
 					fmt.Println("Add Callback Failed, No Valied Schedule Found")
 					magentawhite.Println("(25) Add Callback Failed, No Valied Schedule Found")
 					//RELEASING AGENT
+					SendAgentIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 					SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 					DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 				}
@@ -414,6 +417,7 @@ func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
 				fmt.Println("Add Callback Failed, No Existing Campaign Found")
 				magentawhite.Println("(26) Add Callback Failed, No Existing Campaign Found")
 				//RELEASING AGENT
+				SendAgentIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 				DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 			}
@@ -421,6 +425,7 @@ func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
 			color.Magenta("NO CONTACTS FOUND FOR RE DIALING")
 			magentawhite.Println("(27) NO CONTACTS FOUND FOR RE DIALING")
 			//RELEASING AGENT
+			SendAgentIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 			SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 			DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 
@@ -429,6 +434,7 @@ func SetNextContact(contactsList []Contact, sessionInfo map[string]string) {
 	} else {
 		magentawhite.Println("(28) DISCONNECT REASON NOT SET")
 		//RELEASING AGENT
+		SendAgentIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 		SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 		DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 	}
@@ -545,6 +551,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 				}
 				//RELEASING AGENT
 				magentawhite.Println("(13) Releasing Agent")
+				SendAgentIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 				SetAgentStatusArds(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["OriginalUuidARDS"], "Completed", sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"])
 				DecrConcurrentChannelCount(sessionInfo["ServerId"], sessionInfo["CampaignId"])
 			} else {
@@ -655,6 +662,7 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 		}
 	}
 
+	SendAgentIntegrationData(campaignId, sessionId)
 	SetAgentStatusArds(company, tenant, ardsCategory, resourceId, sessionId, "Completed", ardsServerType, ardsReqType)
 	DecrConcurrentChannelCount(switchName, campaignId)
 }

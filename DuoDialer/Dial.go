@@ -115,10 +115,24 @@ func SendCustomerIntegrationData(campaignId, sessionId string){
 	}
 }
 
+func SendAgentIntegrationData(campaignId, sessionId string){
+	hKey := fmt.Sprintf("agentSessionInfo:%s:%s", campaignId, sessionId)
+	sessionInfo := RedisHashGetAll(hKey)
+	color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
+
+	if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
+		sessionInfo["EventType"] = "AGENT_DISCONNECTED"
+		go ManageIntegrationData(sessionInfo, "AGENT")
+	} else {
+		color.Magenta("NO INTEGRATION DATA")
+	}
+}
+
 func HandleDialResponse(resp *http.Response, err error, server ResourceServerInfo, campaignId, sessionId string) string {
 	if err != nil {
 		color.Red("=============HANDLE DIAL RESPONSE RETURNED ERROR=============")
 		SetSessionInfo(campaignId, sessionId, "Reason", "dial_failed")
+		SetAgentSessionInfo(campaignId, sessionId, "AgentReason", "dial_failed")
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 
 		SendCustomerIntegrationData(campaignId, sessionId)
@@ -141,20 +155,24 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 				if len(resultInfo) > 1 {
 					reason := resultInfo[1]
 					if reason == "" {
+						SetAgentSessionInfo(campaignId, sessionId, "AgentReason", "not_specified")
 						SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
 					} else {
 						reason = strings.TrimSuffix(reason, "\n")
 						color.Red(reason)
 						SetSessionInfo(campaignId, sessionId, "Reason", reason)
+						SetAgentSessionInfo(campaignId, sessionId, "AgentReason", reason)
 					}
 				} else {
 					SetSessionInfo(campaignId, sessionId, "Reason", "not_specified")
+					SetAgentSessionInfo(campaignId, sessionId, "AgentReason", "not_specified")
 				}
 				SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
 				SendCustomerIntegrationData(campaignId, sessionId)
 				go UploadSessionInfo(campaignId, sessionId)
 			} else {
 				SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
+				SetAgentSessionInfo(campaignId, sessionId, "AgentReason", "dial_success")
 				SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_success")
 			}
 		}
