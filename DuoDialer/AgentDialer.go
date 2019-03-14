@@ -62,6 +62,8 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 //Once agent accept, send dial data to server
 func DialAgent(contactName, domain, contactType, resourceId, company, tenant, campaignId, ardsServerType, ardsReqType, sessionId string) {
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+
+	time.Sleep(8000 * time.Millisecond)		
 	if RedisCheckKeyExist(sessionInfoKey) {
 		sessionInfo := RedisHashGetAll(sessionInfoKey)
 		fromNumber := sessionInfo["FromNumber"]

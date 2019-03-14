@@ -143,10 +143,15 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 		jsonData, _ := json.Marshal(bodyData)
 
+		strdata := string(jsonData)
+
+		cyanblue := color.New(color.FgCyan).Add(color.BgBlue)
+		cyanblue.Println(fmt.Sprintf("=============SENDING INTEGRATION DATA - URL : %s, Data : %s", integrationUrl, strdata))
+
+
 		req, err := http.NewRequest("POST", integrationUrl, bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		color.Magenta("=========== SENDING INTEGRATION DATA ===========")
 		resp, err := client.Do(req)
 		if err != nil {
 			fmt.Println(err.Error())
