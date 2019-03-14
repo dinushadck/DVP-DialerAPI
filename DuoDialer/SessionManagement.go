@@ -186,7 +186,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 		if sessionInfo["NumberLoadingMethod"] == "CONTACT" {
 			AddContactToCallback(sessionInfo)
 		} else {
-			AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], sessionInfo["ServerId"])
+			AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], sessionInfo["ServerId"], sessionInfo)
 		}
 	}
 	

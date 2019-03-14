@@ -115,11 +115,8 @@ func SendCustomerIntegrationData(campaignId, sessionId string){
 	}
 }
 
-func SendAgentIntegrationData(campaignId, sessionId string){
-	hKey := fmt.Sprintf("agentSessionInfo:%s:%s", campaignId, sessionId)
-	sessionInfo := RedisHashGetAll(hKey)
-	color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
-
+func SendAgentIntegrationData(sessionInfo map[string]string){
+	
 	if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
 		sessionInfo["EventType"] = "AGENT_DISCONNECTED"
 		go ManageIntegrationData(sessionInfo, "AGENT")
