@@ -6,12 +6,11 @@ import (
 	"io/ioutil"
 	"strings"
 	"time"
+	"strconv"
 )
 
-func SchedulePreviewCallback(company, tenant int, sessionId, phoneNumber, previewData, extention string, attributeInfo []string, thirdpartyreference string) {
+func SchedulePreviewCallback(company, tenant int, sessionId, phoneNumber, previewData, extention string, attributeInfo []string, thirdpartyreference, campaignId, campaignName string) {
 
-	campaignId := "ScheduleCallbak"
-	campaignName := "ScheduleCallbak"
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
 	resourceServerInfos := RegisterCallServer(company, tenant)
@@ -49,10 +48,8 @@ func SchedulePreviewCallback(company, tenant int, sessionId, phoneNumber, previe
 
 }
 
-func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention, thirdpartyreference string) {
+func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention, thirdpartyreference, campaignId, campaignName string) {
 
-	campaignId := "ScheduleCallbak"
-	campaignName := "ScheduleCallbak"
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
 	resourceServerInfos := RegisterCallServer(company, tenant)
@@ -72,6 +69,9 @@ func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention,
 	}
 	furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
 	data := " xml dialer"
+
+	PublishCampaignCallCounts(sessionId, "DIALED", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
+	PublishCampaignCallCounts(sessionId, "DIALING", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
 
 	resp, err := Dial(resourceServerInfos.Url, param, furl, data)
 

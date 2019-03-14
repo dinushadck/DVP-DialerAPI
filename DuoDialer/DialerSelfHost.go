@@ -229,11 +229,11 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 
 			fmt.Println("attributeDetails ::", attributeDetails)
 
-			SchedulePreviewCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["PriviewData"].(string), "", attributeDetails, callbackInfo["ThirdPartyReference"].(string))
+			SchedulePreviewCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["PriviewData"].(string), "", attributeDetails, callbackInfo["ThirdPartyReference"].(string), callbackInfo["CampaignId"].(string), callbackInfo["CampaignName"].(string))
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "ivr" {
 
-			ScheduleIvrCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["Extention"].(string), callbackInfo["ThirdPartyReference"].(string))
+			ScheduleIvrCallback(company, tenant, callbackInfo["SessionId"].(string), callbackInfo["PhoneNumber"].(string), callbackInfo["Extention"].(string), callbackInfo["ThirdPartyReference"].(string), callbackInfo["CampaignId"].(string), callbackInfo["CampaignName"].(string))
 
 		} else {
 

@@ -621,6 +621,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								}
 							} else {
 
+								PublishCampaignCallCounts("", "NUMBERADDED", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
+
 								tCount, _ := strconv.Atoi(tryCount)
 
 								duplicatesNotFound := CheckDuplicates(company, tenant, campaignId, camScheduleId, number, duplicateNumTimeout, tCount)

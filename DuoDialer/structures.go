@@ -420,6 +420,19 @@ type PubEvents struct {
 	TenantId      int
 }
 
+type DashboardEvents struct {
+	EventClass    string
+	EventType     string
+	EventCategory string
+	SessionID     string
+	TimeStamp	  string
+	Parameter1    string
+	Parameter2    string
+	BusinessUnit  string
+	Company     int
+	Tenant      int
+}
+
 //--------------------Ards--------------------
 type RequestServer struct {
 	ServerType     string
