@@ -126,6 +126,6 @@ func RemoveCampaignCallRealtime(tenantId, companyId, campaignId, sessionId strin
 	companyIdInt, _ := strconv.Atoi(companyId)
 	tenantIdInt, _ := strconv.Atoi(tenantId)
 
-	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campCallInfoRealTime, "REMOVE_CAMPAIGN", companyIdInt, tenantIdInt)
+	go SendNotificationToRoom("DIALER:RealTimeCampaignEvents", "DIALER", "STATELESS", campCallInfoRealTime, "REMOVE_CAMPAIGN_CALL", companyIdInt, tenantIdInt)
 	
 }

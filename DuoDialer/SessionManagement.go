@@ -145,7 +145,7 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 		strdata := string(jsonData)
 
-		cyanblue := color.New(color.FgCyan).Add(color.BgBlue)
+		cyanblue := color.New(color.FgCyan).Add(color.BgMagenta)
 		cyanblue.Println(fmt.Sprintf("=============SENDING INTEGRATION DATA - URL : %s, Data : %s", integrationUrl, strdata))
 
 
@@ -179,6 +179,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	sessionInfo := RedisHashGetAll(hashKey)
 	RedisRemove(hashKey)
 	RedisRemove(hashAgentKey)
+	RemoveCampaignCallRealtime(sessionInfo["TenantId"], sessionInfo["CompanyId"], campaignId, sessionId)
 	PublishCampaignCallCounts(sessionId, "DISCONNECTING", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
 	PublishCampaignCallCounts(sessionId, "DISCONNECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
 	//Check Session Is Contact Based Dialing - IF Yes Do Other Operation

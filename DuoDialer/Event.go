@@ -70,8 +70,6 @@ func OnEvent(eventInfo SubEvents) {
 						color.Magenta("NO INTEGRATION DATA")
 					}
 
-					RemoveCampaignCallRealtime(eventInfo.TenantId, eventInfo.CompanyId, eventInfo.CampaignId, eventInfo.SessionId)
-
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				} else {
