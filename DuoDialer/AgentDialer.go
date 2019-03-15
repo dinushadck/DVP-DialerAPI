@@ -64,7 +64,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 
 	color.Yellow("===========SLEEEPING============")
-	time.Sleep(8000 * time.Millisecond)
+	//time.Sleep(8000 * time.Millisecond)
 	color.Yellow("===========SLEEEP ENDED============")		
 	if RedisCheckKeyExist(sessionInfoKey) {
 		sessionInfo := RedisHashGetAll(sessionInfoKey)
