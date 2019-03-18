@@ -57,11 +57,11 @@ func UpdateCampaignRealtimeField(fieldName, val string, tenantId, companyId, cam
 
 	key := fmt.Sprintf("RealTimeCampaign:%d:%d:%d", tenantId, companyId, campaignId)
 
-	if(fieldName == "OperationalStatus" && val == "DIALING"){
+	if(fieldName == "OperationalStatus"){
 		//check current value and update
 		existingField := RedisHashGetField(key, fieldName)
 
-		if(existingField != "DIALING"){
+		if(existingField != val){
 			RedisHashSetField(key, fieldName, val)
 
 			campInfoRealTime := make(map[string]string)
