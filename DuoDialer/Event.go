@@ -45,7 +45,7 @@ func OnEvent(eventInfo SubEvents) {
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
 				//PublishCampaignCallCounts(eventInfo.SessionId, "ANSWERED", eventInfo.CompanyId, eventInfo.TenantId, eventInfo.CampaignId)
 				PublishCampaignCallCounts(eventInfo.SessionId, "CONNECTED", eventInfo.CompanyId, eventInfo.TenantId, eventInfo.CampaignId)
-				UpdateCampaignCallRealtimeField("DialStatus", "CONNECTED", eventInfo.TenantId, eventInfo.CompanyId, eventInfo.CampaignId, eventInfo.SessionId)
+				UpdateCampaignCallRealtimeField("DialState", "CONNECTED", eventInfo.TenantId, eventInfo.CompanyId, eventInfo.CampaignId, eventInfo.SessionId)
 				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory))
 				break
 			case "CHANNEL_DESTROY":
