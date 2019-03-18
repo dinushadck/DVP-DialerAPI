@@ -70,7 +70,7 @@ func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention,
 	furl := fmt.Sprintf("sofia/gateway/%s/%s %s", trunkCode, phoneNumber, extention)
 	data := " xml dialer"
 
-	PublishCampaignCallCounts(sessionId, "DIALED", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
+	//PublishCampaignCallCounts(sessionId, "DIALED", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
 	PublishCampaignCallCounts(sessionId, "DIALING", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
 
 	resp, err := Dial(resourceServerInfos.Url, param, furl, data)

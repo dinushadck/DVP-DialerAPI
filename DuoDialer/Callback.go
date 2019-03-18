@@ -307,7 +307,7 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 			redwhite.Println(fmt.Sprintf("DIALING OUT CALL - AGENT CAMPAIGN : %s | NUMBER : %s", sessionInfo["CampaignName"], dnis))
 
 			//resp, err := DialNew(resourceServer.Url, param, furl, data)
-			PublishCampaignCallCounts(uuid, "DIALED", sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"])
+			//PublishCampaignCallCounts(uuid, "DIALED", sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"])
 			PublishCampaignCallCounts(uuid, "DIALING", sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"])
 			resp, err := Dial(resourceServer.Url, param, furl, data)
 			HandleDialResponse(resp, err, resourceServer, sessionInfo["CampaignId"], uuid)

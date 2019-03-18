@@ -150,7 +150,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 
 			//resp, err := DialNew(resourceServer.Url, param, furl, data)
 			RemoveRequest(company, tenant, sessionId)
-			PublishCampaignCallCounts(sessionId, "DIALED", company, tenant, campaignId)
+			//PublishCampaignCallCounts(sessionId, "DIALED", company, tenant, campaignId)
 			PublishCampaignCallCounts(sessionId, "DIALING", company, tenant, campaignId)
 			resp, err := Dial(resourceServer.Url, param, furl, data)
 			HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
