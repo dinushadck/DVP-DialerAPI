@@ -17,7 +17,7 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 
 	strTenant := strconv.Itoa(tenant)
 	strCompany := strconv.Itoa(company)
-	AddCampaignCallsRealtime(phoneNumber, tryCount, "DIALING", strTenant, strCompany, campaignId, uuid)
+	AddCampaignCallsRealtime(phoneNumber, tryCount, "WAITING", strTenant, strCompany, campaignId, uuid)
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	
@@ -152,6 +152,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			RemoveRequest(company, tenant, sessionId)
 			//PublishCampaignCallCounts(sessionId, "DIALED", company, tenant, campaignId)
 			PublishCampaignCallCounts(sessionId, "DIALING", company, tenant, campaignId)
+			UpdateCampaignCallRealtimeField("DialState", "DIALING", tenant, company, campaignId, sessionId)
 			resp, err := Dial(resourceServer.Url, param, furl, data)
 			HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)
 		} else {

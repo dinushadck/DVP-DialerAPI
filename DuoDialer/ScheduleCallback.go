@@ -72,6 +72,7 @@ func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention,
 
 	//PublishCampaignCallCounts(sessionId, "DIALED", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
 	PublishCampaignCallCounts(sessionId, "DIALING", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
+	UpdateCampaignCallRealtimeField("DialState", "DIALING", strconv.Itoa(tenant), strconv.Itoa(tenant), campaignId, sessionId)
 
 	resp, err := Dial(resourceServerInfos.Url, param, furl, data)
 

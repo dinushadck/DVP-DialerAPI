@@ -181,7 +181,10 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	RedisRemove(hashAgentKey)
 	RemoveCampaignCallRealtime(sessionInfo["TenantId"], sessionInfo["CompanyId"], campaignId, sessionId)
 	PublishCampaignCallCounts(sessionId, "DISCONNECTING", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
-	PublishCampaignCallCounts(sessionId, "DISCONNECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
+	if(sessionInfo["CustomerAnswered"] != "TRUE"){
+		PublishCampaignCallCounts(sessionId, "DISCONNECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
+	}
+	
 	//Check Session Is Contact Based Dialing - IF Yes Do Other Operation
 	if sessionInfo["Type"] != "SMS"{
 		if sessionInfo["NumberLoadingMethod"] == "CONTACT" {

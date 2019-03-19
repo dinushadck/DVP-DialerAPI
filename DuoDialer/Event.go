@@ -41,10 +41,12 @@ func OnEvent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_ANSWER":
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "DialerStatus", "channel_answered")
+				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "CustomerAnswered", "TRUE")
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelAnswertime", time.Now().Format(layout4))
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
 				//PublishCampaignCallCounts(eventInfo.SessionId, "ANSWERED", eventInfo.CompanyId, eventInfo.TenantId, eventInfo.CampaignId)
 				PublishCampaignCallCounts(eventInfo.SessionId, "CONNECTED", eventInfo.CompanyId, eventInfo.TenantId, eventInfo.CampaignId)
+				PublishCampaignCallCounts(eventInfo.SessionId, "DISCONNECTED", eventInfo.CompanyId, eventInfo.TenantId, eventInfo.CampaignId)
 				UpdateCampaignCallRealtimeField("DialState", "CONNECTED", eventInfo.TenantId, eventInfo.CompanyId, eventInfo.CampaignId, eventInfo.SessionId)
 				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory))
 				break

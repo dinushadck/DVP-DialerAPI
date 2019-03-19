@@ -16,7 +16,7 @@ func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInf
 
 	strTenant := strconv.Itoa(tenant)
 	strCompany := strconv.Itoa(company)
-	AddCampaignCallsRealtime(phoneNumber, tryCount, "DIALING", strTenant, strCompany, campaignId, uuid)
+	AddCampaignCallsRealtime(phoneNumber, tryCount, "WAITING", strTenant, strCompany, campaignId, uuid)
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 	IncrCampaignDialCount(company, tenant, campaignId)

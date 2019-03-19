@@ -308,6 +308,7 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 
 			//resp, err := DialNew(resourceServer.Url, param, furl, data)
 			//PublishCampaignCallCounts(uuid, "DIALED", sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"])
+			UpdateCampaignCallRealtimeField("DialState", "DIALING", sessionInfo["TenantId"], sessionInfo["CompanyId"], sessionInfo["CampaignId"], uuid)
 			PublishCampaignCallCounts(uuid, "DIALING", sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"])
 			resp, err := Dial(resourceServer.Url, param, furl, data)
 			HandleDialResponse(resp, err, resourceServer, sessionInfo["CampaignId"], uuid)
