@@ -183,6 +183,8 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	PublishCampaignCallCounts(sessionId, "DISCONNECTING", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
 	if(sessionInfo["CustomerAnswered"] != "TRUE"){
 		PublishCampaignCallCounts(sessionId, "DISCONNECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
+	}else{
+		PublishCampaignCallCounts(sessionId, "REJECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
 	}
 	
 	//Check Session Is Contact Based Dialing - IF Yes Do Other Operation
