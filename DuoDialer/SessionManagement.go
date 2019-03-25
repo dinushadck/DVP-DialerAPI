@@ -181,8 +181,10 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	RedisRemove(hashAgentKey)
 	RemoveCampaignCallRealtime(sessionInfo["TenantId"], sessionInfo["CompanyId"], campaignId, sessionId)
 	PublishCampaignCallCounts(sessionId, "DISCONNECTING", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
-	if(sessionInfo["CustomerAnswered"] != "TRUE"){
-		color.Red("===================CUSTOMER ANSWERED=======================")
+	if(sessionInfo["DialerCustomerAnswered"] != "TRUE"){
+		jvalue, _ := json.Marshal(sessionInfo)
+		jvalueStr := string(jvalue)
+		color.Red(fmt.Sprintf("===================CUSTOMER ANSWERED======================= - OBJ : %s", jvalueStr))
 		PublishCampaignCallCounts(sessionId, "DISCONNECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
 	}else{
 		color.Red("===================CUSTOMER NOT ANSWERED=======================")

@@ -41,7 +41,7 @@ func OnEvent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_ANSWER":
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "DialerStatus", "channel_answered")
-				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "CustomerAnswered", "TRUE")
+				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "DialerCustomerAnswered", "TRUE")
 				SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ChannelAnswertime", time.Now().Format(layout4))
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
 				//PublishCampaignCallCounts(eventInfo.SessionId, "ANSWERED", eventInfo.CompanyId, eventInfo.TenantId, eventInfo.CampaignId)
