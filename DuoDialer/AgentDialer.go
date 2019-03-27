@@ -63,14 +63,14 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 func DialAgent(contactName, domain, contactType, resourceId, company, tenant, campaignId, ardsServerType, ardsReqType, sessionId string) {
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 
-	color.Yellow("===========SLEEEPING============")
-	/* agentPrepTimeInt, _ := strconv.ParseInt(agentPrepareTime, 10, 64)
+	agentPrepTimeInt, _ := strconv.ParseInt(agentPrepareTime, 10, 64)
 	if agentPrepTimeInt > 0{
-		msPrepTime := agentPrepTimeInt * 1000000
-		time.Sleep(msPrepTime)
-	} */
+		color.Yellow("===========SLEEEPING============")
+		time.Sleep(time.Duration(agentPrepTimeInt) * time.Second)
+		color.Yellow("===========SLEEEP ENDED============")	
+	}
 	//
-	color.Yellow("===========SLEEEP ENDED============")		
+		
 	if RedisCheckKeyExist(sessionInfoKey) {
 		sessionInfo := RedisHashGetAll(sessionInfoKey)
 		fromNumber := sessionInfo["FromNumber"]

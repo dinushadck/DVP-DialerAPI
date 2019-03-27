@@ -46,6 +46,7 @@ func CheckTimeouts() {
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
 				SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+				RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
 				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 			}
 
