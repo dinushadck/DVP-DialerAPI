@@ -54,15 +54,18 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 		for _, numRes := range phoneNumberResult.Result {
 			if numRes.ExtraData != "" {
 				numberWithExtraD := fmt.Sprintf("%s:%s:%s", numRes.CampContactInfo.ContactId, "1", numRes.ExtraData)
+				fmt.Println("======NUMBER 1 : " + numberWithExtraD)
 				numbers = append(numbers, numberWithExtraD)
 			} else {
 				numberWithData := strings.Split(numRes.CampContactInfo.ContactId, ":")
 				if len(numberWithData) > 1 {
 					exData := strings.Join(numberWithData[1:], ":")
 					numberAndExtraD := fmt.Sprintf("%s:%s:%s", numberWithData[0], "1", exData)
+					fmt.Println("======NUMBER 2 : " + numberAndExtraD)
 					numbers = append(numbers, numberAndExtraD)
 				} else {
 					numberWithoutExtraData := fmt.Sprintf("%s:%s:", numRes.CampContactInfo.ContactId, "1")
+					fmt.Println("======NUMBER 3 : " + numberWithoutExtraData)
 					numbers = append(numbers, numberWithoutExtraData)
 				}
 			}
@@ -274,9 +277,9 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 		color.Green("NUMBER POPPED OUT TO DIAL : " + numberWithTryCount)
 		numberInfos := strings.Split(numberWithTryCount, ":")
 		if len(numberInfos) > 3 {
-			//return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":"), "", make([]Contact, 0)
+			return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":"), "", make([]Contact, 0)
 			color.Green("NUMBER POPPED OUT TO DIAL : >3")
-			return numberInfos[0], numberInfos[2], numberInfos[1], "", make([]Contact, 0)
+			//return numberInfos[0], numberInfos[2], numberInfos[1], "", make([]Contact, 0)
 		} else if len(numberInfos) == 3 {
 			color.Green("NUMBER POPPED OUT TO DIAL : 3")
 			return numberInfos[0], numberInfos[1], numberInfos[2], "", make([]Contact, 0)
