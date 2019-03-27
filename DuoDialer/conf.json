@@ -45,5 +45,6 @@
 	"DvpEventType": "redis",
 	"UseAmqpAdapter": "false",
 	"AmqpAdapterPort": "3653",
-	"PreviewTimeout": "120"
+	"PreviewTimeout": "120",
+	"AgentPrepareTime": "10"
 }

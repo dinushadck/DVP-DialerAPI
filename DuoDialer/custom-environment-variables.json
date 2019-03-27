@@ -43,5 +43,6 @@
 	"DvpEventType": "HOST_DVPEVENTS_TYPE",
 	"UseAmqpAdapter": "HOST_USE_AMQP_ADAPTER",
 	"AmqpAdapterPort": "AMQP_ADAPTER_PORT",
-	"PreviewTimeout": "HOST_PREVIEW_TIMEOUT"
+	"PreviewTimeout": "HOST_PREVIEW_TIMEOUT",
+	"AgentPrepareTime": "HOST_AGENT_PREPARE_TIME"
 }

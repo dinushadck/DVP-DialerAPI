@@ -61,6 +61,7 @@ var dvpEventType string
 var useAmqpAdapter string
 var amqpAdapterPort string
 var previewTimeout string
+var agentPrepareTime string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -131,6 +132,7 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.UseAmqpAdapter = "false"
 		defconfiguration.AmqpAdapterPort = "3653"
 		defconfiguration.PreviewTimeout = "120"
+		defconfiguration.AgentPrepareTime = "0"
 	}
 
 	return defconfiguration
@@ -186,6 +188,7 @@ func LoadDefaultConfig() {
 	useAmqpAdapter = defconfiguration.UseAmqpAdapter
 	amqpAdapterPort = defconfiguration.AmqpAdapterPort
 	previewTimeout = defconfiguration.PreviewTimeout
+	agentPrepareTime = defconfiguration.AgentPrepareTime
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -255,6 +258,7 @@ func LoadConfiguration() {
 		useAmqpAdapter = os.Getenv(envconfiguration.UseAmqpAdapter)
 		amqpAdapterPort = os.Getenv(envconfiguration.AmqpAdapterPort)
 		previewTimeout = os.Getenv(envconfiguration.PreviewTimeout)
+		agentPrepareTime = os.Getenv(envconfiguration.AgentPrepareTime)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -397,6 +401,9 @@ func LoadConfiguration() {
 		if previewTimeout == "" {
 			previewTimeout = defConfig.PreviewTimeout
 		}
+		if agentPrepareTime == ""{
+			agentPrepareTime = defConfig.AgentPrepareTime
+		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 		securityIp = fmt.Sprintf("%s:%s", securityIp, securityPort)
@@ -414,6 +421,7 @@ func LoadConfiguration() {
 	fmt.Println("useAmqpAdapter:", useAmqpAdapter)
 	fmt.Println("amqpAdapterPort:", amqpAdapterPort)
 	fmt.Println("previewTimeout:", previewTimeout)
+	fmt.Println("agentPrepareTime:", agentPrepareTime)
 }
 
 func LoadCallbackConfiguration() {
