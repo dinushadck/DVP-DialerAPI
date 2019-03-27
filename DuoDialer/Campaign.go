@@ -609,7 +609,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 							number, tryCount, numExtraData, thirdpartyref, contacts := GetNumberToDial(company, tenant, campaignId, camScheduleId, numLoadingMethod)
 
-							
+							color.Green(fmt.Sprintf("Number:%s | TryCount:%s | numExtraData:%s", number, tryCount, numExtraData))
+
 							if number == "" {
 								numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 								if numberCount == 0 {
