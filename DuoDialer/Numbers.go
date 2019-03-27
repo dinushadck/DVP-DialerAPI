@@ -278,7 +278,6 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 		numberInfos := strings.Split(numberWithTryCount, ":")
 		if len(numberInfos) > 3 {
 			return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":"), "", make([]Contact, 0)
-			color.Green("NUMBER POPPED OUT TO DIAL : >3")
 			//return numberInfos[0], numberInfos[2], numberInfos[1], "", make([]Contact, 0)
 		} else if len(numberInfos) == 3 {
 			color.Green("NUMBER POPPED OUT TO DIAL : 3")
