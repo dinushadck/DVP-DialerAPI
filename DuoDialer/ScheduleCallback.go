@@ -71,6 +71,7 @@ func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention,
 	data := " xml dialer"
 
 	//PublishCampaignCallCounts(sessionId, "DIALED", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
+	SetSessionInfo(campaignId, sessionId, "IsDialed", "TRUE")
 	PublishCampaignCallCounts(sessionId, "DIALING", strconv.Itoa(company), strconv.Itoa(tenant), campaignId)
 	UpdateCampaignCallRealtimeField("DialState", "DIALING", strconv.Itoa(tenant), strconv.Itoa(tenant), campaignId, sessionId)
 

@@ -32,6 +32,7 @@ func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaign
 	redwhite := color.New(color.FgRed).Add(color.BgWhite)
 	redwhite.Println(fmt.Sprintf("DIALING OUT CALL - BLAST CAMPAIGN : %s | NUMBER : %s", campaignName, phoneNumber))
 	//PublishCampaignCallCounts(uuid, "DIALED", strCompany, strTenant, campaignId)
+	SetSessionInfo(campaignId, uuid, "IsDialed", "TRUE")
 	PublishCampaignCallCounts(uuid, "DIALING", strCompany, strTenant, campaignId)
 	resp, err := Dial(resourceServer.Url, param, furl, data)
 	HandleDialResponse(resp, err, resourceServer, campaignId, uuid)

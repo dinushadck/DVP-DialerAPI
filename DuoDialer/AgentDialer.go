@@ -156,6 +156,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			//resp, err := DialNew(resourceServer.Url, param, furl, data)
 			RemoveRequest(company, tenant, sessionId)
 			//PublishCampaignCallCounts(sessionId, "DIALED", company, tenant, campaignId)
+			SetSessionInfo(campaignId, sessionId, "IsDialed", "TRUE")
 			PublishCampaignCallCounts(sessionId, "DIALING", company, tenant, campaignId)
 			UpdateCampaignCallRealtimeField("DialState", "DIALING", tenant, company, campaignId, sessionId)
 			resp, err := Dial(resourceServer.Url, param, furl, data)
