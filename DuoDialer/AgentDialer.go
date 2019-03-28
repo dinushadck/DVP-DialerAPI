@@ -175,6 +175,17 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 	}
 }
 
+func AgentRejectWithoutCallRemove(company, tenant, campaignId, sessionId, requestType, resourceId, rejectReason string) {
+	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+	if RedisCheckKeyExist(sessionInfoKey) {
+		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
+		SetSessionInfo(campaignId, sessionId, "DialerStatus", "agent_reject")
+		ClearResourceSlotWhenReject(company, tenant, requestType, resourceId, sessionId)
+		//RejectRequest(company, tenant, sessionId)
+		//go UploadSessionInfo(campaignId, sessionId)
+	}
+}
+
 func AgentReject(company, tenant, campaignId, sessionId, requestType, resourceId, rejectReason string) {
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	if RedisCheckKeyExist(sessionInfoKey) {

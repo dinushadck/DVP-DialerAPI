@@ -399,7 +399,9 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			redGreen.Println("=========== PREVIEW REJECTED DUE TO AGENT REJECT ==========")
 			fmt.Println("Start Reject Priview Number")
 			//go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
-			AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
+			go RejectRequest(refData.Company, refData.Tenant, refData.SessionID)
+			//AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
+			//AgentRejectWithoutCallRemove(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
 		}
 
 	}else{
