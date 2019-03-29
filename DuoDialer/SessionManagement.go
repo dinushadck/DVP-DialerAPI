@@ -126,11 +126,13 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 	bodyData := map[string]interface{}{}
 
 	integrationUrl := ""
+	dcReason := ""
 	if integrationType == "CUSTOMER" {
 		for _, element := range intData.Customer.Params {
 			bodyData[element] = sessionInfo[element]
 		}
 		integrationUrl = intData.Customer.Url
+		dcReason = sessionInfo["Reason"]
 
 	} else if integrationType == "AGENT" {
 		for _, element := range intData.Agent.Params {
@@ -141,11 +143,16 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 			}
 
 		}
+		dcReason = sessionInfo["AgentReason"]
 		integrationUrl = intData.Agent.Url
 
 	}
 
 	if integrationUrl != "" {
+
+		if disconnectReasonMap[dcReason] != ""{
+			bodyData["Reason"] = disconnectReasonMap[dcReason]
+		}
 
 		jsonData, _ := json.Marshal(bodyData)
 

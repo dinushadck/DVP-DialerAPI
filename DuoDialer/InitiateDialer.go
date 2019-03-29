@@ -14,6 +14,8 @@ func InitiateDuoDialer() {
 	InitiateRedis()
 	//Get callback configurations from campaignmanager service
 	LoadCallbackConfiguration()
+	//Get disconnect reason
+	GetDisconnectReasons()
 	//Add dialer record to redis with dialer name set on env vars
 	AddDialerInfoToRedis()
 	//Create new go routing to listen to eventmonitor events EG:- CHANNEL_CREATE, CHANNEL_ANSWER

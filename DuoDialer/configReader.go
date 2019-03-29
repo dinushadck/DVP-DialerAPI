@@ -62,6 +62,7 @@ var useAmqpAdapter string
 var amqpAdapterPort string
 var previewTimeout string
 var agentPrepareTime string
+var disconnectReasonMap map[string]string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -70,6 +71,10 @@ func GetDirPath() string {
 	}
 	fmt.Println(envPath)
 	return envPath
+}
+
+func GetDisconnectReasons(){
+	disconnectReasonMap = RedisHashGetAll("DisconnectReasonMap")
 }
 
 func GetDefaultConfig() Configuration {
