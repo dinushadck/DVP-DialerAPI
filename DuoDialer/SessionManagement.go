@@ -67,6 +67,12 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["TryCount"] = tryCount
 	data["ExpireTime"] = sessionExprTimeStr
 
+	tryCountInt, _ := strconv.Atoi(tryCount)
+
+	if(tryCountInt > 1){
+		data["CALLBACK"] = "CALLBACK"
+	}
+
 	if previewData != "" {
 		data["PreviewData"] = previewData
 	}
@@ -179,13 +185,17 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	sessionInfo := RedisHashGetAll(hashKey)
 	RedisRemove(hashKey)
 	RedisRemove(hashAgentKey)
+	dashboardparam2 := "BASIC"
+	if sessionInfo["CALLBACK"] == "CALLBACK"{
+		dashboardparam2 = "CALLBACK"
+	}
 	RemoveCampaignCallRealtime(sessionInfo["TenantId"], sessionInfo["CompanyId"], campaignId, sessionId)
-	PublishCampaignCallCounts(sessionId, "DISCONNECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
+	PublishCampaignCallCounts(sessionId, "DISCONNECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId, dashboardparam2)
 	if(sessionInfo["DialerCustomerAnswered"] != "TRUE"){
-		PublishCampaignCallCounts(sessionId, "DISCONNECTING", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
+		PublishCampaignCallCounts(sessionId, "DISCONNECTING", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId, dashboardparam2)
 
 		if(sessionInfo["IsDialed"] == "TRUE"){
-			PublishCampaignCallCounts(sessionId, "REJECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId)
+			PublishCampaignCallCounts(sessionId, "REJECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId, dashboardparam2)
 		}
 		
 	}

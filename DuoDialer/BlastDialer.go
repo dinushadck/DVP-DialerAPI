@@ -33,7 +33,12 @@ func DialNumber(company, tenant int, resourceServer ResourceServerInfo, campaign
 	redwhite.Println(fmt.Sprintf("DIALING OUT CALL - BLAST CAMPAIGN : %s | NUMBER : %s", campaignName, phoneNumber))
 	//PublishCampaignCallCounts(uuid, "DIALED", strCompany, strTenant, campaignId)
 	SetSessionInfo(campaignId, uuid, "IsDialed", "TRUE")
-	PublishCampaignCallCounts(uuid, "DIALING", strCompany, strTenant, campaignId)
+	dashboardparam2 := "BASIC"
+	tryCountInt, _ := strconv.Atoi(tryCount)
+	if tryCountInt > 1{
+		dashboardparam2 = "CALLBACK"
+	}
+	PublishCampaignCallCounts(uuid, "DIALING", strCompany, strTenant, campaignId, dashboardparam2)
 	resp, err := Dial(resourceServer.Url, param, furl, data)
 	HandleDialResponse(resp, err, resourceServer, campaignId, uuid)
 }

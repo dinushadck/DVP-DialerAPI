@@ -157,7 +157,13 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			RemoveRequest(company, tenant, sessionId)
 			//PublishCampaignCallCounts(sessionId, "DIALED", company, tenant, campaignId)
 			SetSessionInfo(campaignId, sessionId, "IsDialed", "TRUE")
-			PublishCampaignCallCounts(sessionId, "DIALING", company, tenant, campaignId)
+
+			dashboardparam2 := "BASIC"
+			tryCountInt, _ := strconv.Atoi(sessionInfo["TryCount"])
+			if tryCountInt > 1{
+				dashboardparam2 = "CALLBACK"
+			}
+			PublishCampaignCallCounts(sessionId, "DIALING", company, tenant, campaignId, dashboardparam2)
 			UpdateCampaignCallRealtimeField("DialState", "DIALING", tenant, company, campaignId, sessionId)
 			resp, err := Dial(resourceServer.Url, param, furl, data)
 			HandleDialResponse(resp, err, resourceServer, campaignId, sessionId)

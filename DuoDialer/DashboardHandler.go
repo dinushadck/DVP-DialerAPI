@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func PublishCampaignCallCounts(sessionId, category, comapnyId, tenantId, campaignId string) {
+func PublishCampaignCallCounts(sessionId, category, comapnyId, tenantId, campaignId, param2 string) {
 	tenant, _ := strconv.Atoi(tenantId)
 	company, _ := strconv.Atoi(comapnyId)
 
@@ -22,7 +22,7 @@ func PublishCampaignCallCounts(sessionId, category, comapnyId, tenantId, campaig
 	pubEventData.EventCategory = category
 	pubEventData.TimeStamp = time.Now().Format(layout1)
 	pubEventData.Parameter1 = campaignId
-	pubEventData.Parameter2 = ""
+	pubEventData.Parameter2 = param2
 	pubEventData.BusinessUnit = "default"
 
 	jvalue, _ := json.Marshal(pubEventData)

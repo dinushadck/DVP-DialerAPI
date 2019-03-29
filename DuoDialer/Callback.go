@@ -309,8 +309,9 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 			//resp, err := DialNew(resourceServer.Url, param, furl, data)
 			//PublishCampaignCallCounts(uuid, "DIALED", sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"])
 			SetSessionInfo(sessionInfo["CampaignId"], uuid, "IsDialed", "TRUE")
+			SetSessionInfo(sessionInfo["CampaignId"], uuid, "CALLBACK", "CALLBACK")
 			UpdateCampaignCallRealtimeField("DialState", "DIALING", sessionInfo["TenantId"], sessionInfo["CompanyId"], sessionInfo["CampaignId"], uuid)
-			PublishCampaignCallCounts(uuid, "DIALING", sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"])
+			PublishCampaignCallCounts(uuid, "DIALING", sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["CampaignId"], "CALLBACK")
 			resp, err := Dial(resourceServer.Url, param, furl, data)
 			HandleDialResponse(resp, err, resourceServer, sessionInfo["CampaignId"], uuid)
 		} else {
@@ -539,6 +540,7 @@ func AddContactToCallback(sessionInfo map[string]string) {
 
 								jsonData, _ := json.Marshal(callbackObj)
 								magentawhite.Println("(10) Uploading callback")
+
 								go UploadCallbackInfo(_company, _tenant, callbackTime, sessionInfo["CampaignId"], "DIALER", "CALLBACK", "INTERNAL", cbUrl, string(jsonData))
 							}
 						}
