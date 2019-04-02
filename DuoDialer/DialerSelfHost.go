@@ -400,6 +400,7 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			fmt.Println("Start Reject Priview Number")
 			//go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
 			go RejectRequest(refData.Company, refData.Tenant, refData.SessionID)
+			go ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
 			//AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
 			//AgentRejectWithoutCallRemove(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
 		}
@@ -407,6 +408,7 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 	}else{
 		redGreen.Println("=========== PREVIEW REJECTED DUE TO NO SESSION FOUND ==========")
 		go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
+		go ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
 		//SetAgentStatusArds(refData.Company, refData.Tenant, "", refData.ResourceInfo.ResourceId, refData.SessionID, "Completed", refData.ServerType, refData.RequestType)
 		AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
 
