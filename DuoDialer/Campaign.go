@@ -790,7 +790,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								fmt.Println("SMS Pub data: ", string(publishData))
 								if pubDataConvErr == nil {
 									fmt.Println("Start Publish to rabbitMQ")
-									color.Yellow(fmt.Sprintf("=============== SMS DIALING - Publishing : %s ====================", campaignId))
+									whitemagenta := color.New(color.FgWhite).Add(color.BgMagenta)
+									whitemagenta.Println(fmt.Sprintf("=============== SMS DIALING - Publishing : %s ====================", campaignId))
 									RabbitMQPublish("SMSOUT", publishData)
 									SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
 									SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_success")

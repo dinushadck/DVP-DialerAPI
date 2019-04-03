@@ -29,6 +29,7 @@ func PublishCampaignCallCounts(sessionId, category, comapnyId, tenantId, campaig
 	jvalueStr := string(jvalue)
 	
 	color.Magenta(fmt.Sprintf("!!!!!!!!! DASHBOARD PUBLISH - %s - !!!!!!!!!!", jvalueStr))
-	DashboardRabbitMQPublish("DashboardEvents", jvalue)
+	//DashboardRabbitMQPublish("DashboardEvents", jvalue)
+	RabbitMQPublish("DashboardEvents", jvalue)
 
 }

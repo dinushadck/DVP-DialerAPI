@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/streadway/amqp"
 )
 
@@ -94,16 +93,19 @@ func RabbitMQPublish(queueName string, publishData []byte) {
 			// Since publish is asynchronous this can happen if the network connection
 			// is reset or if the server has run out of resources.
 			fmt.Println("basic.publish: ", err)
-		} else {
-			fmt.Println("basic.publish: ", queueName)
-			whitemagenta := color.New(color.FgWhite).Add(color.BgMagenta)
-			whitemagenta.Println("SMS OUT : " + queueName + " | BODY : " + string(publishData))
 		}
 	}
 }
 
 
 func DashboardRabbitMQPublish(queueName string, publishData []byte) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in publish to amqp adapter", r)
+		}
+	}()
+
 	rmqIps := strings.Split(rabbitMQHost, ",")
 		defaultAmqpIP := rmqIps[0]
 
