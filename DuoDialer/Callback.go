@@ -268,7 +268,10 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaignInfo.CampConfigurations.Caller, customerNumber)
 
 	if sessionInfo["OriginalUuidARDS"] != "" {
+		magentawhite.Println("NO ORIGINAL UUID ARDS FOUND - SETTING CURRENT UUID")
 		sessionInfo["OriginalUuidARDS"] = sessionInfo["SessionId"]
+	}else{
+		magentawhite.Println("UUID ARDS FOUND - EXITING")
 	}
 	sessionInfo["SessionId"] = uuid
 	sessionInfo["Number"] = dnis

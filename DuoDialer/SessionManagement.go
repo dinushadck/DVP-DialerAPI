@@ -190,6 +190,7 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	hashAgentKey := fmt.Sprintf("agentSessionInfo:%s:%s", campaignId, sessionId)
 	sessionInfo := RedisHashGetAll(hashKey)
+	color.Red(fmt.Sprintf("ARDS UUID : %s", sessionInfo["OriginalUuidARDS"]))
 	RedisRemove(hashKey)
 	RedisRemove(hashAgentKey)
 	dashboardparam2 := "BASIC"
