@@ -53,7 +53,14 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	if phoneNumberResult.IsSuccess == true {
 		for _, numRes := range phoneNumberResult.Result {
 			if numRes.ExtraData != "" {
-				numberWithExtraD := fmt.Sprintf("%s:%s:%s", numRes.CampContactInfo.ContactId, "1", numRes.ExtraData)
+				numPrevSplit := strings.Split(numRes.CampContactInfo.ContactId, ":")
+				numberWithExtraD := ""
+				if len(numPrevSplit) > 1 {
+					numberWithExtraD = fmt.Sprintf("%s:%s:%s", numPrevSplit[0], "1", numPrevSplit[1])
+				} else {
+					numberWithExtraD = fmt.Sprintf("%s:%s:%s", numRes.CampContactInfo.ContactId, "1", numRes.ExtraData)
+				}
+
 				fmt.Println("======NUMBER 1 : " + numberWithExtraD)
 				numbers = append(numbers, numberWithExtraD)
 			} else {
@@ -218,7 +225,7 @@ func LoadInitialNumberSet(company, tenant int, campaignId, camScheduleId string,
 func CheckDuplicates(company, tenant int, campaignId, camScheduleId, number string, timeout, tryCount int) bool {
 	color.Green(fmt.Sprintf("========= Checking For Duplicates - Number : %s - Timeout : %d - Trycount : %d", number, timeout, tryCount))
 
-	if timeout > 0 && tryCount < 2{
+	if timeout > 0 && tryCount < 2 {
 		duplicateNumKey := fmt.Sprintf("NumberDuplicateCheck:%d:%d:%s:%s", company, tenant, campaignId, number)
 
 		incrVal := RedisIncr(duplicateNumKey)
@@ -226,15 +233,15 @@ func CheckDuplicates(company, tenant int, campaignId, camScheduleId, number stri
 
 		color.Green(fmt.Sprintf("========= Number Dial Duplicate Count - Key : %s - Count : %d", duplicateNumKey, incrVal))
 
-		if incrVal > 1{
-			color.Red(fmt.Sprintf("========= DUPLICATE NUMBER DETECTED - Key : %s - Timeout : %d", duplicateNumKey, timeout))			
-			return false;
-		}else{
-			return true;
+		if incrVal > 1 {
+			color.Red(fmt.Sprintf("========= DUPLICATE NUMBER DETECTED - Key : %s - Timeout : %d", duplicateNumKey, timeout))
+			return false
+		} else {
+			return true
 		}
 
-	}else{
-		return true;
+	} else {
+		return true
 	}
 }
 

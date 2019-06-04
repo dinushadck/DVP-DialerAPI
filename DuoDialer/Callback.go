@@ -270,7 +270,7 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 	if sessionInfo["OriginalUuidARDS"] == "" {
 		magentawhite.Println("NO ORIGINAL UUID ARDS FOUND - SETTING CURRENT UUID")
 		sessionInfo["OriginalUuidARDS"] = sessionInfo["SessionId"]
-	}else{
+	} else {
 		magentawhite.Println("UUID ARDS FOUND - EXITING")
 	}
 	sessionInfo["SessionId"] = uuid
@@ -683,7 +683,7 @@ func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, numb
 	if isCampaignExists {
 		blackgreen.Println(fmt.Sprintf("CALLBACK CAMPAIGN %d EXIST", campaignId))
 		camScheduleStr := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
-		numberWithTryCount := fmt.Sprintf("%s:%d", number, _tryCount)
+		numberWithTryCount := fmt.Sprintf("%s:%d:%s", number, _tryCount, previewData)
 		if campaign.CampConfigurations.NumberLoadingMethod == "CONTACT" {
 			contactDet := ContactsDetails{Phone: number, Api_Contacts: otherContacts, PreviewData: previewData, TryCount: _tryCount}
 			blackgreen.Println(fmt.Sprintf("Adding contacts to front : %v", contactDet))
