@@ -56,7 +56,7 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 				numPrevSplit := strings.Split(numRes.CampContactInfo.ContactId, ":")
 				numberWithExtraD := ""
 				if len(numPrevSplit) > 1 {
-					numberWithExtraD = fmt.Sprintf("%s:%s:%s", numPrevSplit[0], "1", numPrevSplit[1])
+					numberWithExtraD = fmt.Sprintf("%s:%s:%s", numPrevSplit[0], "1", strings.Join(numberInfos[1:], ":"))
 				} else {
 					numberWithExtraD = fmt.Sprintf("%s:%s:%s", numRes.CampContactInfo.ContactId, "1", numRes.ExtraData)
 				}
