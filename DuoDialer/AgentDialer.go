@@ -78,7 +78,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 		phoneNumber := sessionInfo["Number"]
 		extention := sessionInfo["Extention"]
 		callServerId := sessionInfo["ServerId"]
-		//xGateway := sessionInfo["XGateway"]
+		xGateway := sessionInfo["XGateway"]
 		campaignName := sessionInfo["CampaignName"]
 		ardsQueueName := sessionInfo["ArdsQueueName"]
 
@@ -120,7 +120,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			var furl string
 			var data string
 			
-			param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_name=%s,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,DialerAgentSipName=%s,CALL_LEG_TYPE=CUSTOMER}", ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, fromNumber, fromNumber, phoneNumber, sessionInfo["Agent"], sessionInfo["AgentSipName"])
+			param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_name=%s,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,DialerAgentSipName=%s,sip_h_X-Gateway=%s,CALL_LEG_TYPE=CUSTOMER}", ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, fromNumber, fromNumber, phoneNumber, sessionInfo["Agent"], sessionInfo["AgentSipName"], xGateway)
 			furl = fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, phoneNumber)
 
 			/* if contactType == "PRIVATE" {
