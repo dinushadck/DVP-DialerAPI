@@ -146,7 +146,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			//			}
 
 			//call recording enable
-			data = fmt.Sprintf(" %s xml dialer", contactName)
+			data = fmt.Sprintf(" %s xml %d_%d_dialer", contactName, tenantInt, companyInt)
 			//data = fmt.Sprintf(" %s xml dialer", phoneNumber)
 
 			SetSessionInfo(campaignId, sessionId, "Reason", "Dial Number")
