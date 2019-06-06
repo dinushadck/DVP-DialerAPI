@@ -93,19 +93,22 @@ func AddRequest(company, tenant int, uuid, otherData string, attributes []string
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	if err != nil {
+	if err != nil || resp == nil {
 		fmt.Println(err.Error())
+		return "ERROR", err
+	} else {
+		response, _ := ioutil.ReadAll(resp.Body)
+		result := string(response)
+		fmt.Println("response Body:", result)
+
+		defer resp.Body.Close()
+
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		return result, err
+
 	}
 
-	response, _ := ioutil.ReadAll(resp.Body)
-	result := string(response)
-	fmt.Println("response Body:", result)
-
-	defer resp.Body.Close()
-
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
-	return result, err
 }
 
 func RemoveRequest(company, tenant, sessionId string) {
