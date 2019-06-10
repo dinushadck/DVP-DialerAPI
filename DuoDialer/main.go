@@ -41,13 +41,16 @@ func CheckTimeouts() {
 				//Decrement Campaign Count
 				hKey := fmt.Sprintf("sessionInfo:%s", cbKey)
 				sessionInfo := RedisHashGetAll(hKey)
-				DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
+				/* DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
 				RedisHashDelField("CALLBACK_TIMEOUTS", sessionInfo["CampaignId"]+":"+sessionInfo["SessionId"])
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
 				SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 				RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
-				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"]) */
+
+				RejectRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+				ClearResourceSlotWhenReject(sessionInfo["CompanyId"], sessionInfo["TenantId"], "CALL", sessionInfo["ResourceId"], sessionInfo["SessionId"])
 			}
 
 		}
@@ -55,16 +58,16 @@ func CheckTimeouts() {
 	}
 }
 
-func AddInitialCampaignsToRealtimeList(){
+func AddInitialCampaignsToRealtimeList() {
 
 	runningCampaigns := GetAllRunningCampaign()
-	
+
 	for _, campaign := range runningCampaigns {
 		AddCampaignDataRealtime(campaign)
-	}		
+	}
 }
 
-func main() {	
+func main() {
 
 	//Innitiate configuration
 	InitiateDuoDialer()
@@ -128,7 +131,7 @@ func main() {
 
 					if campStatus == "Resume" || campStatus == "Start" || campStatus == "PauseByDialer" || campStatus == "Waiting for Appoinment" {
 						//tempCampaignStartDate, _ := time.Parse(layout2, campaign.CampConfigurations.StartDate)
-						//tempCampaignEndDate, _ := time.Parse(layout2, campaign.CampConfigurations.EndDate)						
+						//tempCampaignEndDate, _ := time.Parse(layout2, campaign.CampConfigurations.EndDate)
 
 						if campStatus == "Resume" {
 							UpdateCampaignStartStatus(campaign.CompanyId, campaign.TenantId, campIdStr)
@@ -172,7 +175,7 @@ func main() {
 							RemoveCampaignRealtime(campaign.TenantId, campaign.CompanyId, campaign.CampaignId)
 							break
 						case "Pause":
-							UpdateCampaignRealtimeField("OperationalStatus", "PAUSE", campaign.TenantId, campaign.CompanyId, campaign.CampaignId)							
+							UpdateCampaignRealtimeField("OperationalStatus", "PAUSE", campaign.TenantId, campaign.CompanyId, campaign.CampaignId)
 							break
 						default:
 							break
