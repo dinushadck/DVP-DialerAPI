@@ -55,8 +55,8 @@ type Configuration struct {
 	DvpEventType             string
 	UseAmqpAdapter           string
 	AmqpAdapterPort          string
-	PreviewTimeout			 string
-	AgentPrepareTime		 string
+	PreviewTimeout           string
+	AgentPrepareTime         string
 }
 
 type EnvConfiguration struct {
@@ -105,8 +105,8 @@ type EnvConfiguration struct {
 	DvpEventType             string
 	UseAmqpAdapter           string
 	AmqpAdapterPort          string
-	PreviewTimeout			 string
-	AgentPrepareTime		 string
+	PreviewTimeout           string
+	AgentPrepareTime         string
 }
 
 //--------------------Campaign--------------------
@@ -170,16 +170,17 @@ type CampaignCallback struct {
 }
 
 type CampaignCallbackObj struct {
-	CampaignId       string
-	CallbackClass    string
-	CallbackType     string
-	CallbackCategory string
-	ContactId        string
-	CallBackCount    string
-	DialoutTime      time.Time
-	OtherContacts    []Contact
-	PreviewData      string
+	CampaignId          string
+	CallbackClass       string
+	CallbackType        string
+	CallbackCategory    string
+	ContactId           string
+	CallBackCount       string
+	DialoutTime         time.Time
+	OtherContacts       []Contact
+	PreviewData         string
 	ThirdPartyReference string
+	BusinessUnit        string
 }
 
 type CallbackInfo map[string]interface{}
@@ -217,8 +218,16 @@ type CampaignShedule struct {
 	EndDate       time.Time
 }
 
+type CampaignDialNumber struct {
+	PhoneNumber  string
+	PreviewData  string
+	BusinessUnit string
+	TryCount     string
+}
+
 type ContactInfo struct {
-	ContactId string
+	ContactId    string
+	BusinessUnit string
 }
 
 type CampaignContactInfo struct {
@@ -244,10 +253,10 @@ type Contact struct {
 }
 
 type ContactsDetails struct {
-	Phone        string
-	PreviewData  string
-	Api_Contacts []Contact
-	TryCount     int
+	Phone               string
+	PreviewData         string
+	Api_Contacts        []Contact
+	TryCount            int
 	Thirdpartyreference string
 }
 
@@ -427,12 +436,12 @@ type DashboardEvents struct {
 	EventType     string
 	EventCategory string
 	SessionID     string
-	TimeStamp	  string
+	TimeStamp     string
 	Parameter1    string
 	Parameter2    string
 	BusinessUnit  string
-	Company     int
-	Tenant      int
+	Company       int
+	Tenant        int
 }
 
 //--------------------Ards--------------------

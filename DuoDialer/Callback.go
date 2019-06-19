@@ -265,7 +265,7 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 
 	uuid := GetUuid(resourceServerInfos.Url)
 	internalAuthToken := fmt.Sprintf("%d:%d", campaignInfo.TenantId, campaignInfo.CompanyId)
-	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaignInfo.CampConfigurations.Caller, customerNumber)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaignInfo.CampConfigurations.Caller, customerNumber, "")
 
 	if sessionInfo["OriginalUuidARDS"] == "" {
 		magentawhite.Println("NO ORIGINAL UUID ARDS FOUND - SETTING CURRENT UUID")
@@ -645,6 +645,8 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 								callbackObj.CallBackCount = tryCount
 								callbackObj.ContactId = phoneNumber
 								callbackObj.DialoutTime = callbackTime
+								callbackObj.PreviewData = sessionInfo["PreviewData"]
+								callbackObj.BusinessUnit = sessionInfo["BusinessUnit"]
 
 								dialerAPIUrl := fmt.Sprintf("http://%s", CreateHost(lbIpAddress, lbPort))
 								path := fmt.Sprintf("DVP/DialerAPI/ResumeCallback")
@@ -675,7 +677,7 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 	DecrConcurrentChannelCount(switchName, campaignId)
 }
 
-func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string, otherContacts []Contact, previewData string) {
+func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string, otherContacts []Contact, previewData, businessUnit string) {
 	blackgreen := color.New(color.FgBlack).Add(color.BgGreen)
 	campaignIdStr := strconv.Itoa(campaignId)
 	_tryCount := callbackCount + 1
@@ -683,14 +685,20 @@ func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, numb
 	if isCampaignExists {
 		blackgreen.Println(fmt.Sprintf("CALLBACK CAMPAIGN %d EXIST", campaignId))
 		camScheduleStr := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
-		numberWithTryCount := fmt.Sprintf("%s:%d:%s", number, _tryCount, previewData)
+		//numberWithTryCount := fmt.Sprintf("%s:%d:%s", number, _tryCount, previewData)
 		if campaign.CampConfigurations.NumberLoadingMethod == "CONTACT" {
 			contactDet := ContactsDetails{Phone: number, Api_Contacts: otherContacts, PreviewData: previewData, TryCount: _tryCount}
 			blackgreen.Println(fmt.Sprintf("Adding contacts to front : %v", contactDet))
 			AddContactToFront(company, tenant, campaignIdStr, contactDet)
 		} else {
-			blackgreen.Println(fmt.Sprintf("Adding number to front - NumberWithTryCount | %s", numberWithTryCount))
-			AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
+			numberInfo := CampaignDialNumber{}
+			numberInfo.PhoneNumber = number
+			numberInfo.TryCount = strconv.Itoa(_tryCount)
+			numberInfo.BusinessUnit = businessUnit
+			numberInfo.PreviewData = previewData
+
+			blackgreen.Println(fmt.Sprintf("Adding number to front - Number | %s", number))
+			AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberInfo)
 		}
 
 	} else {

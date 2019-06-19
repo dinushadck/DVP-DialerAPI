@@ -12,7 +12,7 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string, integrationData *IntegrationConfig, contacts *[]Contact, thirdpartyreference string) {
+func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string, integrationData *IntegrationConfig, contacts *[]Contact, thirdpartyreference, businessUnit string) {
 	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention, ": ", xGateway)
 
 	strTenant := strconv.Itoa(tenant)
@@ -20,9 +20,9 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 	AddCampaignCallsRealtime(phoneNumber, tryCount, "WAITING", strTenant, strCompany, campaignId, uuid)
 
 	IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
-	
+
 	IncrCampaignDialCount(company, tenant, campaignId)
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "AgentDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData, contacts, "", thirdpartyreference)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "AgentDial", tryCount, campaignId, scheduleId, campaignName, uuid, phoneNumber, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServer.ResourceServerId, integrationData, contacts, "", thirdpartyreference, businessUnit)
 	InitiateAgentSessionInfo(company, tenant, 240, campaignId, campaignName, uuid, phoneNumber, integrationData, thirdpartyreference)
 	SetSessionInfo(campaignId, uuid, "FromNumber", fromNumber)
 	SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
@@ -64,13 +64,13 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 
 	agentPrepTimeInt, _ := strconv.ParseInt(agentPrepareTime, 10, 64)
-	if agentPrepTimeInt > 0{
+	if agentPrepTimeInt > 0 {
 		color.Yellow("===========SLEEEPING============")
 		time.Sleep(time.Duration(agentPrepTimeInt) * time.Second)
-		color.Yellow("===========SLEEEP ENDED============")	
+		color.Yellow("===========SLEEEP ENDED============")
 	}
 	//
-		
+
 	if RedisCheckKeyExist(sessionInfoKey) {
 		sessionInfo := RedisHashGetAll(sessionInfoKey)
 		fromNumber := sessionInfo["FromNumber"]
@@ -119,7 +119,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			var param string
 			var furl string
 			var data string
-			
+
 			param = fmt.Sprintf("{sip_h_DVP-DESTINATION-TYPE=GATEWAY,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,DVP_CUSTOM_PUBID=%s,nolocal:DIALER_AGENT_EVENT=%s,CustomCompanyStr=%s,CampaignId=%s,CampaignName='%s',tenantid=%s,companyid=%s,ards_resource_id=%s,ards_client_uuid=%s,origination_uuid=%s,ards_servertype=%s,ards_requesttype=%s,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT,return_ring_ready=false,ignore_early_media=true,origination_caller_id_name=%s,origination_caller_id_number=%s,DialerCustomerNumber=%s,DialerAgentName=%s,DialerAgentSipName=%s,sip_h_X-Gateway=%s,CALL_LEG_TYPE=CUSTOMER}", ardsQueueName, subChannelName, subChannelNameAgent, customCompanyStr, campaignId, campaignName, tenant, company, resourceId, sessionId, sessionId, ardsServerType, ardsReqType, fromNumber, fromNumber, phoneNumber, sessionInfo["Agent"], sessionInfo["AgentSipName"], xGateway)
 			furl = fmt.Sprintf("sofia/gateway/%s/%s", trunkCode, phoneNumber)
 
@@ -160,7 +160,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 
 			dashboardparam2 := "BASIC"
 			tryCountInt, _ := strconv.Atoi(sessionInfo["TryCount"])
-			if tryCountInt > 1{
+			if tryCountInt > 1 {
 				dashboardparam2 = "CALLBACK"
 			}
 			PublishCampaignCallCounts(sessionId, "DIALING", company, tenant, campaignId, dashboardparam2)
@@ -174,7 +174,7 @@ func DialAgent(contactName, domain, contactType, resourceId, company, tenant, ca
 			AbortDialing(company, tenant, campaignId, sessionId, "NoSession")
 		}
 
-	}else{
+	} else {
 		color.Red(fmt.Sprintf("=====Redis Hash Not Found For Key - Dial Failed : %s", sessionInfoKey))
 		RemoveRequestNoSession(company, tenant, sessionId)
 		SetAgentStatusArds(company, tenant, "", resourceId, sessionId, "Completed", ardsServerType, ardsReqType)
@@ -205,10 +205,10 @@ func AgentReject(company, tenant, campaignId, sessionId, requestType, resourceId
 }
 
 func AbortDialing(company, tenant, campaignId, sessionId, rejectReason string) {
-	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)	
+	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	if RedisCheckKeyExist(sessionInfoKey) {
 		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
-		SetSessionInfo(campaignId, sessionId, "DialerStatus", "abort_dialing")		
+		SetSessionInfo(campaignId, sessionId, "DialerStatus", "abort_dialing")
 		//RejectRequest(company, tenant, sessionId)
 		go UploadSessionInfo(campaignId, sessionId)
 	}

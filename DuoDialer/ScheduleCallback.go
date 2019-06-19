@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 )
 
 func SchedulePreviewCallback(company, tenant int, sessionId, phoneNumber, previewData, extention string, attributeInfo []string, thirdpartyreference, campaignId, campaignName string) {
@@ -14,9 +14,9 @@ func SchedulePreviewCallback(company, tenant int, sessionId, phoneNumber, previe
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
 	resourceServerInfos := RegisterCallServer(company, tenant)
-	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, "", phoneNumber)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, "", phoneNumber, "")
 
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "ScheduleCallbak", "PreviewDial", "1", campaignId, "", campaignName, sessionId, dnis, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, previewData, thirdpartyreference)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "ScheduleCallbak", "PreviewDial", "1", campaignId, "", campaignName, sessionId, dnis, "ards added", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, previewData, thirdpartyreference, "")
 	SetSessionInfo(campaignId, sessionId, "FromNumber", ani)
 	SetSessionInfo(campaignId, sessionId, "TrunkCode", trunkCode)
 	SetSessionInfo(campaignId, sessionId, "Extention", extention)
@@ -53,9 +53,9 @@ func ScheduleIvrCallback(company, tenant int, sessionId, phoneNumber, extention,
 	internalAuthToken := fmt.Sprintf("%d:%d", tenant, company)
 
 	resourceServerInfos := RegisterCallServer(company, tenant)
-	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, "", phoneNumber)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, "", phoneNumber, "")
 
-	InitiateSessionInfo(company, tenant, 240, "Campaign", "ScheduleCallbak", "IVR", "1", campaignId, "", campaignName, sessionId, dnis, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "", thirdpartyreference)
+	InitiateSessionInfo(company, tenant, 240, "Campaign", "ScheduleCallbak", "IVR", "1", campaignId, "", campaignName, sessionId, dnis, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "", thirdpartyreference, "")
 
 	fmt.Println("Start DialNumber: ", sessionId, ": ", ani, ": ", trunkCode, ": ", dnis, ": ", extention)
 

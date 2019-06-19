@@ -102,13 +102,13 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 
 			fmt.Println(resourceServerInfos)
 
-			trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaigninfo.CampConfigurations.Caller, dialNumber)
+			trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaigninfo.CampConfigurations.Caller, dialNumber, "")
 			uuid := GetUuid(resourceServerInfos.Url)
 
 			fmt.Println("UUID : " + uuid)
 
 			scheduleId := fmt.Sprintf("%d", campaigninfo.CampScheduleInfo[0].ScheduleId)
-			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "API", "1", campaignId, scheduleId, campaigninfo.CampaignName, uuid, dnis, "api called", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, &campaigninfo.CampConfigurations.IntegrationData, nil, "", "")
+			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "API", "1", campaignId, scheduleId, campaigninfo.CampaignName, uuid, dnis, "api called", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, &campaigninfo.CampConfigurations.IntegrationData, nil, "", "", "")
 
 			SetSessionInfo(campaignId, uuid, "FromNumber", ani)
 			SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
@@ -206,7 +206,7 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 			mapstructure.Decode(callbackInfo["OtherContacts"], &callbackContactList)
 			//json.Unmarshal([]byte(strCallbackContacts), &callbackContactList)
 
-			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string))
+			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string), callbackInfo["BusinessUnit"].(string))
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "agent" {
 
@@ -405,7 +405,7 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			//AgentRejectWithoutCallRemove(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
 		}
 
-	}else{
+	} else {
 		redGreen.Println("=========== PREVIEW REJECTED DUE TO NO SESSION FOUND ==========")
 		RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
 		ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
@@ -413,8 +413,6 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 		AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
 
 	}
-
-	
 
 	return
 	//} else {

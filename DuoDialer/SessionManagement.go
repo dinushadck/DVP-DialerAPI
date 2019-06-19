@@ -31,7 +31,7 @@ func InitiateAgentSessionInfo(company, tenant, sessionExprTime int, campaignId, 
 		data["IntegrationData"] = string(intgrData)
 	}
 
-	if thirdpartyreference != ""{
+	if thirdpartyreference != "" {
 		data["ThirdPartyReference"] = thirdpartyreference
 	}
 
@@ -40,7 +40,7 @@ func InitiateAgentSessionInfo(company, tenant, sessionExprTime int, campaignId, 
 }
 
 //Initiate dial session for a number
-func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string, integrationData *IntegrationConfig, contacts *[]Contact, previewData, thirdpartyreference string) {
+func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, scategory, tryCount, campaignId, scheduleId, campaignName, sessionId, number, reason, dialerStatus, dialTime, serverId string, integrationData *IntegrationConfig, contacts *[]Contact, previewData, thirdpartyreference, businessUnit string) {
 	companyStr := strconv.Itoa(company)
 	tenantStr := strconv.Itoa(tenant)
 	sessionExprTimeStr := strconv.Itoa(sessionExprTime)
@@ -66,10 +66,11 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 	data["DialerStatus"] = dialerStatus
 	data["TryCount"] = tryCount
 	data["ExpireTime"] = sessionExprTimeStr
+	data["BusinessUnit"] = businessUnit
 
 	tryCountInt, _ := strconv.Atoi(tryCount)
 
-	if(tryCountInt > 1){
+	if tryCountInt > 1 {
 		data["CALLBACK"] = "CALLBACK"
 	}
 
@@ -77,7 +78,7 @@ func InitiateSessionInfo(company, tenant, sessionExprTime int, sclass, stype, sc
 		data["PreviewData"] = previewData
 	}
 
-	if thirdpartyreference != ""{
+	if thirdpartyreference != "" {
 		data["ThirdPartyReference"] = thirdpartyreference
 	}
 
@@ -150,7 +151,7 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 	if integrationUrl != "" {
 
-		if disconnectReasonMap[dcReason] != ""{
+		if disconnectReasonMap[dcReason] != "" {
 			bodyData["Reason"] = disconnectReasonMap[dcReason]
 		}
 
@@ -160,7 +161,6 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 		cyanblue := color.New(color.FgCyan).Add(color.BgMagenta)
 		cyanblue.Println(fmt.Sprintf("=============SENDING INTEGRATION DATA - URL : %s, Data : %s", integrationUrl, strdata))
-
 
 		req, err := http.NewRequest("POST", integrationUrl, bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
@@ -194,29 +194,28 @@ func UploadSessionInfo(campaignId, sessionId string) {
 	RedisRemove(hashKey)
 	RedisRemove(hashAgentKey)
 	dashboardparam2 := "BASIC"
-	if sessionInfo["CALLBACK"] == "CALLBACK"{
+	if sessionInfo["CALLBACK"] == "CALLBACK" {
 		dashboardparam2 = "CALLBACK"
 	}
 	RemoveCampaignCallRealtime(sessionInfo["TenantId"], sessionInfo["CompanyId"], campaignId, sessionId)
 	PublishCampaignCallCounts(sessionId, "DISCONNECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId, dashboardparam2)
-	if(sessionInfo["DialerCustomerAnswered"] != "TRUE"){
+	if sessionInfo["DialerCustomerAnswered"] != "TRUE" {
 		PublishCampaignCallCounts(sessionId, "DISCONNECTING", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId, dashboardparam2)
 
-		if(sessionInfo["IsDialed"] == "TRUE"){
+		if sessionInfo["IsDialed"] == "TRUE" {
 			PublishCampaignCallCounts(sessionId, "REJECTED", sessionInfo["CompanyId"], sessionInfo["TenantId"], campaignId, dashboardparam2)
 		}
-		
+
 	}
-	
+
 	//Check Session Is Contact Based Dialing - IF Yes Do Other Operation
-	if sessionInfo["Type"] != "SMS"{
+	if sessionInfo["Type"] != "SMS" {
 		if sessionInfo["NumberLoadingMethod"] == "CONTACT" {
 			AddContactToCallback(sessionInfo)
 		} else {
 			AddPhoneNumberToCallback(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["TryCount"], sessionInfo["CampaignId"], sessionInfo["ScheduleId"], sessionInfo["Number"], sessionInfo["Reason"], sessionInfo["ArdsCategory"], sessionInfo["ResourceId"], sessionInfo["SessionId"], sessionInfo["ARDSServerType"], sessionInfo["ARDSRequestType"], sessionInfo["ServerId"], sessionInfo)
 		}
 	}
-	
 
 	PublishEvent(campaignId, sessionId)
 	UploadSessionInfoToCampaignManager(sessionInfo)

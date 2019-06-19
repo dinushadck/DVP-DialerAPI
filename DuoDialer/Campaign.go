@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 //----------Ongoing Campaign Count-----------------------
@@ -587,7 +587,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 		for {
 			campStatus = GetCampaignStatus(campaignId, company, tenant)
-			if campStatus == "Running" {				
+			if campStatus == "Running" {
 				tm := time.Now().In(location)
 				DialerLog(fmt.Sprintf("endTime: %s", appmntEndTime.String()))
 				DialerLog(fmt.Sprintf("timeNW: %s", tm.String()))
@@ -607,9 +607,9 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 						if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
 
-							number, tryCount, numExtraData, thirdpartyref, contacts := GetNumberToDial(company, tenant, campaignId, camScheduleId, numLoadingMethod)
+							number, tryCount, numExtraData, businessUnit, thirdpartyref, contacts := GetNumberToDial(company, tenant, campaignId, camScheduleId, numLoadingMethod)
 
-							color.Green(fmt.Sprintf("Number:%s | TryCount:%s | numExtraData:%s", number, tryCount, numExtraData))
+							color.Green(fmt.Sprintf("Number:%s | TryCount:%s | numExtraData:%s | businessUnit:%s", number, tryCount, numExtraData, businessUnit))
 
 							if number == "" {
 								numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
@@ -625,21 +625,21 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								tCount, _ := strconv.Atoi(tryCount)
 
 								duplicatesNotFound := CheckDuplicates(company, tenant, campaignId, camScheduleId, number, duplicateNumTimeout, tCount)
-								
-								if duplicatesNotFound{
 
-									if tCount <= 1{
+								if duplicatesNotFound {
+
+									if tCount <= 1 {
 										PublishCampaignCallCounts("", "NUMBERADDED", strconv.Itoa(company), strconv.Itoa(tenant), campaignId, "")
-									}									
-								
+									}
+
 									uuid := GetUuid(resourceServerInfos.Url)
-									trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number)
-	
+									trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number, businessUnit)
+
 									if trunkCode != "" && uuid != "" {
 										switch dialoutMec {
 										case "BLAST":
 											color.Cyan(fmt.Sprintf("======= STARTING BLAST DIALER : %s =======", campaignId))
-											go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, tryCount, extention, integrationData, &contacts, thirdpartyref)
+											go DialNumber(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, uuid, ani, trunkCode, dnis, xGateway, tryCount, extention, integrationData, &contacts, thirdpartyref, businessUnit)
 											break
 										case "FIFO":
 											color.Cyan(fmt.Sprintf("======= STARTING FIFO DIALER : %s =======", campaignId))
@@ -647,22 +647,22 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 											break
 										case "PREVIEW":
 											color.Cyan(fmt.Sprintf("======= STARTING PREVIEW DIALER : %s ======= %v", campaignId, contacts))
-											go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref)
+											go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref, businessUnit)
 											break
 										case "AGENT":
 											color.Cyan(fmt.Sprintf("======= STARTING AGENT DIALER : %s =======", campaignId))
-											go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref)
+											go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref, businessUnit)
 											break
 										}
 									} else {
-											color.Yellow("======= TRUNK OR UUID NOT FOUND =======")
-										}
+										color.Yellow("======= TRUNK OR UUID NOT FOUND =======")
+									}
 								}
 
-								time.Sleep(100 * time.Millisecond)										
-									
-							}									
-													
+								time.Sleep(100 * time.Millisecond)
+
+							}
+
 						} else {
 							color.Cyan("CHANNEL COUNT EXCEEDED : " + campaignName)
 							time.Sleep(500 * time.Millisecond)
@@ -674,7 +674,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 						templates := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "EMAIL", "TEMPLATE")
 						attachmentNames := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "EMAIL", "ATTACHMENT")
 
-						email, _, numExtraData, _, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
+						email, _, numExtraData, _, _, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
 						if email == "" {
 							emailCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 							if emailCount == 0 {
@@ -692,7 +692,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							emailData["from"] = defaultAni
 							emailData["subject"] = campaignName
 
-							InitiateSessionInfo(company, tenant, 240, "Campaign", "Email", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, email, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "", "")
+							InitiateSessionInfo(company, tenant, 240, "Campaign", "Email", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, email, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "", "", "")
 
 							if len(templates) > 0 {
 								emailData["template"] = templates[0]
@@ -755,7 +755,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 						templates := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "SMS", "TEMPLATE")
 
-						number, _, numExtraData, _, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
+						number, _, numExtraData, _, _, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
 						if number == "" {
 							numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 							if numberCount == 0 {
@@ -774,7 +774,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 							smsData["from"] = "facetone"
 							smsData["subject"] = campaignName
 
-							InitiateSessionInfo(company, tenant, 240, "Campaign", "SMS", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, number, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "", "")
+							InitiateSessionInfo(company, tenant, 240, "Campaign", "SMS", "BlastDial", "1", campaignId, scheduleId, campaignName, sessionId, number, "start", "dial_start", time.Now().UTC().Format(layout4), resourceServerInfos.ResourceServerId, nil, nil, "", "", "")
 
 							if len(templates) > 0 {
 								smsData["template"] = templates[0]

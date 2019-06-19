@@ -6,18 +6,17 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/fatih/color"
 )
 
-func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camScheduleId string) []string {
+func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camScheduleId string) []CampaignDialNumber {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in GetNumbersFromNumberBase", r)
 		}
 	}()
-	numbers := make([]string, 0)
+	numbers := make([]CampaignDialNumber, 0)
 	pageKey := fmt.Sprintf("PhoneNumberPage:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 
 	numberOffsetToRequest := "0"
@@ -52,7 +51,16 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 	json.Unmarshal(response, &phoneNumberResult)
 	if phoneNumberResult.IsSuccess == true {
 		for _, numRes := range phoneNumberResult.Result {
-			if numRes.ExtraData != "" {
+			numberInfo := CampaignDialNumber{}
+
+			numberInfo.PhoneNumber = numRes.CampContactInfo.ContactId
+			numberInfo.BusinessUnit = numRes.CampContactInfo.BusinessUnit
+			numberInfo.PreviewData = numRes.ExtraData
+			numberInfo.TryCount = "1"
+
+			numbers = append(numbers, numberInfo)
+
+			/* if numRes.ExtraData != "" {
 				numPrevSplit := strings.Split(numRes.CampContactInfo.ContactId, ":")
 				numberWithExtraD := ""
 				if len(numPrevSplit) > 1 {
@@ -75,7 +83,7 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 					fmt.Println("======NUMBER 3 : " + numberWithoutExtraData)
 					numbers = append(numbers, numberWithoutExtraData)
 				}
-			}
+			} */
 		}
 
 		RedisIncrBy(pageKey, len(phoneNumberResult.Result))
@@ -177,9 +185,15 @@ func LoadNumbers(company, tenant, numberLimit int, campaignId, camScheduleId str
 		dncNumberKey := fmt.Sprintf("DncNumber:%d:%d", tenant, company)
 		RedisSet(numLoadingStatusKey, "waiting")
 		for _, number := range numbers {
-			if !RedisSetIsMember(dncNumberKey, number) {
-				fmt.Println("Adding number to campaign: ", number)
-				RedisListRpush(listId, number)
+			if !RedisSetIsMember(dncNumberKey, number.PhoneNumber) {
+				numInf, err := json.Marshal(number)
+
+				if err == nil {
+					fmt.Println("Adding number to campaign: ", number.PhoneNumber)
+					RedisListRpush(listId, string(numInf))
+
+				}
+
 			}
 		}
 	}
@@ -245,7 +259,7 @@ func CheckDuplicates(company, tenant int, campaignId, camScheduleId, number stri
 	}
 }
 
-func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, string, []Contact) {
+func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, string, string, []Contact) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 
 	if numLoadingMethod == "CONTACT" {
@@ -278,11 +292,17 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 
 		strTryCount := strconv.Itoa(contactInf.TryCount)
 
-		return contactInf.Phone, strTryCount, contactInf.PreviewData, contactInf.Thirdpartyreference, contactInf.Api_Contacts
+		return contactInf.Phone, strTryCount, contactInf.PreviewData, "", contactInf.Thirdpartyreference, contactInf.Api_Contacts
 	} else {
 		//18705056550:{"A":18705056550}:1:{}
 		color.Green("NUMBER POPPED OUT TO DIAL : " + numberWithTryCount)
-		numberInfos := strings.Split(numberWithTryCount, ":")
+
+		numInf := CampaignDialNumber{}
+		_ = json.Unmarshal([]byte(numberWithTryCount), &numInf)
+
+		return numInf.PhoneNumber, numInf.TryCount, numInf.PreviewData, numInf.BusinessUnit, "", make([]Contact, 0)
+
+		/* numberInfos := strings.Split(numberWithTryCount, ":")
 		if len(numberInfos) > 3 {
 			return numberInfos[0], numberInfos[1], strings.Join(numberInfos[2:], ":"), "", make([]Contact, 0)
 			//return numberInfos[0], numberInfos[2], numberInfos[1], "", make([]Contact, 0)
@@ -294,7 +314,7 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 			return numberInfos[0], numberInfos[1], "", "", make([]Contact, 0)
 		} else {
 			return "", "", "", "", make([]Contact, 0)
-		}
+		} */
 
 	}
 
@@ -330,9 +350,11 @@ func RemoveNumberStatusKey(company, tenant int, campaignId string) {
 	}
 }
 
-func AddNumberToFront(company, tenant int, campaignId, camScheduleId, number string) bool {
+func AddNumberToFront(company, tenant int, campaignId, camScheduleId string, numberInfo CampaignDialNumber) bool {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
-	return RedisListLpush(listId, number)
+
+	numInf, _ := json.Marshal(numberInfo)
+	return RedisListLpush(listId, string(numInf))
 }
 
 func AddContactToFront(company, tenant int, campaignId string, contact ContactsDetails) bool {

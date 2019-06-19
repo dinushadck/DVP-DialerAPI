@@ -33,8 +33,12 @@ func DirectDialCampaign(company, tenant, campaignId, ScheduleId int, number stri
 				camScheduleStr := strconv.Itoa(scheduleInfo.CamScheduleId)
 				validateAppoinment := CheckAppoinmentForCallback(company, tenant, scheduleIdStr, tmNow, scheduleInfo.TimeZone)
 				if validateAppoinment {
-					numberWithTryCount := fmt.Sprintf("%s:%d", number, 1)
-					return AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberWithTryCount)
+					//numberWithTryCount := fmt.Sprintf("%s:%d", number, 1)
+					numberInfo := CampaignDialNumber{}
+					numberInfo.PhoneNumber = number
+					numberInfo.TryCount = "1"
+					numberInfo.BusinessUnit = ""
+					return AddNumberToFront(company, tenant, campaignIdStr, camScheduleStr, numberInfo)
 				}
 			}
 		} else {
@@ -47,7 +51,7 @@ func DirectDialCampaign(company, tenant, campaignId, ScheduleId int, number stri
 func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourceServerId string) bool {
 
 	internalAccessToken := fmt.Sprintf("%d:%d", tenant, company)
-	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAccessToken, fromNumber, phoneNumber)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAccessToken, fromNumber, phoneNumber, "")
 
 	if trunkCode != "" {
 
@@ -60,7 +64,7 @@ func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourc
 
 			IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 			IncrCampaignDialCount(company, tenant, campaignId)
-			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, "0", campaignId, uuid, dnis, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId, nil, nil, "", "")
+			InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, "0", campaignId, uuid, dnis, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId, nil, nil, "", "", "")
 			SetSessionInfo(campaignId, uuid, "FromNumber", ani)
 			SetSessionInfo(campaignId, uuid, "TrunkCode", trunkCode)
 			SetSessionInfo(campaignId, uuid, "Extention", extention)
@@ -131,7 +135,7 @@ func ClickToCall(company, tenant int, phoneNumber, extention, resourceServerId s
 
 		IncrConcurrentChannelCount(resourceServer.ResourceServerId, campaignId)
 		IncrCampaignDialCount(company, tenant, campaignId)
-		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, "0", campaignId, uuid, phoneNumber, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId, nil, nil, "", "")
+		InitiateSessionInfo(company, tenant, 240, "Campaign", "Dialer", "DirectDial", "1", campaignId, "0", campaignId, uuid, phoneNumber, "direct dial", "dial_start", time.Now().UTC().Format(layout4), resourceServerId, nil, nil, "", "", "")
 
 		SetSessionInfo(campaignId, uuid, "Extention", extention)
 
