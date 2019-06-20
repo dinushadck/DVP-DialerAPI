@@ -265,7 +265,8 @@ func RedialContactToSameAgent(campaignInfo Campaign, sessionInfo map[string]stri
 
 	uuid := GetUuid(resourceServerInfos.Url)
 	internalAuthToken := fmt.Sprintf("%d:%d", campaignInfo.TenantId, campaignInfo.CompanyId)
-	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaignInfo.CampConfigurations.Caller, customerNumber, "")
+	context := fmt.Sprintf("%d_%d_dialer", campaignInfo.TenantId, campaignInfo.CompanyId)
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaignInfo.CampConfigurations.Caller, customerNumber, context, "")
 
 	if sessionInfo["OriginalUuidARDS"] == "" {
 		magentawhite.Println("NO ORIGINAL UUID ARDS FOUND - SETTING CURRENT UUID")

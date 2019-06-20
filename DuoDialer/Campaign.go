@@ -633,7 +633,8 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 									}
 
 									uuid := GetUuid(resourceServerInfos.Url)
-									trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number, businessUnit)
+									context := fmt.Sprintf("%d_%d_dialer", tenant, company)
+									trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, defaultAni, number, context, businessUnit)
 
 									if trunkCode != "" && uuid != "" {
 										switch dialoutMec {

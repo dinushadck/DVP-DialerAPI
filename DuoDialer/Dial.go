@@ -31,12 +31,12 @@ func GetUuid(callServerHost string) string {
 	}
 }
 
-func GetTrunkCode(internalAuthToken, ani, dnis, businessUnit string) (trunkCode, rAni, rDnis, xGateway string) {
+func GetTrunkCode(internalAuthToken, ani, dnis, context, businessUnit string) (trunkCode, rAni, rDnis, xGateway string) {
 	fmt.Println("Start GetTrunkCode: ", internalAuthToken, ": ", ani, ": ", dnis)
 	client := &http.Client{}
 
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
-	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CallRuleApi/CallRule/Outbound/ANI/%s/DNIS/%s/BusinessUnit/%s", CreateHost(callRuleServiceHost, callRuleServicePort), ani, dnis, businessUnit)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CallRuleApi/CallRule/Outbound/ANI/%s/DNIS/%s/Context/%s/BusinessUnit/%s", CreateHost(callRuleServiceHost, callRuleServicePort), ani, dnis, context, businessUnit)
 	//request := fmt.Sprintf("%s?ANI=%s&DNIS=%s", callRuleService, ani, dnis)
 	fmt.Println("Start GetTrunkCode request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
@@ -102,7 +102,7 @@ func DialNew(server, params, furl, data string) (*http.Response, error) {
 	return resp, err
 }
 
-func SendCustomerIntegrationData(campaignId, sessionId string){
+func SendCustomerIntegrationData(campaignId, sessionId string) {
 	hKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	sessionInfo := RedisHashGetAll(hKey)
 	color.Magenta(fmt.Sprintf(sessionInfo["IntegrationData"]))
@@ -115,8 +115,8 @@ func SendCustomerIntegrationData(campaignId, sessionId string){
 	}
 }
 
-func SendAgentIntegrationData(sessionInfo map[string]string){
-	
+func SendAgentIntegrationData(sessionInfo map[string]string) {
+
 	if sessionInfo != nil && sessionInfo["IntegrationData"] != "" {
 		sessionInfo["EventType"] = "AGENT_DISCONNECTED"
 		go ManageIntegrationData(sessionInfo, "AGENT")

@@ -102,7 +102,9 @@ func (dvp DVP) DialCall(campaignId string, dialNumber string, agent string, doma
 
 			fmt.Println(resourceServerInfos)
 
-			trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaigninfo.CampConfigurations.Caller, dialNumber, "")
+			context := fmt.Sprintf("%d_%d_dialer", tenant, company)
+
+			trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAuthToken, campaigninfo.CampConfigurations.Caller, dialNumber, context, "")
 			uuid := GetUuid(resourceServerInfos.Url)
 
 			fmt.Println("UUID : " + uuid)

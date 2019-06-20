@@ -51,7 +51,9 @@ func DirectDialCampaign(company, tenant, campaignId, ScheduleId int, number stri
 func DirectDial(company, tenant int, fromNumber, phoneNumber, extention, resourceServerId string) bool {
 
 	internalAccessToken := fmt.Sprintf("%d:%d", tenant, company)
-	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAccessToken, fromNumber, phoneNumber, "")
+	context := fmt.Sprintf("%d_%d_dialer", tenant, company)
+
+	trunkCode, ani, dnis, xGateway := GetTrunkCode(internalAccessToken, fromNumber, phoneNumber, context, "")
 
 	if trunkCode != "" {
 
