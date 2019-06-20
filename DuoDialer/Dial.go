@@ -36,7 +36,7 @@ func GetTrunkCode(internalAuthToken, ani, dnis, context, businessUnit string) (t
 	client := &http.Client{}
 
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
-	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CallRuleApi/CallRule/Outbound/ANI/%s/DNIS/%s/Context/%s/BusinessUnit/%s", CreateHost(callRuleServiceHost, callRuleServicePort), ani, dnis, context, businessUnit)
+	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CallRuleApi/CallRule/Outbound/ANI/%s/DNIS/%s/ByBU?Context=%s&BusinessUnit=%s", CreateHost(callRuleServiceHost, callRuleServicePort), ani, dnis, context, businessUnit)
 	//request := fmt.Sprintf("%s?ANI=%s&DNIS=%s", callRuleService, ani, dnis)
 	fmt.Println("Start GetTrunkCode request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
