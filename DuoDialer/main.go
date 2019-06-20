@@ -50,7 +50,8 @@ func CheckTimeouts() {
 				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"]) */
 
 				RejectRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
-				ClearResourceSlotWhenReject(sessionInfo["CompanyId"], sessionInfo["TenantId"], "CALL", sessionInfo["ResourceId"], sessionInfo["SessionId"])
+				//REMOVED
+				//ClearResourceSlotWhenReject(sessionInfo["CompanyId"], sessionInfo["TenantId"], "CALL", sessionInfo["ResourceId"], sessionInfo["SessionId"])
 			}
 
 		}

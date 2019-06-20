@@ -402,7 +402,8 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			fmt.Println("Start Reject Priview Number")
 			//go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
 			RejectRequest(refData.Company, refData.Tenant, refData.SessionID)
-			ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
+			//REMOVED
+			//ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
 			//AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
 			//AgentRejectWithoutCallRemove(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
 		}
