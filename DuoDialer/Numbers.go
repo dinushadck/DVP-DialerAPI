@@ -21,9 +21,9 @@ func GetNumbersFromNumberBase(company, tenant, numberLimit int, campaignId, camS
 
 	numberOffsetToRequest := "0"
 
-	if numberLimit == 500 {
+	/*if numberLimit == 500 {
 		numberOffsetToRequest = RedisGet(pageKey)
-	}
+	}*/
 	DialerLog(fmt.Sprintf("numberOffsetToRequest: %s", numberOffsetToRequest))
 
 	// Get phone number from campign service and append
