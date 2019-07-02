@@ -13,8 +13,8 @@ func AddCampaignDataRealtime(campaignData Campaign) {
 
 	campInfoRealTime["CampaignId"] = strconv.Itoa(campaignData.CampaignId)
 	campInfoRealTime["CampaignName"] = campaignData.CampaignName
-	campInfoRealTime["StartTime"] = campaignData.CampConfigurations.StartDate.Format("1999 Jan 06 15:04 -0700")
-	campInfoRealTime["EndTime"] = campaignData.CampConfigurations.EndDate.Format("1999 Jan 06 15:04 -0700")
+	campInfoRealTime["StartTime"] = campaignData.CampConfigurations.StartDate.Format("02-Jan-2006 15:04 -0700")
+	campInfoRealTime["EndTime"] = campaignData.CampConfigurations.EndDate.Format("02-Jan-2006 15:04 -0700")
 	campInfoRealTime["CampaignMode"] = campaignData.CampaignMode
 	campInfoRealTime["CampaignChannel"] = campaignData.CampaignChannel
 	campInfoRealTime["DialoutMechanism"] = campaignData.DialoutMechanism
