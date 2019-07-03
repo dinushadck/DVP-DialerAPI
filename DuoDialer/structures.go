@@ -199,6 +199,10 @@ type CampaignConfigInfo struct {
 	DuplicateNumTimeout int
 }
 
+type SuccessCheck struct {
+	IsSuccess bool
+}
+
 type IntegrationConfig struct {
 	Agent    IntegrationInfo
 	Customer IntegrationInfo

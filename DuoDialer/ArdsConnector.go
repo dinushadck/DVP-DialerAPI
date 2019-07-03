@@ -163,7 +163,7 @@ func RemoveRequestNoSession(company, tenant, sessionId string) {
 	fmt.Println(string(response))
 }
 
-func RejectRequest(company, tenant, sessionId string) {
+func RejectRequest(company, tenant, sessionId string) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in RejectRequest", r)
@@ -186,7 +186,13 @@ func RejectRequest(company, tenant, sessionId string) {
 
 	response, _ := ioutil.ReadAll(resp.Body)
 
+	var apiResult SuccessCheck
+	json.Unmarshal(response, &apiResult)
+
 	fmt.Println(string(response))
+
+	return apiResult.IsSuccess
+
 }
 
 func ClearResourceSlotWhenReject(company, tenant, reqCategory, resId, sessionId string) {

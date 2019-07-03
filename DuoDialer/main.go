@@ -49,7 +49,21 @@ func CheckTimeouts() {
 				RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
 				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"]) */
 
-				RejectRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+				response := RejectRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+
+				RedisHashDelField("CALLBACK_TIMEOUTS", sessionInfo["CampaignId"]+":"+sessionInfo["SessionId"])
+
+				if response != true {
+
+					color.Red("=========== REJECT REQUEST FAILED ABORTING ==========")
+					//DELETE COUNTER
+					DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
+					SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
+					SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
+					SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+					RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+					go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+				}
 				//REMOVED
 				//ClearResourceSlotWhenReject(sessionInfo["CompanyId"], sessionInfo["TenantId"], "CALL", sessionInfo["ResourceId"], sessionInfo["SessionId"])
 			}

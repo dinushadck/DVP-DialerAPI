@@ -401,7 +401,12 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			redGreen.Println("=========== PREVIEW REJECTED DUE TO AGENT REJECT ==========")
 			fmt.Println("Start Reject Priview Number")
 			//go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
-			RejectRequest(refData.Company, refData.Tenant, refData.SessionID)
+			response := RejectRequest(refData.Company, refData.Tenant, refData.SessionID)
+
+			if response != true {
+				redGreen.Println("=========== REJECT REQUEST FAILED ABORTING ==========")
+				AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
+			}
 			//REMOVED
 			//ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
 			//AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
