@@ -49,21 +49,29 @@ func CheckTimeouts() {
 				RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
 				go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"]) */
 
-				response := RejectRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+				RedisHashDelField("CALLBACK_TIMEOUTS", cbKey)
 
-				RedisHashDelField("CALLBACK_TIMEOUTS", sessionInfo["CampaignId"]+":"+sessionInfo["SessionId"])
+				if sessionInfo["SessionId"] != "" {
 
-				if response != true {
+					response := RejectRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
 
-					color.Red("=========== REJECT REQUEST FAILED ABORTING ==========")
-					//DELETE COUNTER
-					DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
-					SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
-					SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
-					SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
-					RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
-					go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+					if response != true {
+
+						color.Red("=========== REJECT REQUEST FAILED ABORTING ==========")
+						//DELETE COUNTER
+						DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
+						SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
+						SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
+						SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+						RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+						go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+					}
+
+				} else {
+					color.Red("=========== SESSION NOT FOUND ON TIMEOUT ROUTE - ABORTING ==========")
+
 				}
+
 				//REMOVED
 				//ClearResourceSlotWhenReject(sessionInfo["CompanyId"], sessionInfo["TenantId"], "CALL", sessionInfo["ResourceId"], sessionInfo["SessionId"])
 			}
