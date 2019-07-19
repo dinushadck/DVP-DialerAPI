@@ -65,6 +65,9 @@ func CheckTimeouts() {
 						SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 						RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
 						go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+					}else{						
+						sessionInfo["EventType"] = "AGENT_REJECTED"
+						go ManageIntegrationData(sessionInfo, "AGENT")
 					}
 
 				} else {

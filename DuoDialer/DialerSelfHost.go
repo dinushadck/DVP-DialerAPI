@@ -406,6 +406,11 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			if response != true {
 				redGreen.Println("=========== REJECT REQUEST FAILED ABORTING ==========")
 				AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
+			} else {
+				hKey := fmt.Sprintf("agentSessionInfo:%s:%s", reqOData.CampaignId, refData.SessionID)
+				sessionInfo := RedisHashGetAll(hKey)
+				sessionInfo["EventType"] = "AGENT_REJECTED"
+				go ManageIntegrationData(sessionInfo, "AGENT")
 			}
 			//REMOVED
 			//ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
