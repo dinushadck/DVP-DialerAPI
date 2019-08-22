@@ -41,6 +41,9 @@ func CheckTimeouts() {
 				//Decrement Campaign Count
 				hKey := fmt.Sprintf("sessionInfo:%s", cbKey)
 				sessionInfo := RedisHashGetAll(hKey)
+
+				hKeyAgent := fmt.Sprintf("agentSessionInfo:%s", cbKey)
+				agentSessionInfo := RedisHashGetAll(hKeyAgent)
 				/* DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
 				RedisHashDelField("CALLBACK_TIMEOUTS", sessionInfo["CampaignId"]+":"+sessionInfo["SessionId"])
 				SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
@@ -65,7 +68,28 @@ func CheckTimeouts() {
 						SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 						RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
 						go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
-					}else{						
+					} else {
+						if agentSessionInfo["AgentRejectCount"] != "" {
+							rejectCountInt, _ := strconv.Atoi(agentSessionInfo["AgentRejectCount"])
+							rejectCount := strconv.Itoa(rejectCountInt + 1)
+
+							if rejectCountInt+1 >= 5 {
+								DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
+								SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
+								SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
+								SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+								RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+								go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+
+							} else {
+								agentSessionInfo["AgentRejectCount"] = rejectCount
+								SetAgentSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "AgentRejectCount", rejectCount)
+							}
+
+						} else {
+							sessionInfo["AgentRejectCount"] = "1"
+							SetAgentSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "AgentRejectCount", "1")
+						}
 						sessionInfo["EventType"] = "AGENT_REJECTED"
 						go ManageIntegrationData(sessionInfo, "AGENT")
 					}
