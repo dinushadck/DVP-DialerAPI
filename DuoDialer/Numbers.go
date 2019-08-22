@@ -203,13 +203,14 @@ func LoadContacts(company, tenant, numberLimit int, campaignId, camScheduleId st
 	listId := fmt.Sprintf("CampaignContacts:%d:%d:%s", company, tenant, campaignId)
 	numbers := GetContactsFromNumberBase(company, tenant, numberLimit, campaignId, camScheduleId)
 
-	color.Green("===========LOADING CONTACTS==========")
+	color.Green(fmt.Sprintf("=========== LOADING CONTACTS : %s ==========", campaignId))
 	DialerLog(fmt.Sprintf("Number count = %d", len(numbers)))
 	if len(numbers) == 0 {
-		color.Green("===========NO CONTACTS FOUND==========")
+		color.Green(fmt.Sprintf("=========== NO CONTACTS FOUND : %s ==========", campaignId))
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 		RedisSet(numLoadingStatusKey, "waiting")
 	} else {
+		color.Green(fmt.Sprintf("=========== CONTACTS FOUND : %s : No : %d ==========", campaignId, len(numbers)))
 		numLoadingStatusKey := fmt.Sprintf("PhoneNumberLoading:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 		dncNumberKey := fmt.Sprintf("DncNumber:%d:%d", tenant, company)
 		RedisSet(numLoadingStatusKey, "waiting")

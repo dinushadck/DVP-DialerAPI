@@ -409,6 +409,14 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			} else {
 				hKey := fmt.Sprintf("agentSessionInfo:%s:%s", reqOData.CampaignId, refData.SessionID)
 				sessionInfo := RedisHashGetAll(hKey)
+
+				redGreen.Println(fmt.Sprintf(" | %s | ", sessionInfo["AgentRejectCount"]))
+
+				if sessionInfo["AgentRejectCount"] != "" {
+					tryCountInt, _ := strconv.Atoi(sessionInfo["AgentRejectCount"])
+					trCount := strconv.Itoa(tryCountInt + 1)
+					sessionInfo["AgentRejectCount"] = trCount
+				}
 				sessionInfo["EventType"] = "AGENT_REJECTED"
 				go ManageIntegrationData(sessionInfo, "AGENT")
 			}
