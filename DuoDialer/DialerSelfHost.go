@@ -403,23 +403,38 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			//go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
 			response := RejectRequest(refData.Company, refData.Tenant, refData.SessionID)
 
+			hKey := fmt.Sprintf("agentSessionInfo:%s:%s", reqOData.CampaignId, refData.SessionID)
+			sessionInfo := RedisHashGetAll(hKey)
+
 			if response != true {
 				redGreen.Println("=========== REJECT REQUEST FAILED ABORTING ==========")
 				AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
 			} else {
-				hKey := fmt.Sprintf("agentSessionInfo:%s:%s", reqOData.CampaignId, refData.SessionID)
-				sessionInfo := RedisHashGetAll(hKey)
 
 				redGreen.Println(fmt.Sprintf(" | %s | ", sessionInfo["AgentRejectCount"]))
 
 				if sessionInfo["AgentRejectCount"] != "" {
-					tryCountInt, _ := strconv.Atoi(sessionInfo["AgentRejectCount"])
-					trCount := strconv.Itoa(tryCountInt + 1)
-					sessionInfo["AgentRejectCount"] = trCount
+					rejectCountInt, _ := strconv.Atoi(sessionInfo["AgentRejectCount"])
+					rejectCount := strconv.Itoa(rejectCountInt + 1)
+
+					if rejectCountInt+1 >= 5 {
+						RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
+						ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
+						//SetAgentStatusArds(refData.Company, refData.Tenant, "", refData.ResourceInfo.ResourceId, refData.SessionID, "Completed", refData.ServerType, refData.RequestType)
+						AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "RejectCountExceeded")
+
+					} else {
+						sessionInfo["AgentRejectCount"] = rejectCount
+					}
+
+				} else {
+					sessionInfo["AgentRejectCount"] = "1"
 				}
-				sessionInfo["EventType"] = "AGENT_REJECTED"
-				go ManageIntegrationData(sessionInfo, "AGENT")
+
 			}
+
+			sessionInfo["EventType"] = "AGENT_REJECTED"
+			go ManageIntegrationData(sessionInfo, "AGENT")
 			//REMOVED
 			//ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
 			//AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")
