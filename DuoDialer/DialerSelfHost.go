@@ -418,6 +418,7 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 					rejectCount := strconv.Itoa(rejectCountInt + 1)
 
 					if rejectCountInt+1 >= 5 {
+						SetAgentSessionInfo(reqOData.CampaignId, refData.SessionID, "AgentRejectCount", rejectCount)
 						RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
 						ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
 						//SetAgentStatusArds(refData.Company, refData.Tenant, "", refData.ResourceInfo.ResourceId, refData.SessionID, "Completed", refData.ServerType, refData.RequestType)
@@ -425,10 +426,12 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 
 					} else {
 						sessionInfo["AgentRejectCount"] = rejectCount
+						SetAgentSessionInfo(reqOData.CampaignId, refData.SessionID, "AgentRejectCount", rejectCount)
 					}
 
 				} else {
 					sessionInfo["AgentRejectCount"] = "1"
+					SetAgentSessionInfo(reqOData.CampaignId, refData.SessionID, "AgentRejectCount", "1")
 				}
 
 			}
