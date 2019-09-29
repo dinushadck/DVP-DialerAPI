@@ -2,9 +2,11 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
 /* var newLoger *logrus.Logger
@@ -26,6 +28,13 @@ func InitializeLogrusLogger() {
 
 var enableLog bool = true
 
+func isJSON(s string) (bool, map[string]string) {
+	var dcReasonData map[string]string
+	result := json.Unmarshal([]byte(s), &dcReasonData)
+	return (result == nil), dcReasonData
+
+}
+
 func EnableConsoleInput() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -42,7 +51,20 @@ func EnableConsoleInput() {
 			GetDisconnectReasons()
 			fmt.Println("DISCONNECTION REASONS LOADED")
 		} else if matched == true {
-			fmt.Println("ADD REASONS")
+			inputReasons := strings.Split(scanner.Text(), "|")
+			if len(inputReasons) == 2 {
+				isJSONStr, jsonData := isJSON(inputReasons[1])
+
+				if isJSONStr {
+					RedisHMSet("DisconnectReasonMap", jsonData)
+					fmt.Println("ADD REASONS SUCCESS")
+				} else {
+					fmt.Println("INVALID FORMAT - DATA IS NOT A VALID JSON")
+				}
+
+			} else {
+				fmt.Println("INVALID FORMAT - PLEASE USE | TO SEPARATE COMMAND AND JSON DATA")
+			}
 		} else {
 			fmt.Println("")
 		}
