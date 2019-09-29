@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 )
 
 /* var newLoger *logrus.Logger
@@ -29,6 +30,8 @@ func EnableConsoleInput() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 
+		matched, _ := regexp.MatchString("^(addreasosns|)", scanner.Text())
+
 		if scanner.Text() == "logon" {
 			enableLog = true
 			fmt.Println("LOG ENABLED")
@@ -38,6 +41,8 @@ func EnableConsoleInput() {
 		} else if scanner.Text() == "reloadreasons" {
 			GetDisconnectReasons()
 			fmt.Println("DISCONNECTION REASONS LOADED")
+		} else if matched == true {
+			fmt.Println("ADD REASONS")
 		} else {
 			fmt.Println("")
 		}
