@@ -49,7 +49,7 @@ func EnableConsoleInput() {
 			fmt.Println("LOG DISABLED")
 		} else if scanner.Text() == "reloadreasons" {
 			GetDisconnectReasons()
-			fmt.Println("DISCONNECTION REASONS LOADED")
+			fmt.Println("DISCONNECTION REASONS LOADED SUCCESSFULLY")
 		} else if scanner.Text() == "flushreasons" {
 			RedisRemove("DisconnectReasonMap")
 			fmt.Println("ALL REASONS FLUSHED SUCCESSFULLY")
@@ -60,7 +60,7 @@ func EnableConsoleInput() {
 
 				if isJSONStr {
 					RedisHMSet("DisconnectReasonMap", jsonData)
-					fmt.Println("ADD REASONS SUCCESS")
+					fmt.Println(fmt.Sprintf("REASONS ADDED SUCCESSFULLY : %v", jsonData))
 				} else {
 					fmt.Println("INVALID FORMAT - DATA IS NOT A VALID JSON")
 				}
