@@ -420,6 +420,7 @@ type SubEvents struct {
 	AuthData         string
 	EventCategory    string
 	DisconnectReason string
+	DisconnectCode   string
 }
 
 type PubEvents struct {

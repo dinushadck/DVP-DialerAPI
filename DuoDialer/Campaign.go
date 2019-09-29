@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 //----------Ongoing Campaign Count-----------------------

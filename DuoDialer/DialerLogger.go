@@ -35,6 +35,9 @@ func EnableConsoleInput() {
 		} else if scanner.Text() == "logoff" {
 			enableLog = false
 			fmt.Println("LOG DISABLED")
+		} else if scanner.Text() == "reloadreasons" {
+			GetDisconnectReasons()
+			fmt.Println("DISCONNECTION REASONS LOADED")
 		} else {
 			fmt.Println("")
 		}
