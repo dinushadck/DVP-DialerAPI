@@ -50,6 +50,9 @@ func EnableConsoleInput() {
 		} else if scanner.Text() == "reloadreasons" {
 			GetDisconnectReasons()
 			fmt.Println("DISCONNECTION REASONS LOADED")
+		} else if scanner.Text() == "flushreasons" {
+			RedisRemove("DisconnectReasonMap")
+			fmt.Println("ALL REASONS FLUSHED SUCCESSFULLY")
 		} else if matched == true {
 			inputReasons := strings.Split(scanner.Text(), "|")
 			if len(inputReasons) == 2 {
