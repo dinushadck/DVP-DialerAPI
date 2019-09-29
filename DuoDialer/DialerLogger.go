@@ -30,7 +30,7 @@ func EnableConsoleInput() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 
-		matched, _ := regexp.MatchString("^(addreasosns|)", scanner.Text())
+		matched, _ := regexp.MatchString(`^(addreasons|)`, scanner.Text())
 
 		if scanner.Text() == "logon" {
 			enableLog = true
