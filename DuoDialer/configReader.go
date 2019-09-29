@@ -62,6 +62,7 @@ var useAmqpAdapter string
 var amqpAdapterPort string
 var previewTimeout string
 var agentPrepareTime string
+var previewReAssignOnFail string
 var disconnectReasonMap map[string]string
 
 func GetDirPath() string {
@@ -73,7 +74,7 @@ func GetDirPath() string {
 	return envPath
 }
 
-func GetDisconnectReasons(){
+func GetDisconnectReasons() {
 	disconnectReasonMap = RedisHashGetAll("DisconnectReasonMap")
 }
 
@@ -138,6 +139,7 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.AmqpAdapterPort = "3653"
 		defconfiguration.PreviewTimeout = "120"
 		defconfiguration.AgentPrepareTime = "0"
+		defconfiguration.PreviewReAssignOnFail = "false"
 	}
 
 	return defconfiguration
@@ -194,6 +196,7 @@ func LoadDefaultConfig() {
 	amqpAdapterPort = defconfiguration.AmqpAdapterPort
 	previewTimeout = defconfiguration.PreviewTimeout
 	agentPrepareTime = defconfiguration.AgentPrepareTime
+	previewReAssignOnFail = defconfiguration.PreviewReAssignOnFail
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -264,6 +267,7 @@ func LoadConfiguration() {
 		amqpAdapterPort = os.Getenv(envconfiguration.AmqpAdapterPort)
 		previewTimeout = os.Getenv(envconfiguration.PreviewTimeout)
 		agentPrepareTime = os.Getenv(envconfiguration.AgentPrepareTime)
+		previewReAssignOnFail = os.Getenv(envconfiguration.PreviewReAssignOnFail)
 
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
@@ -406,8 +410,11 @@ func LoadConfiguration() {
 		if previewTimeout == "" {
 			previewTimeout = defConfig.PreviewTimeout
 		}
-		if agentPrepareTime == ""{
+		if agentPrepareTime == "" {
 			agentPrepareTime = defConfig.AgentPrepareTime
+		}
+		if previewReAssignOnFail == "" {
+			previewReAssignOnFail = defConfig.PreviewReAssignOnFail
 		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
@@ -427,6 +434,7 @@ func LoadConfiguration() {
 	fmt.Println("amqpAdapterPort:", amqpAdapterPort)
 	fmt.Println("previewTimeout:", previewTimeout)
 	fmt.Println("agentPrepareTime:", agentPrepareTime)
+	fmt.Println("previewReAssignOnFail", previewReAssignOnFail)
 }
 
 func LoadCallbackConfiguration() {

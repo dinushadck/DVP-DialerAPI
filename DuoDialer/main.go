@@ -56,42 +56,57 @@ func CheckTimeouts() {
 
 				if sessionInfo["SessionId"] != "" {
 
-					response := RejectRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+					if previewReAssignOnFail == "false" {
 
-					if response != true {
-
-						color.Red("=========== REJECT REQUEST FAILED ABORTING ==========")
+						color.Yellow("=========== NOT REASSIGNING TO ANOTHER AGENT ==========")
 						//DELETE COUNTER
 						DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
-						SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
+						SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "PREVIEW_TIMEOUT")
 						SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
 						SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
 						RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
 						go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
-					} else {
-						if agentSessionInfo["AgentRejectCount"] != "" {
-							rejectCountInt, _ := strconv.Atoi(agentSessionInfo["AgentRejectCount"])
-							rejectCount := strconv.Itoa(rejectCountInt + 1)
 
-							if rejectCountInt+1 >= 5 {
-								DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
-								SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "callback_timeout")
-								SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
-								SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
-								RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
-								go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+					} else {
+
+						response := RejectRequest(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+
+						if response != true {
+
+							color.Red("=========== REJECT REQUEST FAILED ABORTING ==========")
+							//DELETE COUNTER
+							DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
+							SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "PREVIEW_TIMEOUT")
+							SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
+							SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+							RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+							go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+						} else {
+							if agentSessionInfo["AgentRejectCount"] != "" {
+								rejectCountInt, _ := strconv.Atoi(agentSessionInfo["AgentRejectCount"])
+								rejectCount := strconv.Itoa(rejectCountInt + 1)
+
+								if rejectCountInt+1 >= 5 {
+									DecrConcurrentChannelCount(sessionInfo["ResourceServerId"], sessionInfo["CampaignId"])
+									SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "Reason", "PREVIEW_TIMEOUT")
+									SetSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "DialerStatus", "failed")
+									SendCustomerIntegrationData(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+									RemoveRequestNoSession(sessionInfo["CompanyId"], sessionInfo["TenantId"], sessionInfo["SessionId"])
+									go UploadSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"])
+
+								} else {
+									agentSessionInfo["AgentRejectCount"] = rejectCount
+									SetAgentSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "AgentRejectCount", rejectCount)
+								}
 
 							} else {
-								agentSessionInfo["AgentRejectCount"] = rejectCount
-								SetAgentSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "AgentRejectCount", rejectCount)
+								sessionInfo["AgentRejectCount"] = "1"
+								SetAgentSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "AgentRejectCount", "1")
 							}
-
-						} else {
-							sessionInfo["AgentRejectCount"] = "1"
-							SetAgentSessionInfo(sessionInfo["CampaignId"], sessionInfo["SessionId"], "AgentRejectCount", "1")
+							sessionInfo["EventType"] = "AGENT_REJECTED"
+							go ManageIntegrationData(sessionInfo, "AGENT")
 						}
-						sessionInfo["EventType"] = "AGENT_REJECTED"
-						go ManageIntegrationData(sessionInfo, "AGENT")
+
 					}
 
 				} else {

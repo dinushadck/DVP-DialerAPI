@@ -57,6 +57,7 @@ type Configuration struct {
 	AmqpAdapterPort          string
 	PreviewTimeout           string
 	AgentPrepareTime         string
+	PreviewReAssignOnFail    string
 }
 
 type EnvConfiguration struct {
@@ -107,6 +108,7 @@ type EnvConfiguration struct {
 	AmqpAdapterPort          string
 	PreviewTimeout           string
 	AgentPrepareTime         string
+	PreviewReAssignOnFail    string
 }
 
 //--------------------Campaign--------------------

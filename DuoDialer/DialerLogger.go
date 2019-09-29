@@ -60,7 +60,7 @@ func EnableConsoleInput() {
 
 				if isJSONStr {
 					RedisHMSet("DisconnectReasonMap", jsonData)
-					fmt.Println(fmt.Sprintf("REASONS ADDED SUCCESSFULLY : %v", jsonData))
+					fmt.Println(fmt.Sprintf("REASONS ADDED SUCCESSFULLY : %s", inputReasons[1]))
 				} else {
 					fmt.Println("INVALID FORMAT - DATA IS NOT A VALID JSON")
 				}
