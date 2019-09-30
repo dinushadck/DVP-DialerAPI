@@ -12,7 +12,7 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string, integrationData *IntegrationConfig, contacts *[]Contact, thirdpartyreference, businessUnit string) {
+func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string, integrationData *IntegrationConfig, contacts *[]Contact, thirdpartyreference, businessUnit string, numberWiseSkills []string) {
 	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention, ": ", xGateway)
 
 	strTenant := strconv.Itoa(tenant)
@@ -32,7 +32,11 @@ func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInf
 	//get attribute info from redis ** after put data stucture to cam service
 	attributeInfo := make([]string, 0)
 
-	attributeInfo = RequestCampaignAttributeInfo(company, tenant, campaignId)
+	if numberWiseSkills != nil && len(numberWiseSkills) > 0 {
+		attributeInfo = numberWiseSkills
+	} else {
+		attributeInfo = RequestCampaignAttributeInfo(company, tenant, campaignId)
+	}
 
 	reqOtherData := RequestOtherData{}
 	reqOtherData.CampaignId = campaignId

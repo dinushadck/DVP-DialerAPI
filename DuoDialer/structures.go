@@ -264,6 +264,7 @@ type ContactsDetails struct {
 	Api_Contacts        []Contact
 	TryCount            int
 	Thirdpartyreference string
+	Skills				[]string
 }
 
 type ContactsResult struct {

@@ -260,7 +260,7 @@ func CheckDuplicates(company, tenant int, campaignId, camScheduleId, number stri
 	}
 }
 
-func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, string, string, []Contact) {
+func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingMethod string) (string, string, string, string, string, []Contact, []string) {
 	listId := fmt.Sprintf("CampaignNumbers:%d:%d:%s:%s", company, tenant, campaignId, camScheduleId)
 
 	if numLoadingMethod == "CONTACT" {
@@ -293,7 +293,7 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 
 		strTryCount := strconv.Itoa(contactInf.TryCount)
 
-		return contactInf.Phone, strTryCount, contactInf.PreviewData, "", contactInf.Thirdpartyreference, contactInf.Api_Contacts
+		return contactInf.Phone, strTryCount, contactInf.PreviewData, "", contactInf.Thirdpartyreference, contactInf.Api_Contacts, contactInf.Skills
 	} else {
 		//18705056550:{"A":18705056550}:1:{}
 		color.Green("NUMBER POPPED OUT TO DIAL : " + numberWithTryCount)
@@ -301,7 +301,7 @@ func GetNumberToDial(company, tenant int, campaignId, camScheduleId, numLoadingM
 		numInf := CampaignDialNumber{}
 		_ = json.Unmarshal([]byte(numberWithTryCount), &numInf)
 
-		return numInf.PhoneNumber, numInf.TryCount, numInf.PreviewData, numInf.BusinessUnit, "", make([]Contact, 0)
+		return numInf.PhoneNumber, numInf.TryCount, numInf.PreviewData, numInf.BusinessUnit, "", make([]Contact, 0), make([]string, 0)
 
 		/* numberInfos := strings.Split(numberWithTryCount, ":")
 		if len(numberInfos) > 3 {

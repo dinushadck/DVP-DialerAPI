@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 //----------Ongoing Campaign Count-----------------------
@@ -607,7 +607,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 						if cchannelCountS < maxChannelLimit && cchannelCountC < maxCampaignChannelLimit {
 
-							number, tryCount, numExtraData, businessUnit, thirdpartyref, contacts := GetNumberToDial(company, tenant, campaignId, camScheduleId, numLoadingMethod)
+							number, tryCount, numExtraData, businessUnit, thirdpartyref, contacts, numberWiseSills := GetNumberToDial(company, tenant, campaignId, camScheduleId, numLoadingMethod)
 
 							color.Green(fmt.Sprintf("Number:%s | TryCount:%s | numExtraData:%s | businessUnit:%s", number, tryCount, numExtraData, businessUnit))
 
@@ -648,11 +648,11 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 											break
 										case "PREVIEW":
 											color.Cyan(fmt.Sprintf("======= STARTING PREVIEW DIALER : %s ======= %v", campaignId, contacts))
-											go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref, businessUnit)
+											go AddPreviewDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref, businessUnit, numberWiseSills)
 											break
 										case "AGENT":
 											color.Cyan(fmt.Sprintf("======= STARTING AGENT DIALER : %s =======", campaignId))
-											go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref, businessUnit)
+											go AddAgentDialRequest(company, tenant, resourceServerInfos, campaignId, scheduleId, campaignName, dialoutMec, uuid, ani, trunkCode, dnis, xGateway, numExtraData, tryCount, extention, integrationData, &contacts, thirdpartyref, businessUnit, numberWiseSills)
 											break
 										}
 									} else {
@@ -675,7 +675,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 						templates := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "EMAIL", "TEMPLATE")
 						attachmentNames := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "EMAIL", "ATTACHMENT")
 
-						email, _, numExtraData, _, _, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
+						email, _, numExtraData, _, _, _, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
 						if email == "" {
 							emailCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 							if emailCount == 0 {
@@ -756,7 +756,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 
 						templates := RequestCampaignAddtionalData(company, tenant, campaignId, "BLAST", "SMS", "TEMPLATE")
 
-						number, _, numExtraData, _, _, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
+						number, _, numExtraData, _, _, _, _ := GetNumberToDial(company, tenant, campaignId, camScheduleId, "")
 						if number == "" {
 							numberCount := GetNumberCount(company, tenant, campaignId, camScheduleId)
 							if numberCount == 0 {
