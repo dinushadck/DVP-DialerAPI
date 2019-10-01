@@ -43,6 +43,8 @@ func AddPreviewDialRequest(company, tenant int, resourceServer ResourceServerInf
 	reqOtherData.StrData = numExtraData
 	reqOtherData.DialoutMec = dialoutMec
 	tmpReqOtherData, _ := json.Marshal(reqOtherData)
+	tmpAttributeInfo, _ := json.Marshal(attributeInfo)
+	SetSessionInfo(campaignId, uuid, "Skills", string(tmpAttributeInfo))
 
 	resp, err := AddRequest(company, tenant, uuid, string(tmpReqOtherData), attributeInfo)
 	if err != nil {

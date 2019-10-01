@@ -208,7 +208,13 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 			mapstructure.Decode(callbackInfo["OtherContacts"], &callbackContactList)
 			//json.Unmarshal([]byte(strCallbackContacts), &callbackContactList)
 
-			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string), callbackInfo["BusinessUnit"].(string))
+			tempSkillData := make([]string, 0)
+			if callbackInfo["Skills"] != "" {
+				json.Unmarshal([]byte(callbackInfo["Skills"].(string)), &tempSkillData)
+
+			}
+
+			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string), callbackInfo["BusinessUnit"].(string), callbackInfo["ThirdPartyReference"].(string), tempSkillData)
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "agent" {
 

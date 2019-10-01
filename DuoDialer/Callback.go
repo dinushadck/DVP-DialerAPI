@@ -678,7 +678,7 @@ func AddPhoneNumberToCallback(company, tenant, tryCount, campaignId, scheduleId,
 	DecrConcurrentChannelCount(switchName, campaignId)
 }
 
-func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string, otherContacts []Contact, previewData, businessUnit string) {
+func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, number string, otherContacts []Contact, previewData, businessUnit, thirdpartyRef string, skills []string) {
 	blackgreen := color.New(color.FgBlack).Add(color.BgGreen)
 	campaignIdStr := strconv.Itoa(campaignId)
 	_tryCount := callbackCount + 1
@@ -688,7 +688,7 @@ func ResumeCampaignCallback(company, tenant, callbackCount, campaignId int, numb
 		camScheduleStr := strconv.Itoa(campaign.CampScheduleInfo[0].CamScheduleId)
 		//numberWithTryCount := fmt.Sprintf("%s:%d:%s", number, _tryCount, previewData)
 		if campaign.CampConfigurations.NumberLoadingMethod == "CONTACT" {
-			contactDet := ContactsDetails{Phone: number, Api_Contacts: otherContacts, PreviewData: previewData, TryCount: _tryCount}
+			contactDet := ContactsDetails{Phone: number, Api_Contacts: otherContacts, PreviewData: previewData, TryCount: _tryCount, Skills: skills, Thirdpartyreference: thirdpartyRef}
 			blackgreen.Println(fmt.Sprintf("Adding contacts to front : %v", contactDet))
 			AddContactToFront(company, tenant, campaignIdStr, contactDet)
 		} else {
