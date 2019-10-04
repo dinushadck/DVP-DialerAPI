@@ -48,7 +48,7 @@ func OnEvent(eventInfo SubEvents) {
 				IncrCampaignConnectedCount(company, tenant, eventInfo.CampaignId)
 				//PublishCampaignCallCounts(eventInfo.SessionId, "ANSWERED", eventInfo.CompanyId, eventInfo.TenantId, eventInfo.CampaignId)
 				dashboardparam2 := "BASIC"
-				if sessionInfo["CALLBACK"] == "CALLBACK"{
+				if sessionInfo["CALLBACK"] == "CALLBACK" {
 					dashboardparam2 = "CALLBACK"
 				}
 				PublishCampaignCallCounts(eventInfo.SessionId, "CONNECTED", eventInfo.CompanyId, eventInfo.TenantId, eventInfo.CampaignId, dashboardparam2)
@@ -58,12 +58,13 @@ func OnEvent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_DESTROY":
 				//LogEvent(eventInfo)
-				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s, DisconnectReason : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory, eventInfo.DisconnectReason))
+				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s, DisconnectReason : %s, DisconnectCode : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory, eventInfo.DisconnectReason, eventInfo.DisconnectCode))
 				hashKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				session := RedisCheckKeyExist(hashKey)
 				if session {
 					color.Magenta("==========Session Found============")
 					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
+					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ReasonCode", eventInfo.DisconnectCode)
 
 					hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 					sessionInfo := RedisHashGetAll(hKey)
@@ -124,7 +125,8 @@ func OnEventAgent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_DESTROY":
 				SetAgentSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", eventInfo.DisconnectReason)
-				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s, DisconnectReason : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.DisconnectReason))
+				SetAgentSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReasonCode", eventInfo.DisconnectCode)
+				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s, DisconnectReason : %s, DisconnectCode : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.DisconnectReason, eventInfo.DisconnectCode))
 				/* hKey := fmt.Sprintf("agentSessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
 

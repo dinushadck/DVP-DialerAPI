@@ -208,7 +208,13 @@ func (dvp DVP) ResumeCallback(callbackInfo CallbackInfo) {
 			mapstructure.Decode(callbackInfo["OtherContacts"], &callbackContactList)
 			//json.Unmarshal([]byte(strCallbackContacts), &callbackContactList)
 
-			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string), callbackInfo["BusinessUnit"].(string))
+			tempSkillData := make([]string, 0)
+			if callbackInfo["Skills"] != "" {
+				json.Unmarshal([]byte(callbackInfo["Skills"].(string)), &tempSkillData)
+
+			}
+
+			ResumeCampaignCallback(company, tenant, callbackCount, campaignId, callbackInfo["ContactId"].(string), callbackContactList, callbackInfo["PreviewData"].(string), callbackInfo["BusinessUnit"].(string), callbackInfo["ThirdPartyReference"].(string), tempSkillData)
 
 		} else if strings.ToLower(callbackInfo["CallbackType"].(string)) == "schedulecallback" && strings.ToLower(callbackInfo["CallbackCategory"].(string)) == "agent" {
 
@@ -401,12 +407,50 @@ func (dvp DVP) PreviewCallBack(rdata ReceiveData) {
 			redGreen.Println("=========== PREVIEW REJECTED DUE TO AGENT REJECT ==========")
 			fmt.Println("Start Reject Priview Number")
 			//go RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
-			response := RejectRequest(refData.Company, refData.Tenant, refData.SessionID)
+			if previewReAssignOnFail == "false" {
+				RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
+				ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
+				AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, rdata.Reply.Message)
+			} else {
+				response := RejectRequest(refData.Company, refData.Tenant, refData.SessionID)
 
-			if response != true {
-				redGreen.Println("=========== REJECT REQUEST FAILED ABORTING ==========")
-				AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
+				hKey := fmt.Sprintf("agentSessionInfo:%s:%s", reqOData.CampaignId, refData.SessionID)
+				sessionInfo := RedisHashGetAll(hKey)
+
+				if response != true {
+					redGreen.Println("=========== REJECT REQUEST FAILED ABORTING ==========")
+					AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "NoSessionFound")
+				} else {
+
+					redGreen.Println(fmt.Sprintf(" | %s | ", sessionInfo["AgentRejectCount"]))
+
+					if sessionInfo["AgentRejectCount"] != "" {
+						rejectCountInt, _ := strconv.Atoi(sessionInfo["AgentRejectCount"])
+						rejectCount := strconv.Itoa(rejectCountInt + 1)
+
+						if rejectCountInt+1 >= 5 {
+							SetAgentSessionInfo(reqOData.CampaignId, refData.SessionID, "AgentRejectCount", rejectCount)
+							RemoveRequestNoSession(refData.Company, refData.Tenant, refData.SessionID)
+							ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
+							//SetAgentStatusArds(refData.Company, refData.Tenant, "", refData.ResourceInfo.ResourceId, refData.SessionID, "Completed", refData.ServerType, refData.RequestType)
+							AbortDialing(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, "RejectCountExceeded")
+
+						} else {
+							sessionInfo["AgentRejectCount"] = rejectCount
+							SetAgentSessionInfo(reqOData.CampaignId, refData.SessionID, "AgentRejectCount", rejectCount)
+						}
+
+					} else {
+						sessionInfo["AgentRejectCount"] = "1"
+						SetAgentSessionInfo(reqOData.CampaignId, refData.SessionID, "AgentRejectCount", "1")
+					}
+
+				}
+
+				sessionInfo["EventType"] = "AGENT_REJECTED"
+				go ManageIntegrationData(sessionInfo, "AGENT")
 			}
+
 			//REMOVED
 			//ClearResourceSlotWhenReject(refData.Company, refData.Tenant, refData.RequestType, refData.ResourceInfo.ResourceId, refData.SessionID)
 			//AgentReject(refData.Company, refData.Tenant, reqOData.CampaignId, refData.SessionID, refData.RequestType, refData.ResourceInfo.ResourceId, "AgentRejected")

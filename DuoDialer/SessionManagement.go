@@ -133,18 +133,25 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 			bodyData[element] = sessionInfo[element]
 		}
 		integrationUrl = intData.Customer.Url
-		dcReason = sessionInfo["Reason"]
+		dcReason = sessionInfo["ReasonCode"]
+
+		if dcReason == "" {
+			dcReason = sessionInfo["Reason"]
+		}
 
 	} else if integrationType == "AGENT" {
 		for _, element := range intData.Agent.Params {
 			if element == "Reason" {
-				bodyData[element] = sessionInfo["AgentReason"]
+				bodyData[element] = sessionInfo["AgentReasonCode"]
 			} else {
 				bodyData[element] = sessionInfo[element]
 			}
 
 		}
-		dcReason = sessionInfo["AgentReason"]
+		dcReason = sessionInfo["AgentReasonCode"]
+		if dcReason == "" {
+			dcReason = sessionInfo["AgentReason"]
+		}
 		integrationUrl = intData.Agent.Url
 
 	}

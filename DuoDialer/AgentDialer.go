@@ -12,7 +12,7 @@ import (
 )
 
 //Add preview dial request to dialer
-func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string, integrationData *IntegrationConfig, contacts *[]Contact, thirdpartyreference, businessUnit string) {
+func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo, campaignId, scheduleId, campaignName, dialoutMec, uuid, fromNumber, trunkCode, phoneNumber, xGateway, numExtraData, tryCount, extention string, integrationData *IntegrationConfig, contacts *[]Contact, thirdpartyreference, businessUnit string, numberWiseSkills []string) {
 	fmt.Println("Start AddPreviewDialRequest: ", uuid, ": ", fromNumber, ": ", trunkCode, ": ", phoneNumber, ": ", extention, ": ", xGateway)
 
 	strTenant := strconv.Itoa(tenant)
@@ -32,13 +32,19 @@ func AddAgentDialRequest(company, tenant int, resourceServer ResourceServerInfo,
 	//get attribute info from redis ** after put data stucture to cam service
 	attributeInfo := make([]string, 0)
 
-	attributeInfo = RequestCampaignAttributeInfo(company, tenant, campaignId)
+	if numberWiseSkills != nil && len(numberWiseSkills) > 0 {
+		attributeInfo = numberWiseSkills
+	} else {
+		attributeInfo = RequestCampaignAttributeInfo(company, tenant, campaignId)
+	}
 
 	reqOtherData := RequestOtherData{}
 	reqOtherData.CampaignId = campaignId
 	reqOtherData.StrData = numExtraData
 	reqOtherData.DialoutMec = dialoutMec
 	tmpReqOtherData, _ := json.Marshal(reqOtherData)
+	tmpAttributeInfo, _ := json.Marshal(attributeInfo)
+	SetSessionInfo(campaignId, uuid, "Skills", string(tmpAttributeInfo))
 
 	resp, err := AddRequest(company, tenant, uuid, string(tmpReqOtherData), attributeInfo)
 	if err != nil {

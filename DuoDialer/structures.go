@@ -57,6 +57,7 @@ type Configuration struct {
 	AmqpAdapterPort          string
 	PreviewTimeout           string
 	AgentPrepareTime         string
+	PreviewReAssignOnFail    string
 }
 
 type EnvConfiguration struct {
@@ -107,6 +108,7 @@ type EnvConfiguration struct {
 	AmqpAdapterPort          string
 	PreviewTimeout           string
 	AgentPrepareTime         string
+	PreviewReAssignOnFail    string
 }
 
 //--------------------Campaign--------------------
@@ -262,6 +264,7 @@ type ContactsDetails struct {
 	Api_Contacts        []Contact
 	TryCount            int
 	Thirdpartyreference string
+	Skills				[]string
 }
 
 type ContactsResult struct {
@@ -420,6 +423,7 @@ type SubEvents struct {
 	AuthData         string
 	EventCategory    string
 	DisconnectReason string
+	DisconnectCode   string
 }
 
 type PubEvents struct {

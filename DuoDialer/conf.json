@@ -46,5 +46,6 @@
 	"UseAmqpAdapter": "false",
 	"AmqpAdapterPort": "3653",
 	"PreviewTimeout": "120",
-	"AgentPrepareTime": "0"
+	"AgentPrepareTime": "0",
+	"PreviewReAssignOnFail": "false"
 }

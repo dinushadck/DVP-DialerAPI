@@ -44,5 +44,6 @@
 	"UseAmqpAdapter": "HOST_USE_AMQP_ADAPTER",
 	"AmqpAdapterPort": "AMQP_ADAPTER_PORT",
 	"PreviewTimeout": "HOST_PREVIEW_TIMEOUT",
-	"AgentPrepareTime": "HOST_AGENT_PREPARE_TIME"
+	"AgentPrepareTime": "HOST_AGENT_PREPARE_TIME",
+	"PreviewReAssignOnFail": "HOST_PREVIEW_REASSIGN_ON_FAIL"
 }
