@@ -58,13 +58,14 @@ func OnEvent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_DESTROY":
 				//LogEvent(eventInfo)
-				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s, DisconnectReason : %s, DisconnectCode : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory, eventInfo.DisconnectReason, eventInfo.DisconnectCode))
+				redCyan := color.New(color.FgRed).Add(color.BgCyan)
+				redCyan.Println(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s, DisconnectReason : %s, DisconnectCode : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory, eventInfo.DisconnectReason, eventInfo.DisconnectionCode))
 				hashKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				session := RedisCheckKeyExist(hashKey)
 				if session {
 					color.Magenta("==========Session Found============")
 					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "Reason", eventInfo.DisconnectReason)
-					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ReasonCode", eventInfo.DisconnectCode)
+					SetSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "ReasonCode", eventInfo.DisconnectionCode)
 
 					hKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 					sessionInfo := RedisHashGetAll(hKey)
@@ -82,7 +83,34 @@ func OnEvent(eventInfo SubEvents) {
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				} else {
-					color.Magenta("==========Session Not Found : " + hashKey)
+					hashdcKey := fmt.Sprintf("sessionAlreadyDCInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
+					sessionDCExist := RedisCheckKeyExist(hashdcKey)
+
+					if sessionDCExist {
+
+						color.Magenta("==========ALT Session Found : " + hashdcKey)
+
+						sessionInfoDC := RedisHashGetAll(hashdcKey)
+
+						color.Magenta(fmt.Sprintf(sessionInfoDC["IntegrationData"]))
+
+						if sessionInfoDC != nil && sessionInfoDC["IntegrationData"] != "" {
+
+							RedisRemove(hashdcKey)
+							sessionInfoDC["EventType"] = "CUSTOMER_DISCONNECT"
+
+							sessionInfoDC["Reason"] = eventInfo.DisconnectReason
+							sessionInfoDC["ReasonCode"] = eventInfo.DisconnectionCode
+							go ManageIntegrationData(sessionInfoDC, "CUSTOMER")
+						} else {
+							color.Magenta("NO INTEGRATION DATA")
+						}
+
+					} else {
+						color.Magenta("==========Session Not Found : " + hashKey)
+
+					}
+
 				}
 				break
 			default:
@@ -125,8 +153,8 @@ func OnEventAgent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_DESTROY":
 				SetAgentSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReason", eventInfo.DisconnectReason)
-				SetAgentSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReasonCode", eventInfo.DisconnectCode)
-				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s, DisconnectReason : %s, DisconnectCode : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.DisconnectReason, eventInfo.DisconnectCode))
+				SetAgentSessionInfo(eventInfo.CampaignId, eventInfo.SessionId, "AgentReasonCode", eventInfo.DisconnectionCode)
+				redGreen.Println(fmt.Sprintf("EventName: %s, SessionId: %s, DisconnectReason : %s, DisconnectCode : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.DisconnectReason, eventInfo.DisconnectionCode))
 				/* hKey := fmt.Sprintf("agentSessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				sessionInfo := RedisHashGetAll(hKey)
 

@@ -126,11 +126,18 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 	fmt.Println(intData)
 	bodyData := map[string]interface{}{}
 
+	cyanblue := color.New(color.FgCyan).Add(color.BgMagenta)
+
 	integrationUrl := ""
 	dcReason := ""
+
 	if integrationType == "CUSTOMER" {
 		for _, element := range intData.Customer.Params {
-			bodyData[element] = sessionInfo[element]
+			if element == "Reason" {
+				bodyData[element] = sessionInfo["ReasonCode"]
+			} else {
+				bodyData[element] = sessionInfo[element]
+			}
 		}
 		integrationUrl = intData.Customer.Url
 		dcReason = sessionInfo["ReasonCode"]
@@ -166,7 +173,6 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 		strdata := string(jsonData)
 
-		cyanblue := color.New(color.FgCyan).Add(color.BgMagenta)
 		cyanblue.Println(fmt.Sprintf("=============SENDING INTEGRATION DATA - URL : %s, Data : %s", integrationUrl, strdata))
 
 		req, err := http.NewRequest("POST", integrationUrl, bytes.NewBuffer(jsonData))

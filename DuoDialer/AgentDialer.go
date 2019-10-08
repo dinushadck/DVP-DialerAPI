@@ -213,6 +213,7 @@ func AgentReject(company, tenant, campaignId, sessionId, requestType, resourceId
 func AbortDialing(company, tenant, campaignId, sessionId, rejectReason string) {
 	sessionInfoKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
 	if RedisCheckKeyExist(sessionInfoKey) {
+		SetSessionInfo(campaignId, sessionId, "ReasonCode", rejectReason)
 		SetSessionInfo(campaignId, sessionId, "Reason", rejectReason)
 		SetSessionInfo(campaignId, sessionId, "DialerStatus", "abort_dialing")
 		//RejectRequest(company, tenant, sessionId)

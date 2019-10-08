@@ -264,7 +264,7 @@ type ContactsDetails struct {
 	Api_Contacts        []Contact
 	TryCount            int
 	Thirdpartyreference string
-	Skills				[]string
+	Skills              []string
 }
 
 type ContactsResult struct {
@@ -410,20 +410,20 @@ type Appoinment struct {
 
 //--------------------Events--------------------
 type SubEvents struct {
-	TenantId         string
-	CompanyId        string
-	SwitchName       string
-	CampaignId       string
-	SessionId        string
-	EventClass       string
-	EventType        string
-	EventTime        string
-	EventName        string
-	EventData        string
-	AuthData         string
-	EventCategory    string
-	DisconnectReason string
-	DisconnectCode   string
+	TenantId          string
+	CompanyId         string
+	SwitchName        string
+	CampaignId        string
+	SessionId         string
+	EventClass        string
+	EventType         string
+	EventTime         string
+	EventName         string
+	EventData         string
+	AuthData          string
+	EventCategory     string
+	DisconnectReason  string
+	DisconnectionCode string
 }
 
 type PubEvents struct {

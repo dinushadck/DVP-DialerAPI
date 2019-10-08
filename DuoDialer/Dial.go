@@ -144,7 +144,6 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 		response, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		tmx := string(response[:])
-		fmt.Println(tmx)
 		resultInfo := strings.Split(tmx, " ")
 		if len(resultInfo) > 0 {
 			if resultInfo[0] == "-ERR" {
@@ -165,7 +164,12 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 					SetAgentSessionInfo(campaignId, sessionId, "AgentReason", "not_specified")
 				}
 				SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
-				SendCustomerIntegrationData(campaignId, sessionId)
+				//SendCustomerIntegrationData(campaignId, sessionId)
+				hashKey := fmt.Sprintf("sessionInfo:%s:%s", campaignId, sessionId)
+				sessionInfo := RedisHashGetAll(hashKey)
+				hashdcKey := fmt.Sprintf("sessionAlreadyDCInfo:%s:%s", campaignId, sessionId)
+				RedisHMSet(hashdcKey, sessionInfo)
+				RedisExpire(hashdcKey, 180)
 				go UploadSessionInfo(campaignId, sessionId)
 			} else {
 				SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
