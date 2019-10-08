@@ -164,8 +164,8 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 					SetAgentSessionInfo(campaignId, sessionId, "AgentReason", "not_specified")
 				}
 				SetSessionInfo(campaignId, sessionId, "DialerStatus", "dial_failed")
-				SendCustomerIntegrationData(campaignId, sessionId)
-				go UploadSessionInfo(campaignId, sessionId)
+				//SendCustomerIntegrationData(campaignId, sessionId)
+				//go UploadSessionInfo(campaignId, sessionId)
 			} else {
 				SetSessionInfo(campaignId, sessionId, "Reason", "dial_success")
 				SetAgentSessionInfo(campaignId, sessionId, "AgentReason", "dial_success")
