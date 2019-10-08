@@ -88,7 +88,7 @@ func OnEvent(eventInfo SubEvents) {
 
 					if sessionDCExist {
 
-						color.Magenta("==========ALT Session Not Found : " + hashKey)
+						color.Magenta("==========ALT Session Found : " + hashdcKey)
 
 						sessionInfoDC := RedisHashGetAll(hashdcKey)
 
