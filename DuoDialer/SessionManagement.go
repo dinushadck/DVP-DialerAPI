@@ -130,9 +130,15 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 	integrationUrl := ""
 	dcReason := ""
+
+	cyanblue.Println(fmt.Sprintf("============= DC REASON 1 : %v", sessionInfo))
 	if integrationType == "CUSTOMER" {
 		for _, element := range intData.Customer.Params {
-			bodyData[element] = sessionInfo[element]
+			if element == "Reason" {
+				bodyData[element] = sessionInfo["ReasonCode"]
+			} else {
+				bodyData[element] = sessionInfo[element]
+			}
 		}
 		integrationUrl = intData.Customer.Url
 		dcReason = sessionInfo["ReasonCode"]
@@ -158,14 +164,10 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 	}
 
-	cyanblue.Println(fmt.Sprintf("============= DC REASON 1 : %s", dcReason))
-
 	if integrationUrl != "" {
 
 		if disconnectReasonMap[dcReason] != "" {
 			bodyData["Reason"] = disconnectReasonMap[dcReason]
-		} else {
-			cyanblue.Println("NO REASON FOUND ON DC REASON MAP")
 		}
 
 		jsonData, _ := json.Marshal(bodyData)
