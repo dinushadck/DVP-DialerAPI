@@ -141,10 +141,11 @@ func HandleDialResponse(resp *http.Response, err error, server ResourceServerInf
 	}
 
 	if resp != nil {
+		yellowGreen := color.New(color.FgYellow).Add(color.BgGreen)
 		response, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		tmx := string(response[:])
-		fmt.Println(tmx)
+		yellowGreen.Println(fmt.Sprintf("===== DIAL RESPONSE : %s", tmx))
 		resultInfo := strings.Split(tmx, " ")
 		if len(resultInfo) > 0 {
 			if resultInfo[0] == "-ERR" {
