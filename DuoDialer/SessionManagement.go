@@ -126,6 +126,8 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 	fmt.Println(intData)
 	bodyData := map[string]interface{}{}
 
+	cyanblue := color.New(color.FgCyan).Add(color.BgMagenta)
+
 	integrationUrl := ""
 	dcReason := ""
 	if integrationType == "CUSTOMER" {
@@ -156,17 +158,20 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 
 	}
 
+	cyanblue.Println(fmt.Sprintf("============= DC REASON 1 : %s", dcReason))
+
 	if integrationUrl != "" {
 
 		if disconnectReasonMap[dcReason] != "" {
 			bodyData["Reason"] = disconnectReasonMap[dcReason]
+		} else {
+			cyanblue.Println("NO REASON FOUND ON DC REASON MAP")
 		}
 
 		jsonData, _ := json.Marshal(bodyData)
 
 		strdata := string(jsonData)
 
-		cyanblue := color.New(color.FgCyan).Add(color.BgMagenta)
 		cyanblue.Println(fmt.Sprintf("=============SENDING INTEGRATION DATA - URL : %s, Data : %s", integrationUrl, strdata))
 
 		req, err := http.NewRequest("POST", integrationUrl, bytes.NewBuffer(jsonData))
