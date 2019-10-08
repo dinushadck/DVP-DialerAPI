@@ -83,7 +83,34 @@ func OnEvent(eventInfo SubEvents) {
 					go UploadSessionInfo(eventInfo.CampaignId, eventInfo.SessionId)
 					//fmt.Println("SessionId: ", eventInfo.SessionId, " EventName: ", eventInfo.EventName, " EventCat: ", eventInfo.EventCategory)
 				} else {
-					color.Magenta("==========Session Not Found : " + hashKey)
+					hashdcKey := fmt.Sprintf("sessionAlreadyDCInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
+					sessionDCExist := RedisCheckKeyExist(hashdcKey)
+
+					if sessionDCExist {
+
+						color.Magenta("==========ALT Session Not Found : " + hashKey)
+
+						sessionInfoDC := RedisHashGetAll(hashdcKey)
+
+						color.Magenta(fmt.Sprintf(sessionInfoDC["IntegrationData"]))
+
+						if sessionInfoDC != nil && sessionInfoDC["IntegrationData"] != "" {
+
+							RedisRemove(hashdcKey)
+							sessionInfoDC["EventType"] = "CUSTOMER_DISCONNECT"
+
+							sessionInfoDC["Reason"] = eventInfo.DisconnectReason
+							sessionInfoDC["ReasonCode"] = eventInfo.DisconnectionCode
+							go ManageIntegrationData(sessionInfoDC, "CUSTOMER")
+						} else {
+							color.Magenta("NO INTEGRATION DATA")
+						}
+
+					} else {
+						color.Magenta("==========Session Not Found : " + hashKey)
+
+					}
+
 				}
 				break
 			default:
