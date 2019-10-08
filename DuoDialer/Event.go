@@ -58,7 +58,8 @@ func OnEvent(eventInfo SubEvents) {
 				break
 			case "CHANNEL_DESTROY":
 				//LogEvent(eventInfo)
-				color.Magenta(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s, DisconnectReason : %s, DisconnectCode : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory, eventInfo.DisconnectReason, eventInfo.DisconnectCode))
+				redCyan := color.New(color.FgRed).Add(color.BgCyan)
+				redCyan.Println(fmt.Sprintf("EventName: %s, SessionId: %s, EventCat: %s, DisconnectReason : %s, DisconnectCode : %s", eventInfo.EventName, eventInfo.SessionId, eventInfo.EventCategory, eventInfo.DisconnectReason, eventInfo.DisconnectCode))
 				hashKey := fmt.Sprintf("sessionInfo:%s:%s", eventInfo.CampaignId, eventInfo.SessionId)
 				session := RedisCheckKeyExist(hashKey)
 				if session {
