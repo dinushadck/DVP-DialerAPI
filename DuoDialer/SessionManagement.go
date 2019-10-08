@@ -131,7 +131,6 @@ func ManageIntegrationData(sessionInfo map[string]string, integrationType string
 	integrationUrl := ""
 	dcReason := ""
 
-	cyanblue.Println(fmt.Sprintf("============= DC REASON 1 : %v", sessionInfo))
 	if integrationType == "CUSTOMER" {
 		for _, element := range intData.Customer.Params {
 			if element == "Reason" {
