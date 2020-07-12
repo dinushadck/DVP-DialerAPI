@@ -58,6 +58,7 @@ type Configuration struct {
 	PreviewTimeout           string
 	AgentPrepareTime         string
 	PreviewReAssignOnFail    string
+	UseDynamicPort           string
 }
 
 type EnvConfiguration struct {
@@ -109,6 +110,7 @@ type EnvConfiguration struct {
 	PreviewTimeout           string
 	AgentPrepareTime         string
 	PreviewReAssignOnFail    string
+	UseDynamicPort           string
 }
 
 //--------------------Campaign--------------------

@@ -64,6 +64,7 @@ var previewTimeout string
 var agentPrepareTime string
 var previewReAssignOnFail string
 var disconnectReasonMap map[string]string
+var useDynamicPort string
 
 func GetDirPath() string {
 	envPath := os.Getenv("GO_CONFIG_DIR")
@@ -140,6 +141,7 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.PreviewTimeout = "120"
 		defconfiguration.AgentPrepareTime = "0"
 		defconfiguration.PreviewReAssignOnFail = "false"
+		defconfiguration.UseDynamicPort = "true"
 	}
 
 	return defconfiguration
@@ -197,6 +199,7 @@ func LoadDefaultConfig() {
 	previewTimeout = defconfiguration.PreviewTimeout
 	agentPrepareTime = defconfiguration.AgentPrepareTime
 	previewReAssignOnFail = defconfiguration.PreviewReAssignOnFail
+	useDynamicPort = defconfiguration.UseDynamicPort
 
 	redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 }
@@ -268,7 +271,7 @@ func LoadConfiguration() {
 		previewTimeout = os.Getenv(envconfiguration.PreviewTimeout)
 		agentPrepareTime = os.Getenv(envconfiguration.AgentPrepareTime)
 		previewReAssignOnFail = os.Getenv(envconfiguration.PreviewReAssignOnFail)
-
+		useDynamicPort = os.Getenv(envconfiguration.UseDynamicPort)
 		if redisIp == "" {
 			redisIp = defConfig.RedisIp
 		}
@@ -416,6 +419,9 @@ func LoadConfiguration() {
 		if previewReAssignOnFail == "" {
 			previewReAssignOnFail = defConfig.PreviewReAssignOnFail
 		}
+		if useDynamicPort == "" {
+			useDynamicPort = defConfig.UseDynamicPort
+		}
 
 		redisIp = fmt.Sprintf("%s:%s", redisIp, redisPort)
 		securityIp = fmt.Sprintf("%s:%s", securityIp, securityPort)
@@ -435,6 +441,7 @@ func LoadConfiguration() {
 	fmt.Println("previewTimeout:", previewTimeout)
 	fmt.Println("agentPrepareTime:", agentPrepareTime)
 	fmt.Println("previewReAssignOnFail", previewReAssignOnFail)
+	fmt.Println("useDynamicPort", useDynamicPort)
 }
 
 func LoadCallbackConfiguration() {

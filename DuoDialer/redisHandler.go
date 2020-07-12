@@ -29,9 +29,12 @@ func InitiateRedis() {
 		if err != nil {
 			return nil, err
 		}
-		if err = client.Cmd("AUTH", redisPassword).Err; err != nil {
-			client.Close()
-			return nil, err
+
+		if redisPassword != "" {
+			if err = client.Cmd("AUTH", redisPassword).Err; err != nil {
+				client.Close()
+				return nil, err
+			}
 		}
 		if err = client.Cmd("select", redisDb).Err; err != nil {
 			client.Close()
