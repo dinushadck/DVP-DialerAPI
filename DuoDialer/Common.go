@@ -16,7 +16,7 @@ func stringInSlice(a string, list []string) bool {
 
 func CreateHost(_ip, _port string) string {
 	testIp := net.ParseIP(_ip)
-	if testIp.To4() == nil {
+	if testIp.To4() == nil && useDynamicPort == "false" {
 		return _ip
 	} else {
 		return fmt.Sprintf("%s:%s", _ip, _port)
