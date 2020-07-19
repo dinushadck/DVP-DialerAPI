@@ -247,7 +247,7 @@ func LoadConfiguration() {
 		callbackServerHost = os.Getenv(envconfiguration.CallbackServerHost)
 		callbackServerPort = os.Getenv(envconfiguration.CallbackServerPort)
 		ardsServiceHost = os.Getenv(envconfiguration.ArdsServiceHost)
-		ardsServicePort = os.Getenv(envconfiguration.ArdsServiceHost)
+		ardsServicePort = os.Getenv(envconfiguration.ArdsServicePort)
 		notificationServiceHost = os.Getenv(envconfiguration.NotificationServiceHost)
 		notificationServicePort = os.Getenv(envconfiguration.NotificationServicePort)
 		clusterConfigServiceHost = os.Getenv(envconfiguration.ClusterConfigServiceHost)
@@ -454,7 +454,7 @@ func LoadCallbackConfiguration() {
 	jwtToken := fmt.Sprintf("Bearer %s", accessToken)
 	client := &http.Client{}
 
-	request := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/Configuration/callback/Reasons", CreateHost(campaignServiceHost, campaignServicePort))
+	request := fmt.Sprintf("https://%s/DVP/API/1.0.0.0/CampaignManager/Campaign/Configuration/callback/Reasons", CreateHost(campaignServiceHost, campaignServicePort))
 	fmt.Println("Start RequestCampaignCallbackReason request: ", request)
 	req, _ := http.NewRequest("GET", request, nil)
 	req.Header.Set("authorization", jwtToken)
