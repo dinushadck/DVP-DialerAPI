@@ -96,7 +96,7 @@ func GetDefaultConfig() Configuration {
 		defconfiguration.RedisPort = "6379"
 		defconfiguration.SecurityIp = "127.0.0.1"
 		defconfiguration.SecurityPort = "6389"
-		defconfiguration.RedisPassword = "DuoS123"
+		defconfiguration.RedisPassword = ""
 		defconfiguration.RedisDb = 5
 		defconfiguration.DialerId = "Dialer2"
 		defconfiguration.CampaignLimit = 30

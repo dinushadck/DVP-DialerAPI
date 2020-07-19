@@ -37,7 +37,9 @@ func AddRequestServer() {
 	jsonData, _ := json.Marshal(reqServer)
 
 	serviceurl := fmt.Sprintf("http://%s/DVP/API/1.0.0.0/ARDS/requestserver", CreateHost(ardsServiceHost, ardsServicePort))
+	fmt.Printf("ARDS URL Requesting %s \n", serviceurl)
 	req, err := http.NewRequest("POST", serviceurl, bytes.NewBuffer(jsonData))
+	fmt.Printf("ARDS URL Requested %s \n", serviceurl)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", jwtToken)
 	fmt.Println("request:", serviceurl)

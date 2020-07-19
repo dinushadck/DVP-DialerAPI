@@ -15,6 +15,7 @@ func stringInSlice(a string, list []string) bool {
 }
 
 func CreateHost(_ip, _port string) string {
+	fmt.Printf("IP - %s Port - %s useDynamicPort - %s \n", _ip, _port, useDynamicPort)
 	testIp := net.ParseIP(_ip)
 	if testIp.To4() == nil && useDynamicPort == "false" {
 		return _ip
