@@ -616,7 +616,7 @@ func StartCampaign(campaignId, campaignName, dialoutMec, CampaignChannel, camCla
 								if numberCount == 0 {
 									//SetCampaignStatus(campaignId, "End", company, tenant)
 									//RemoveCampaignFromDialer(campaignId, company, tenant)
-									SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
+									//SetCampaignStatus(campaignId, "PauseByDialer", company, tenant)
 									//SetCampChannelMaxLimitDirect(campaignId, "0")
 									return
 								}
